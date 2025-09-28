@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据分析师Web应用</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/typescript@5.2.2/lib/typescript.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    // Tailwind配置
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            neutral: '#F5F7FA',
+            'neutral-dark': '#1D2129',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+    }
+  </style>
+</head>
+<body class="bg-neutral min-h-screen font-sans text-neutral-dark">
+  <div id="root" class="w-full"></div>
+  
+  <!-- 配置TypeScript编译器并运行代码 -->
+  <script>
+    // 编译并运行TypeScript代码
+    window.onload = function() {
+      try {
+        // 编译并加载types.ts
+        const typesXHR = new XMLHttpRequest();
+        typesXHR.open('GET', 'types.ts', false);
+        typesXHR.send();
+        const typesCode = typesXHR.responseText;
+        
+        // 编译并加载utils.ts
+        const utilsXHR = new XMLHttpRequest();
+        utilsXHR.open('GET', 'utils.ts', false);
+        utilsXHR.send();
+        const utilsCode = utilsXHR.responseText;
+        
+        // 编译并加载App.tsx
+        const appXHR = new XMLHttpRequest();
+        appXHR.open('GET', 'App.tsx', false);
+        appXHR.send();
+        const appCode = appXHR.responseText;
+        
+        // 合并所有代码
+        const allCode = typesCode + '\n' + utilsCode + '\n' + appCode;
+        
+        // 编译TypeScript代码，禁用模块系统
+        const { outputText } = ts.transpileModule(allCode, {
+          compilerOptions: {
+            module: ts.ModuleKind.None,
+            target: ts.ScriptTarget.ESNext,
+            jsx: ts.JsxEmit.React,
+            esModuleInterop: false,
+            strict: false,
+            removeComments: true,
+            noImplicitUseStrict: true,
+            isolatedModules: false
+          },
+          fileName: 'app.tsx'
+        });
+        
+        // 移除任何可能的exports引用
+        const cleanOutput = outputText.replace(/\bexports\.\w+\s*=/g, '').replace(/\bmodule\.exports\s*=/g, '');
+        
+        // 创建全局命名空间
+        window.calculateBasicStats = undefined;
+        window.generateDistributionData = undefined;
+        window.parseCSVContent = undefined;
+        window.calculateMLE = undefined;
+        window.calculateMoM = undefined;
+        
+        // 执行清理后的代码
+        eval(cleanOutput);
+        
+        // 确保函数已正确挂载
+        if (window.calculateBasicStats && window.generateDistributionData && window.parseCSVContent && window.calculateMLE && window.calculateMoM) {
+          console.log('所有工具函数已成功加载');
+          // 调用mountApp函数挂载应用
+          if (window.mountApp) {
+            window.mountApp();
+          } else {
+            console.error('mountApp函数未找到');
+            alert('应用挂载失败，请刷新页面重试。');
+          }
+        } else {
+          console.error('工具函数未正确加载');
+          alert('应用加载失败，请查看控制台获取详细信息。');
+        }
+      } catch (error) {
+        console.error('TypeScript编译错误:', error);
+        alert('代码编译失败，请查看控制台获取详细信息。');
+      }
+    };
+  </script>
+</body>
+</html>

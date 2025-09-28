@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据分析师Web应用</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script>
+    // Tailwind配置
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            neutral: '#F5F7FA',
+            'neutral-dark': '#1D2129',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+            'card-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+          }
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+      .text-balance {
+        text-wrap: balance;
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      .animate-slide-up {
+        animation: slideUp 0.4s ease-out;
+      }
+      .animate-pulse-slow {
+        animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-neutral min-h-screen font-sans text-neutral-dark">
+  <div id="root" class="w-full"></div>
+
+  <script>
+    // 工具函数
+    const calculateBasicStats = function(data) {
+      const n = data.length;
+      const mean = data.reduce((sum, val) => sum + val, 0) / n;
+      const sortedData = [...data].sort((a, b) => a - b);
+      const median = n % 2 === 0 
+        ? (sortedData[n/2 - 1] + sortedData[n/2]) / 2 
+        : sortedData[Math.floor(n/2)];
+      
+      // 计算方差和标准差
+      const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+      const stdDev = Math.sqrt(variance);
+      
+      // 计算众数
+      const frequencyMap = {};
+      data.forEach(val => {
+        frequencyMap[val] = (frequencyMap[val] || 0) + 1;
+      });
+      let mode = sortedData[0];
+      let maxFreq = 1;
+      Object.entries(frequencyMap).forEach(([val, freq]) => {
+        if (freq > maxFreq) {
+          maxFreq = freq;
+          mode = parseFloat(val);
+        }
+      });
+      
+      // 计算偏度和峰度
+      const skewnessNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 3), 0) / n;
+      const skewness = skewnessNumerator / Math.pow(stdDev, 3);
+      
+      const kurtosisNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 4), 0) / n;
+      const kurtosis = kurtosisNumerator / Math.pow(stdDev, 4) - 3;
+      
+      return {
+        mean,
+        median,
+        mode,
+        variance,
+        stdDev,
+        skewness,
+        kurtosis
+      };
+    };
+
+    const generateDistributionData = function(params) {
+      const { type, params: distParams, sampleSize } = params;
+      const result = [];
+      
+      switch (type) {
+        case 'normal':
+          const { mean = 0, stdDev = 1 } = distParams;
+          for (let i = 0; i < sampleSize; i++) {
+            // Box-Muller变换生成正态分布随机数
+            let u1 = 0, u2 = 0;
+            while (u1 === 0) u1 = Math.random();
+            while (u2 === 0) u2 = Math.random();
+            const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            result.push(z0 * stdDev + mean);
+          }
+          break;
+          
+        case 'uniform':
+          const { min = 0, max = 1 } = distParams;
+          for (let i = 0; i < sampleSize; i++) {
+            result.push(min + Math.random() * (max - min));
+          }
+          break;
+          
+        case 'exponential':
+          const { lambda = 1 } = distParams;
+          for (let i = 0; i < sampleSize; i++) {
+            result.push(-Math.log(Math.random()) / lambda);
+          }
+          break;
+          
+        case 'poisson':
+          const { rate = 1 } = distParams;
+          for (let i = 0; i < sampleSize; i++) {
+            let k = 0;
+            let p = 1;
+            const L = Math.exp(-rate);
+            do {
+              k++;
+              p *= Math.random();
+            } while (p > L);
+            result.push(k - 1);
+          }
+          break;
+      }
+      
+      return result;
+    };
+
+    const parseCSVContent = function(content) {
+      try {
+        // 假设CSV格式，第一列是数据
+        const lines = content.split('\n').filter(line => line.trim() !== '');
+        return lines.slice(1) // 跳过标题行
+          .map(line => {
+            const values = line.split(',');
+            return parseFloat(values[0]);
+          })
+          .filter(value => !isNaN(value));
+      } catch (error) {
+        console.error('CSV解析错误:', error);
+        throw new Error('CSV文件解析失败，请检查文件格式。');
+      }
+    };
+
+    const calculateMLE = function(data) {
+      // 假设正态分布的MLE参数估计
+      const n = data.length;
+      const mean = data.reduce((sum, val) => sum + val, 0) / n;
+      const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+      
+      return {
+        mean,
+        variance,
+        stdDev: Math.sqrt(variance)
+      };
+    };
+
+    const calculateMoM = function(data) {
+      // 假设正态分布的MoM参数估计
+      const n = data.length;
+      const mean = data.reduce((sum, val) => sum + val, 0) / n;
+      const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+      
+      return {
+        mean,
+        variance,
+        stdDev: Math.sqrt(variance)
+      };
+    };
+
+    // 阿里云API调用函数 - 实际连接到阿里云API，非模拟
+    // 支持两种调用方式：1. 标准DashScope API 2. OpenAI兼容接口
+    const callAliyunAPI = async function(prompt, apiKey, model) {
+      try {
+        if (!apiKey) {
+          throw new Error('请先配置阿里云API密钥！');
+        }
+        
+        console.log('API调用信息:', { model, promptLength: prompt.length });
+        
+        // 使用标准DashScope API方式 (当前实现)
+        // 阿里云官方文档确认的标准API地址
+        const endpoint = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
+        console.log('使用标准DashScope API地址:', endpoint);
+        
+        // 构建请求体 - 严格按照阿里云DashScope API官方文档格式
+        // 参考文档：https://help.aliyun.com/zh/dashscope/developer-reference/use-qwen-by-api
+        const requestBody = {
+          model: model,  // 模型名称，如qwen-plus, qwen-turbo, qwen-max等
+          input: {
+            prompt: prompt  // 用户提示文本，支持单轮对话
+          },
+          parameters: {
+            result_format: 'text',  // 返回格式：text或json_object
+            temperature: 0.8,       // 控制生成文本的随机性，范围0-1
+            top_p: 0.8              // 控制词汇多样性，范围0-1
+          }
+        };
+        
+        console.log('API请求体格式确认 - 符合官方规范:', requestBody);
+        
+        // 构建请求头，包含认证信息
+        // 阿里云DashScope API官方要求使用Bearer认证方式
+        const headers = {
+          'Content-Type': 'application/json',  // 必须设置为application/json
+          'Authorization': `Bearer ${apiKey}`  // Bearer + 空格 + API Key格式
+        };
+        
+        console.log('开始发送实际API请求到阿里云服务器...');
+        console.log('请求地址:', endpoint);
+        console.log('请求头验证 - 符合官方要求:', headers);
+        
+        // 添加请求超时处理
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+        
+        try {
+          // 发送实际的API请求
+          console.log('正在发送真实API请求...');
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+            credentials: 'omit' // 不发送cookies，避免跨域问题
+          });
+          
+          clearTimeout(timeoutId);
+          
+          console.log('API响应状态:', response.status);
+          
+          // 记录响应头信息，帮助调试
+          const responseHeaders = Object.fromEntries(response.headers.entries());
+          console.log('API响应头:', responseHeaders);
+          
+          // 检查CORS相关响应头
+          console.log('CORS允许的来源:', responseHeaders['access-control-allow-origin']);
+          console.log('CORS允许的方法:', responseHeaders['access-control-allow-methods']);
+          
+          if (!response.ok) {
+            // 获取详细的错误信息
+            let errorDetail = '';
+            try {
+              const errorData = await response.json();
+              console.log('API错误响应数据:', errorData);
+              errorDetail = errorData.message || errorData.error_msg || '';
+            } catch (e) {
+              // 如果无法解析JSON，就使用默认错误信息
+              console.error('无法解析错误响应:', e);
+              // 尝试获取原始文本响应
+              try {
+                const rawText = await response.text();
+                console.log('原始错误响应:', rawText);
+                errorDetail = rawText;
+              } catch (textError) {
+                console.error('无法获取原始响应:', textError);
+              }
+            }
+            
+            const errorMessage = `API调用失败: ${response.status} ${response.statusText}${errorDetail ? ' - ' + errorDetail : ''}`;
+            throw new Error(errorMessage);
+          }
+          
+          // 解析响应
+          const data = await response.json();
+          console.log('API响应数据结构:', Object.keys(data));
+          console.log('完整API响应数据:', data);
+          
+          // 检查响应结构
+          if (!data.output || !data.output.text) {
+            // 尝试从其他可能的字段获取响应
+            if (data.result) {
+              console.log('从result字段获取响应');
+              return data.result;
+            } else if (data.text) {
+              console.log('从text字段获取响应');
+              return data.text;
+            } else {
+              throw new Error('API返回格式错误: 缺少output.text、result或text字段');
+            }
+          }
+          
+          return data.output.text;
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          
+          // 专门处理fetch网络错误
+          console.error('网络请求错误:', fetchError.name, fetchError.message);
+          
+          if (fetchError.name === 'AbortError') {
+            throw new Error('API请求超时，请检查您的网络连接是否稳定。');
+          } else if (fetchError.message === 'Failed to fetch') {
+            throw new Error('网络连接失败，无法连接到阿里云API服务器。\n\n可能原因：\n1. 您的网络环境限制了对阿里云API的访问\n2. 浏览器的安全策略阻止了跨域请求\n3. 防火墙或代理服务器限制了API访问\n4. 阿里云API服务暂时不可用\n\n解决方案：\n1. 尝试使用不同的网络环境\n2. 确认您的浏览器允许跨域请求\n3. 检查防火墙设置是否允许访问dashscope.aliyuncs.com\n4. 直接在浏览器中访问https://dashscope.aliyuncs.com测试连接');
+          } else {
+            throw fetchError;
+          }
+        }
+      } catch (error) {
+        console.error('API调用错误详情:', error);
+        
+        // 根据不同错误类型提供更具体的提示和解决方案
+        if (error.message.includes('401')) {
+          throw new Error('API密钥无效或已过期，请检查您的API密钥设置。\n\n解决方案:\n1. 确认API Key输入正确\n2. 检查API Key是否已过期\n3. 确保已开通通义千问服务\n4. 登录阿里云控制台检查API Key权限');
+        } else if (error.message.includes('403')) {
+          throw new Error('您没有权限访问此服务，请确保已开通大模型服务并配置了正确的权限。\n\n解决方案:\n1. 登录阿里云控制台确认已开通通义千问服务\n2. 检查账户是否有可用的调用额度\n3. 确认您选择的模型与您的权限匹配\n4. 尝试使用免费额度的模型如qwen-turbo');
+        } else if (error.message.includes('429')) {
+          throw new Error('API调用频率过高，请稍后再试。\n\n解决方案:\n1. 等待1-2分钟后再尝试调用\n2. 减少调用频率\n3. 考虑升级到更高配额的服务');
+        } else if (error.message.includes('NetworkError')) {
+          throw new Error('网络连接失败，请检查您的网络连接。\n\n解决方案:\n1. 确认您的网络连接正常\n2. 检查防火墙设置是否阻止了API请求\n3. 尝试使用VPN或切换网络');
+        } else if (error.message.includes('format error')) {
+          throw new Error('API请求格式错误，请确保所有参数格式正确。\n\n解决方案:\n1. 检查API Key格式\n2. 确认选择的模型名称正确\n3. 刷新页面后重新尝试');
+        } else {
+          throw new Error('与大模型通信失败：' + error.message + '\n\n通用解决方案:\n1. 确认API Key输入正确\n2. 检查网络连接\n3. 确保已开通阿里云通义千问服务\n4. 确认账户有可用的调用额度\n5. 尝试选择其他模型（如qwen-turbo）\n6. 如果在企业网络环境中，请确认网络策略允许访问阿里云API\n7. 按F12打开浏览器控制台，查看详细的API调用日志');
+        }
+      }
+    };
+
+    // 阿里云API配置组件
+    const AliyunAPIConfig = function() {
+      const [apiKey, setApiKey] = React.useState('');
+      const [model, setModel] = React.useState('qwen-plus');
+      const [saveSuccess, setSaveSuccess] = React.useState(false);
+      
+      // 加载已保存的配置
+      React.useEffect(() => {
+        const savedConfig = localStorage.getItem('aliyunApiConfig');
+        if (savedConfig) {
+          const { apiKey: savedKey, model: savedModel } = JSON.parse(savedConfig);
+          setApiKey(savedKey || '');
+          setModel(savedModel || 'qwen-plus');
+        }
+      }, []);
+      
+      // 保存配置
+      const handleSave = function() {
+        const config = { apiKey, model };
+        localStorage.setItem('aliyunApiConfig', JSON.stringify(config));
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      };
+      
+      return React.createElement(
+        'div',
+        { className: 'bg-white rounded-xl shadow-card p-6 mb-6 animate-fade-in' },
+        React.createElement('h3', { className: 'text-lg font-bold mb-4 flex items-center' },
+          React.createElement('i', { className: 'fa fa-cloud text-primary mr-2' }),
+          '阿里云API配置'
+        ),
+        
+        React.createElement(
+          'div',
+          { className: 'space-y-4' },
+          
+          // API Key输入
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { htmlFor: 'apiKey', className: 'block text-sm font-medium text-gray-700 mb-1' }, 'API Key'),
+            React.createElement('input', {
+              type: 'text',
+              id: 'apiKey',
+              value: apiKey,
+              onChange: (e) => setApiKey(e.target.value),
+              placeholder: '请输入您的阿里云API Key',
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all-300'
+            })
+          ),
+          
+
+          
+          // 模型选择
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { htmlFor: 'model', className: 'block text-sm font-medium text-gray-700 mb-1' }, '模型选择'),
+            React.createElement('select', {
+              id: 'model',
+              value: model,
+              onChange: (e) => setModel(e.target.value),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all-300'
+            },
+              React.createElement('option', { value: 'qwen-plus' }, '通义千问 Plus'),
+              React.createElement('option', { value: 'qwen-max' }, '通义千问 Max'),
+              React.createElement('option', { value: 'qwen-turbo' }, '通义千问 Turbo')
+            )
+          ),
+          
+          // 保存按钮
+          React.createElement(
+            'div',
+            null,
+            React.createElement('button', {
+              onClick: handleSave,
+              className: 'bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-all-300 flex items-center'
+            },
+              React.createElement('i', { className: 'fa fa-save mr-2' }),
+              '保存配置'
+            )
+          ),
+          
+          // 保存成功提示
+          saveSuccess && React.createElement(
+            'div',
+            { className: 'bg-green-50 border border-green-200 rounded-lg p-3 flex items-center' },
+            React.createElement('i', { className: 'fa fa-check-circle text-green-500 mr-2' }),
+            React.createElement('span', { className: 'text-green-700 text-sm' }, '配置保存成功！')
+          ),
+          
+          // 提示信息
+          React.createElement(
+            'div',
+            { className: 'bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm' },
+            React.createElement('p', { className: 'text-blue-700 mb-2' }, '💡 提示：'),
+            React.createElement('ul', { className: 'list-disc list-inside text-blue-600 space-y-1' },
+              React.createElement('li', null, '请确保您已在阿里云官网开通了大模型服务'),
+              React.createElement('li', null, '仅需要API Key即可连接阿里云DashScope API'),
+              React.createElement('li', null, 'API Key仅保存在您的本地浏览器中，不会上传到任何服务器'),
+              React.createElement('li', null, '如需修改已保存的配置，重新输入并点击保存按钮即可')
+            )
+          )
+        )
+      );
+    };
+
+    // 大模型对话组件
+    const AIModelChat = function({ analysisResult, data }) {
+      const [messages, setMessages] = React.useState([]);
+      const [inputMessage, setInputMessage] = React.useState('');
+      const [isLoading, setIsLoading] = React.useState(false);
+      const [config, setConfig] = React.useState(null);
+      const [apiStatus, setApiStatus] = React.useState('ready'); // ready, error, configuring
+      
+      // 加载API配置
+      React.useEffect(() => {
+        const savedConfig = localStorage.getItem('aliyunApiConfig');
+        if (savedConfig) {
+          const parsedConfig = JSON.parse(savedConfig);
+          setConfig(parsedConfig);
+          // 检查配置完整性，只需API Key
+          if (!parsedConfig.apiKey) {
+            setApiStatus('error');
+          } else {
+            setApiStatus('ready');
+          }
+        } else {
+          setApiStatus('configuring');
+        }
+      }, []);
+      
+      // 处理发送消息
+      const handleSendMessage = async function() {
+        if (!inputMessage.trim() || isLoading) return;
+        
+        // 检查是否配置了API，只需API Key
+        if (!config?.apiKey) {
+          setApiStatus('error');
+          alert('请先配置阿里云API密钥！\n\n提示：点击右上角"设置"按钮，然后输入您的API Key。');
+          return;
+        }
+        
+        const userMessage = inputMessage.trim();
+        const newMessages = [...messages, { role: 'user', content: userMessage }];
+        setMessages(newMessages);
+        setInputMessage('');
+        setIsLoading(true);
+        
+        try {
+          // 构建完整的提示，包含数据分析结果
+          let fullPrompt = userMessage;
+          
+          if (data.length > 0 && analysisResult) {
+            fullPrompt += "\n\n我的数据分析结果如下：";
+            fullPrompt += "\n- 数据点数量：" + data.length;
+            fullPrompt += "\n- 均值：" + analysisResult.mean?.toFixed(4);
+            fullPrompt += "\n- 中位数：" + analysisResult.median?.toFixed(4);
+            fullPrompt += "\n- 标准差：" + analysisResult.stdDev?.toFixed(4);
+            fullPrompt += "\n- 偏度：" + analysisResult.skewness?.toFixed(4);
+            fullPrompt += "\n- 峰度：" + analysisResult.kurtosis?.toFixed(4);
+            
+            if (analysisResult.mleParams && analysisResult.momParams) {
+              fullPrompt += "\n\n参数估计结果：";
+              fullPrompt += "\n- MLE均值：" + analysisResult.mleParams.mean?.toFixed(4);
+              fullPrompt += "\n- MoM均值：" + analysisResult.momParams.mean?.toFixed(4);
+            }
+          }
+          
+          // 调用阿里云API，仅使用API Key认证
+          const response = await callAliyunAPI(fullPrompt, config.apiKey, config.model);
+          
+          setMessages([...newMessages, { role: 'assistant', content: response }]);
+        } catch (error) {
+          console.error('API调用错误详情:', error);
+          let errorMessage = '抱歉，我暂时无法回答您的问题。';
+          
+          // 根据错误类型提供更具体的提示
+          if (error.message.includes('API密钥无效')) {
+            errorMessage += '\n\n错误：API密钥无效或已过期，请检查您的API密钥设置。';
+          } else if (error.message.includes('权限')) {
+            errorMessage += '\n\n错误：您没有权限访问此服务，请确保已开通大模型服务并配置了正确的权限。';
+          } else if (error.message.includes('频率过高')) {
+            errorMessage += '\n\n错误：API调用频率过高，请稍后再试。';
+          } else {
+            errorMessage += '\n\n错误：' + error.message;
+            errorMessage += '\n\n请检查：\n1. 您的网络连接\n2. API密钥是否正确\n3. 是否已开通阿里云大模型服务\n4. 当前是否有可用的调用额度';
+          }
+          
+          setMessages([...newMessages, { role: 'assistant', content: errorMessage }]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      // 处理按键事件
+      const handleKeyPress = function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+      };
+      
+      // 预设问题建议
+      const suggestionQuestions = [
+        "请分析我的数据分布特征",
+        "基于这些统计结果，我应该使用什么分析方法？",
+        "如何解释偏度和峰度的值？",
+        "这些数据适合进行回归分析吗？",
+        "MLE和MoM结果不同说明了什么？"
+      ];
+      
+      // 根据API状态显示不同的提示
+      const renderAPIStatusMessage = () => {
+        if (apiStatus === 'configuring') {
+          return React.createElement(
+            'div',
+            { className: 'text-center text-blue-600 py-6' },
+            React.createElement('i', { className: 'fa fa-info-circle text-2xl mb-2' }),
+            React.createElement('p', null, '请先配置阿里云API'),
+            React.createElement('p', { className: 'text-sm mt-1' }, '点击右上角"设置"按钮输入API密钥'),
+            React.createElement(
+              'button',
+              {
+                onClick: () => document.getElementById('settings-tab')?.click(),
+                className: 'mt-3 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm py-1 px-4 rounded-full transition-all-300'
+              },
+              '前往API设置'
+            )
+          );
+        } else if (apiStatus === 'error') {
+          return React.createElement(
+            'div',
+            { className: 'text-center text-red-600 py-6' },
+            React.createElement('i', { className: 'fa fa-exclamation-circle text-2xl mb-2' }),
+            React.createElement('p', null, 'API配置不完整或无效'),
+            React.createElement('p', { className: 'text-sm mt-1' }, '请在设置中检查您的API密钥'),
+            React.createElement(
+              'button',
+              {
+                onClick: () => document.getElementById('settings-tab')?.click(),
+                className: 'mt-3 bg-red-100 hover:bg-red-200 text-red-700 text-sm py-1 px-4 rounded-full transition-all-300'
+              },
+              '修改API设置'
+            )
+          );
+        }
+        return null;
+      };
+      
+      return React.createElement(
+        'div',
+        { className: 'bg-white rounded-xl shadow-card p-6 h-[500px] flex flex-col animate-fade-in' },
+        React.createElement('h3', { className: 'text-lg font-bold mb-4 flex items-center' },
+          React.createElement('i', { className: 'fa fa-robot text-primary mr-2' }),
+          '大模型分析助手'
+        ),
+        
+        // API状态提示
+        (apiStatus === 'configuring' || apiStatus === 'error') && renderAPIStatusMessage(),
+        
+        // 消息展示区域
+        React.createElement(
+          'div',
+          { className: 'flex-grow overflow-y-auto mb-4 p-3 bg-gray-50 rounded-lg' },
+          messages.length === 0 && apiStatus === 'ready' ? (
+            React.createElement(
+              'div',
+              { className: 'text-center text-gray-500 py-8' },
+              React.createElement('i', { className: 'fa fa-comment-o text-4xl mb-2' }),
+              React.createElement('p', null, '开始与AI助手对话吧'),
+              React.createElement('p', { className: 'text-sm mt-1' }, '您可以提问关于数据分析的任何问题')
+            )
+          ) : (
+            messages.map((message, index) => React.createElement(
+              'div',
+              { 
+                key: index, 
+                className: `mb-4 ${message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`
+              },
+              React.createElement(
+                'div',
+                { 
+                  className: message.role === 'user' 
+                    ? 'bg-primary text-white rounded-lg p-3 max-w-[80%] rounded-tl-none' 
+                    : 'bg-gray-200 rounded-lg p-3 max-w-[80%] rounded-tr-none'
+                },
+                React.createElement('p', { className: 'text-balance' }, message.content)
+              )
+            ))
+          ),
+          
+          // 加载动画
+          isLoading && React.createElement(
+            'div',
+            { className: 'flex justify-start mb-4' },
+            React.createElement(
+              'div',
+              { className: 'bg-gray-200 rounded-lg p-3 max-w-[80%] rounded-tr-none animate-pulse-slow' },
+              React.createElement(
+                'div',
+                { className: 'flex space-x-2' },
+                React.createElement('div', { className: 'w-2 h-2 bg-gray-400 rounded-full' }),
+                React.createElement('div', { className: 'w-2 h-2 bg-gray-400 rounded-full' }),
+                React.createElement('div', { className: 'w-2 h-2 bg-gray-400 rounded-full' })
+              )
+            )
+          )
+        ),
+        
+        // 预设问题建议
+        messages.length === 0 && apiStatus === 'ready' && React.createElement(
+          'div',
+          { className: 'mb-4' },
+          React.createElement('p', { className: 'text-sm text-gray-500 mb-2' }, '💡 您可能想了解：'),
+          React.createElement(
+            'div',
+            { className: 'flex flex-wrap gap-2' },
+            suggestionQuestions.map((question, index) => React.createElement(
+              'button',
+              {
+                key: index,
+                onClick: () => {
+                  setInputMessage(question);
+                  handleSendMessage();
+                },
+                className: 'px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-all-300'
+              },
+              question
+            ))
+          )
+        ),
+        
+        // 输入区域 - 仅当API状态为ready时显示
+        apiStatus === 'ready' && React.createElement(
+          'div',
+          { className: 'flex gap-2' },
+          React.createElement('input', {
+            type: 'text',
+            value: inputMessage,
+            onChange: (e) => setInputMessage(e.target.value),
+            onKeyPress: handleKeyPress,
+            placeholder: '输入您的问题...',
+            disabled: isLoading,
+            className: 'flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all-300'
+          }),
+          React.createElement('button', {
+            onClick: handleSendMessage,
+            disabled: isLoading || !inputMessage.trim(),
+            className: `bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all-300 ${isLoading ? 'opacity-70' : ''}`
+          },
+            isLoading ? (
+              React.createElement('i', { className: 'fa fa-circle-o-notch fa-spin' })
+            ) : (
+              React.createElement('i', { className: 'fa fa-paper-plane' })
+            )
+          )
+        )
+      );
+    };
+
+    // 数据输入区域组件
+    const DataInputSection = function({ inputMethod, setInputMethod, handleFileUpload, handleDistributionGenerate, handleAIGenerateData, data }) {
+      return React.createElement(
+        'section',
+        { className: 'bg-white rounded-xl shadow-card p-6 mb-8 transition-all-300 hover:shadow-card-hover animate-slide-up' },
+        React.createElement('h2', { className: 'text-xl font-bold mb-4' }, '数据输入'),
+        
+        // 输入方法切换标签
+        React.createElement(
+          'div',
+          { className: 'flex border-b border-gray-200 mb-6' },
+          React.createElement(
+            'button',
+            {
+              className: `px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${inputMethod === 'upload' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`,
+              onClick: () => setInputMethod('upload')
+            },
+            React.createElement('i', { className: 'fa fa-upload mr-2' }),
+            '文件上传'
+          ),
+          React.createElement(
+            'button',
+            {
+              className: `px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${inputMethod === 'distribution' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`,
+              onClick: () => setInputMethod('distribution')
+            },
+            React.createElement('i', { className: 'fa fa-random mr-2' }),
+            '分布生成'
+          ),
+          React.createElement(
+            'button',
+            {
+              className: `px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${inputMethod === 'ai' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`,
+              onClick: () => setInputMethod('ai')
+            },
+            React.createElement('i', { className: 'fa fa-magic mr-2' }),
+            'AI生成'
+          )
+        ),
+        
+        // 文件上传区域
+        inputMethod === 'upload' && React.createElement(
+          'div',
+          { className: 'space-y-4' },
+          React.createElement(
+            'div',
+            { className: 'border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all-300' },
+            React.createElement('input', {
+              type: 'file',
+              accept: '.csv',
+              onChange: handleFileUpload,
+              className: 'hidden',
+              id: 'fileUpload'
+            }),
+            React.createElement(
+              'label',
+              { htmlFor: 'fileUpload', className: 'cursor-pointer' },
+              React.createElement('i', { className: 'fa fa-file-text-o text-5xl text-gray-400 mb-4' }),
+              React.createElement('br'),
+              React.createElement('span', { className: 'font-medium text-primary' }, '点击上传CSV文件'),
+              React.createElement('p', { className: 'text-sm text-gray-500 mt-2' }, '或拖拽文件到此处')
+            )
+          ),
+          React.createElement(
+            'div',
+            { className: 'bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600' },
+            React.createElement('p', { className: 'font-medium mb-1 flex items-center' },
+              React.createElement('i', { className: 'fa fa-info-circle text-primary mr-2' }),
+              '文件格式要求'
+            ),
+            React.createElement('ul', { className: 'list-disc list-inside space-y-1' },
+              React.createElement('li', null, '支持CSV格式的文件'),
+              React.createElement('li', null, '第一列应为数值数据'),
+              React.createElement('li', null, '第一行为可选的标题行')
+            )
+          ),
+          data.length > 0 && React.createElement(
+            'div',
+            { className: 'bg-green-50 border border-green-200 rounded-lg p-4 flex items-center' },
+            React.createElement('i', { className: 'fa fa-check-circle text-green-500 mr-3' }),
+            React.createElement('span', { className: 'text-green-700' }, `已成功导入 ${data.length} 个数据点`)  
+          )
+        ),
+        
+        // 分布生成区域
+        inputMethod === 'distribution' && React.createElement(
+          'div',
+          { className: 'space-y-4' },
+          React.createElement('p', { className: 'text-gray-600' }, '选择分布类型并生成数据：'),
+          React.createElement(
+            'div',
+            { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+            React.createElement(
+              'button',
+              {
+                className: 'bg-white border border-gray-300 rounded-lg p-4 hover:border-primary hover:bg-primary/5 transition-all-300 flex flex-col items-center',
+                onClick: () => handleDistributionGenerate('normal')
+              },
+              React.createElement('i', { className: 'fa fa-bell text-2xl text-primary mb-2' }),
+              React.createElement('span', { className: 'font-medium' }, '正态分布'),
+              React.createElement('span', { className: 'text-xs text-gray-500' }, 'N(μ, σ²)')
+            ),
+            React.createElement(
+              'button',
+              {
+                className: 'bg-white border border-gray-300 rounded-lg p-4 hover:border-primary hover:bg-primary/5 transition-all-300 flex flex-col items-center',
+                onClick: () => handleDistributionGenerate('uniform')
+              },
+              React.createElement('i', { className: 'fa fa-arrows-h text-2xl text-primary mb-2' }),
+              React.createElement('span', { className: 'font-medium' }, '均匀分布'),
+              React.createElement('span', { className: 'text-xs text-gray-500' }, 'U(a, b)')
+            ),
+            React.createElement(
+              'button',
+              {
+                className: 'bg-white border border-gray-300 rounded-lg p-4 hover:border-primary hover:bg-primary/5 transition-all-300 flex flex-col items-center',
+                onClick: () => handleDistributionGenerate('exponential')
+              },
+              React.createElement('i', { className: 'fa fa-line-chart text-2xl text-primary mb-2' }),
+              React.createElement('span', { className: 'font-medium' }, '指数分布'),
+              React.createElement('span', { className: 'text-xs text-gray-500' }, 'Exp(λ)')
+            ),
+            React.createElement(
+              'button',
+              {
+                className: 'bg-white border border-gray-300 rounded-lg p-4 hover:border-primary hover:bg-primary/5 transition-all-300 flex flex-col items-center',
+                onClick: () => handleDistributionGenerate('poisson')
+              },
+              React.createElement('i', { className: 'fa fa-dot-circle-o text-2xl text-primary mb-2' }),
+              React.createElement('span', { className: 'font-medium' }, '泊松分布'),
+              React.createElement('span', { className: 'text-xs text-gray-500' }, 'Poisson(λ)')
+            )
+          ),
+          React.createElement(
+            'div',
+            { className: 'bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600' },
+            React.createElement('p', { className: 'font-medium mb-1 flex items-center' },
+              React.createElement('i', { className: 'fa fa-lightbulb-o text-primary mr-2' }),
+              '提示'
+            ),
+            React.createElement('p', null, '点击任意分布类型按钮，将使用默认参数生成1000个随机数据点。')
+          ),
+          data.length > 0 && React.createElement(
+            'div',
+            { className: 'bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center' },
+            React.createElement('i', { className: 'fa fa-check-circle text-blue-500 mr-3' }),
+            React.createElement('span', { className: 'text-blue-700' }, `已成功生成 ${data.length} 个随机数据点`)  
+          )
+        ),
+        
+        // AI生成区域
+        inputMethod === 'ai' && React.createElement(
+          'div',
+          { className: 'space-y-4' },
+          React.createElement(
+            'div',
+            { className: 'bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-100 rounded-xl p-6 text-center' },
+            React.createElement('i', { className: 'fa fa-magic text-5xl text-purple-500 mb-4' }),
+            React.createElement('h3', { className: 'text-lg font-semibold text-purple-800 mb-2' }, 'AI 数据生成'),
+            React.createElement('p', { className: 'text-gray-600 mb-6' }, '使用先进的AI算法生成符合您需求的数据集'),
+            React.createElement(
+              'button',
+              {
+                className: 'bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg transition-all-300 flex items-center justify-center mx-auto',
+                onClick: handleAIGenerateData
+              },
+              React.createElement('i', { className: 'fa fa-cog fa-spin mr-2' }),
+              '生成数据'
+            )
+          ),
+          React.createElement(
+            'div',
+            { className: 'bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600' },
+            React.createElement('p', { className: 'font-medium mb-1 flex items-center' },
+              React.createElement('i', { className: 'fa fa-info-circle text-primary mr-2' }),
+              '关于AI数据生成'
+            ),
+            React.createElement('p', null, '此功能使用模拟数据生成算法，实际应用中可连接到真实的AI API生成更符合特定需求的数据。')
+          ),
+          data.length > 0 && React.createElement(
+            'div',
+            { className: 'bg-purple-50 border border-purple-200 rounded-lg p-4 flex items-center' },
+            React.createElement('i', { className: 'fa fa-check-circle text-purple-500 mr-3' }),
+            React.createElement('span', { className: 'text-purple-700' }, `已成功生成 ${data.length} 个AI数据点`)  
+          )
+        )
+      );
+    };
+
+    // 分析结果区域组件
+    const AnalysisResultSection = function({ activeTab, setActiveTab, analysisResult, data }) {
+      // 在组件挂载后创建图表
+      React.useEffect(() => {
+        if (data.length > 0) {
+          // 创建直方图
+          const histogramCtx = document.getElementById('histogram')?.getContext('2d');
+          if (histogramCtx) {
+            // 销毁已存在的图表
+            if (window.histogramChart) {
+              window.histogramChart.destroy();
+            }
+            
+            // 计算直方图数据
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const binCount = Math.ceil(Math.sqrt(data.length));
+            const binWidth = (max - min) / binCount;
+            const bins = new Array(binCount).fill(0);
+            
+            data.forEach(value => {
+              const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
+              bins[binIndex]++;
+            });
+            
+            const labels = bins.map((_, index) => 
+              `${(min + index * binWidth).toFixed(2)} - ${(min + (index + 1) * binWidth).toFixed(2)}`
+            );
+            
+            window.histogramChart = new Chart(histogramCtx, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: '数据分布',
+                  data: bins,
+                  backgroundColor: 'rgba(22, 93, 255, 0.6)',
+                  borderColor: 'rgba(22, 93, 255, 1)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: '数据直方图'
+                  },
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: '频率'
+                    }
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: '数值区间'
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          // 创建散点图
+          const scatterCtx = document.getElementById('scatter')?.getContext('2d');
+          if (scatterCtx) {
+            // 销毁已存在的图表
+            if (window.scatterChart) {
+              window.scatterChart.destroy();
+            }
+            
+            // 准备散点图数据
+            const scatterData = data.map((value, index) => ({
+              x: index,
+              y: value
+            }));
+            
+            window.scatterChart = new Chart(scatterCtx, {
+              type: 'scatter',
+              data: {
+                datasets: [{
+                  label: '数据点',
+                  data: scatterData,
+                  backgroundColor: 'rgba(54, 207, 201, 0.6)',
+                  borderColor: 'rgba(54, 207, 201, 1)',
+                  borderWidth: 1,
+                  pointRadius: 3
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: '数据散点图'
+                  },
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  y: {
+                    title: {
+                      display: true,
+                      text: '数值'
+                    }
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: '索引'
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      }, [data]);
+
+      return React.createElement(
+        'section',
+        { className: 'bg-white rounded-xl shadow-card p-6 mb-8 transition-all-300 hover:shadow-card-hover animate-slide-up' },
+        React.createElement('h2', { className: 'text-xl font-bold mb-4' }, '数据分析结果'),
+        
+        // 分析类型切换标签
+        React.createElement(
+          'div',
+          { className: 'flex border-b border-gray-200 mb-6' },
+          React.createElement(
+            'button',
+            {
+              className: `px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${activeTab === 'basic' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`,
+              onClick: () => setActiveTab('basic')
+            },
+            React.createElement('i', { className: 'fa fa-calculator mr-2' }),
+            '基本统计分析'
+          ),
+          React.createElement(
+            'button',
+            {
+              className: `px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${activeTab === 'mle-mom' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`,
+              onClick: () => setActiveTab('mle-mom')
+            },
+            React.createElement('i', { className: 'fa fa-flask mr-2' }),
+            'MLE/MoM分析'
+          )
+        ),
+        
+        // 基本统计分析结果
+        activeTab === 'basic' && React.createElement(
+          'div',
+          { className: 'space-y-6' },
+          
+          // 统计指标卡片
+          React.createElement(
+            'div',
+            { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4' },
+            
+            // 均值
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '均值'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.mean?.toFixed(4))
+            ),
+            
+            // 中位数
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '中位数'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.median?.toFixed(4))
+            ),
+            
+            // 标准差
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '标准差'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.stdDev?.toFixed(4))
+            ),
+            
+            // 方差
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '方差'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.variance?.toFixed(4))
+            )
+          ),
+          
+          // 更多统计指标
+          React.createElement(
+            'div',
+            { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4' },
+            
+            // 众数
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '众数'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.mode?.toFixed(4))
+            ),
+            
+            // 偏度
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '偏度'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.skewness?.toFixed(4))
+            ),
+            
+            // 峰度
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300' },
+              React.createElement('p', { className: 'text-sm text-gray-500' }, '峰度'),
+              React.createElement('p', { className: 'text-2xl font-bold mt-1' }, analysisResult.kurtosis?.toFixed(4))
+            )
+          ),
+          
+          // 统计指标解释
+          React.createElement(
+            'div',
+            { className: 'bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700' },
+            React.createElement('p', { className: 'font-medium mb-2' }, '📊 统计指标解释'),
+            React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-2' },
+              React.createElement('div', null, '• ', React.createElement('span', { className: 'font-medium' }, '均值'), '：数据的平均值'),
+              React.createElement('div', null, '• ', React.createElement('span', { className: 'font-medium' }, '中位数'), '：排序后位于中间的数值'),
+              React.createElement('div', null, '• ', React.createElement('span', { className: 'font-medium' }, '标准差'), '：数据离散程度的度量'),
+              React.createElement('div', null, '• ', React.createElement('span', { className: 'font-medium' }, '偏度'), '：衡量数据分布的不对称性'),
+              React.createElement('div', null, '• ', React.createElement('span', { className: 'font-medium' }, '峰度'), '：衡量数据分布的峰态')
+            )
+          ),
+          
+          // 可视化图表
+          React.createElement(
+            'div',
+            { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+            
+            // 直方图
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4' },
+              React.createElement('div', { className: 'h-80' },
+                React.createElement('canvas', { id: 'histogram' })
+              )
+            ),
+            
+            // 散点图
+            React.createElement(
+              'div',
+              { className: 'bg-white border border-gray-200 rounded-lg p-4' },
+              React.createElement('div', { className: 'h-80' },
+                React.createElement('canvas', { id: 'scatter' })
+              )
+            )
+          )
+        ),
+        
+        // MLE/MoM分析结果
+        activeTab === 'mle-mom' && React.createElement(
+          'div',
+          { className: 'space-y-6' },
+          
+          // MLE参数估计
+          React.createElement(
+            'div',
+            { className: 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6' },
+            React.createElement('h3', { className: 'text-lg font-semibold text-blue-800 mb-4 flex items-center' },
+              React.createElement('i', { className: 'fa fa-bar-chart mr-2' }),
+              '最大似然估计 (MLE)'
+            ),
+            React.createElement(
+              'div',
+              { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4' },
+              
+              // MLE均值
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计均值'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-blue-600' }, analysisResult.mleParams?.mean?.toFixed(4))
+              ),
+              
+              // MLE方差
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计方差'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-blue-600' }, analysisResult.mleParams?.variance?.toFixed(4))
+              ),
+              
+              // MLE标准差
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计标准差'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-blue-600' }, analysisResult.mleParams?.stdDev?.toFixed(4))
+              )
+            )
+          ),
+          
+          // MoM参数估计
+          React.createElement(
+            'div',
+            { className: 'bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-lg p-6' },
+            React.createElement('h3', { className: 'text-lg font-semibold text-purple-800 mb-4 flex items-center' },
+              React.createElement('i', { className: 'fa fa-calculator mr-2' }),
+              '矩法估计 (MoM)'
+            ),
+            React.createElement(
+              'div',
+              { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4' },
+              
+              // MoM均值
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计均值'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-purple-600' }, analysisResult.momParams?.mean?.toFixed(4))
+              ),
+              
+              // MoM方差
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计方差'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-purple-600' }, analysisResult.momParams?.variance?.toFixed(4))
+              ),
+              
+              // MoM标准差
+              React.createElement(
+                'div',
+                { className: 'bg-white rounded-lg p-4 shadow-sm' },
+                React.createElement('p', { className: 'text-sm text-gray-500' }, '估计标准差'),
+                React.createElement('p', { className: 'text-2xl font-bold mt-1 text-purple-600' }, analysisResult.momParams?.stdDev?.toFixed(4))
+              )
+            )
+          ),
+          
+          // 估计方法比较
+          React.createElement(
+            'div',
+            { className: 'bg-white border border-gray-200 rounded-lg p-6' },
+            React.createElement('h3', { className: 'text-lg font-semibold text-gray-800 mb-4' }, '估计方法比较'),
+            React.createElement(
+              'div',
+              { className: 'overflow-x-auto' },
+              React.createElement(
+                'table',
+                { className: 'min-w-full divide-y divide-gray-200' },
+                React.createElement(
+                  'thead',
+                  { className: 'bg-gray-50' },
+                  React.createElement(
+                    'tr',
+                    null,
+                    React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, '参数'),
+                    React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, '最大似然估计'),
+                    React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, '矩法估计'),
+                    React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, '差异')
+                  )
+                ),
+                React.createElement(
+                  'tbody',
+                  { className: 'bg-white divide-y divide-gray-200' },
+                  // 均值比较
+                  React.createElement(
+                    'tr',
+                    null,
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900' }, '均值'),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, analysisResult.mleParams?.mean?.toFixed(6)),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, analysisResult.momParams?.mean?.toFixed(6)),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, ((analysisResult.mleParams?.mean || 0) - (analysisResult.momParams?.mean || 0)).toFixed(8))
+                  ),
+                  // 方差比较
+                  React.createElement(
+                    'tr',
+                    null,
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900' }, '方差'),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, analysisResult.mleParams?.variance?.toFixed(6)),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, analysisResult.momParams?.variance?.toFixed(6)),
+                    React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, ((analysisResult.mleParams?.variance || 0) - (analysisResult.momParams?.variance || 0)).toFixed(8))
+                  )
+                )
+              )
+            )
+          ),
+          
+          // MLE和MoM方法解释
+          React.createElement(
+            'div',
+            { className: 'bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700' },
+            React.createElement('p', { className: 'font-medium mb-2' }, '🔬 参数估计方法解释'),
+            React.createElement('div', null,
+              React.createElement('p', { className: 'mb-2' }, '• ', React.createElement('span', { className: 'font-medium' }, '最大似然估计 (MLE)'), '：寻找最可能产生观测数据的参数值'),
+              React.createElement('p', null, '• ', React.createElement('span', { className: 'font-medium' }, '矩法估计 (MoM)'), '：通过匹配样本矩和理论矩来估计参数')
+            )
+          )
+        )
+      );
+    };
+
+    // 教程组件
+    const TutorialSection = function() {
+      const [activeTopic, setActiveTopic] = React.useState('basic');
+      
+      // 教程内容
+      const tutorialContents = {
+        basic: {
+          title: '基础使用指南',
+          content: [
+            {
+              subtitle: '数据输入',
+              items: [
+                'CSV文件上传：点击文件上传区域，选择您的数据文件',
+                '分布数据生成：选择一种概率分布，系统会自动生成对应数据',
+                'AI数据生成：点击"生成数据"按钮，获取AI生成的示例数据'
+              ]
+            },
+            {
+              subtitle: '数据分析',
+              items: [
+                '基本统计分析：查看均值、中位数、标准差等统计指标',
+                'MLE/MoM分析：了解不同参数估计方法的结果对比',
+                '数据可视化：通过直方图和散点图直观了解数据分布'
+              ]
+            },
+            {
+              subtitle: '导出结果',
+              items: [
+                '截图保存：使用系统截图功能保存分析结果',
+                '数据共享：导出处理后的数据用于其他应用'
+              ]
+            }
+          ]
+        },
+        advanced: {
+          title: '高级功能详解',
+          content: [
+            {
+              subtitle: '统计指标解释',
+              items: [
+                '均值：数据的集中趋势度量',
+                '中位数：数据排序后的中间值，不受极端值影响',
+                '标准差：数据离散程度的度量',
+                '偏度：数据分布的不对称性度量',
+                '峰度：数据分布的陡峭程度度量'
+              ]
+            },
+            {
+              subtitle: '分布类型特点',
+              items: [
+                '正态分布：对称的钟形曲线，适用于许多自然现象',
+                '均匀分布：所有值出现的概率相等',
+                '指数分布：常用于描述事件发生的时间间隔',
+                '泊松分布：用于描述在固定时间内事件发生的次数'
+              ]
+            },
+            {
+              subtitle: '参数估计方法',
+              items: [
+                '最大似然估计 (MLE)：在统计推断中广泛使用的方法',
+                '矩法估计 (MoM)：计算简单但在某些情况下精度较低'
+              ]
+            }
+          ]
+        },
+        model: {
+          title: '大模型助手使用指南',
+          content: [
+            {
+              subtitle: '配置阿里云API',
+              items: [
+                '前往阿里云官网开通大模型服务',
+                '获取您的API Key和API Secret',
+                '在应用中配置API密钥信息'
+              ]
+            },
+            {
+              subtitle: '提问技巧',
+              items: [
+                '明确具体问题：例如"我的数据是否符合正态分布？"',
+                '请求建议：例如"基于这些统计结果，我应该使用什么分析方法？"',
+                '要求解释：例如"如何解释偏度和峰度的值？"'
+              ]
+            },
+            {
+              subtitle: '常见问题',
+              items: [
+                'API调用失败：检查网络连接和密钥配置',
+                '响应时间长：大模型处理需要一定时间，请耐心等待',
+                '结果不理想：尝试调整问题的表达方式'
+              ]
+            }
+          ]
+        },
+        troubleshooting: {
+          title: '常见问题排查',
+          content: [
+            {
+              subtitle: '文件上传问题',
+              items: [
+                '文件格式错误：确保上传的是CSV格式文件',
+                '数据解析失败：检查CSV文件格式是否符合要求',
+                '文件大小限制：建议单次上传数据量不超过10万条'
+              ]
+            },
+            {
+              subtitle: '分析结果问题',
+              items: [
+                '结果异常：检查数据是否包含异常值或缺失值',
+                '图表显示问题：尝试刷新页面或使用最新版本的浏览器',
+                '计算错误：确保输入的数据类型正确'
+              ]
+            },
+            {
+              subtitle: '性能优化',
+              items: [
+                '大数据集：对于大型数据集，可能需要更长的处理时间',
+                '浏览器兼容性：推荐使用Chrome、Firefox或Edge的最新版本',
+                '缓存清理：定期清理浏览器缓存以获得最佳体验'
+              ]
+            }
+          ]
+        }
+      };
+      
+      const currentTopic = tutorialContents[activeTopic];
+      
+      return React.createElement(
+        'section',
+        { className: 'bg-white rounded-xl shadow-card p-6 mb-8 transition-all-300 hover:shadow-card-hover animate-slide-up' },
+        React.createElement('h2', { className: 'text-xl font-bold mb-6' }, '使用教程'),
+        
+        // 教程主题导航
+        React.createElement(
+          'div',
+          { className: 'flex flex-wrap gap-2 mb-6' },
+          Object.entries(tutorialContents).map(([key, topic]) => React.createElement(
+            'button',
+            {
+              key: key,
+              onClick: () => setActiveTopic(key),
+              className: `px-4 py-2 rounded-lg transition-all-300 ${activeTopic === key 
+                ? 'bg-primary text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+            },
+            topic.title
+          ))
+        ),
+        
+        // 教程内容
+        React.createElement(
+          'div',
+          { className: 'space-y-6' },
+          currentTopic.content.map((section, index) => React.createElement(
+            'div',
+            { key: index, className: 'bg-gray-50 rounded-lg p-5' },
+            React.createElement('h3', { className: 'text-lg font-semibold mb-3 text-gray-800' }, section.subtitle),
+            React.createElement(
+              'ul',
+              { className: 'space-y-2' },
+              section.items.map((item, itemIndex) => React.createElement(
+                'li',
+                { key: itemIndex, className: 'flex items-start' },
+                React.createElement('i', { className: 'fa fa-check-circle text-primary mt-1 mr-2 flex-shrink-0' }),
+                React.createElement('span', null, item)
+              ))
+            )
+          ))
+        )
+      );
+    };
+
+    // 主应用组件
+    const DataAnalysisApp = function() {
+      const [activeTab, setActiveTab] = React.useState('basic');
+      const [inputMethod, setInputMethod] = React.useState('upload');
+      const [data, setData] = React.useState([]);
+      const [analysisResult, setAnalysisResult] = React.useState({});
+      const [currentView, setCurrentView] = React.useState('analysis'); // analysis, tutorial, settings
+      
+      // 处理数据分析
+      const analyzeData = function() {
+        if (data.length === 0) return;
+        const basicStats = calculateBasicStats(data);
+        const mleParams = calculateMLE(data);
+        const momParams = calculateMoM(data);
+        
+        setAnalysisResult({
+          ...basicStats,
+          mleParams,
+          momParams
+        });
+      };
+      
+      // 处理文件上传
+      const handleFileUpload = function(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const content = event.target?.result;
+          try {
+            const parsedData = parseCSVContent(content);
+            setData(parsedData);
+          } catch (error) {
+            console.error('文件解析错误:', error);
+            alert('文件解析错误，请确保上传的是有效的CSV文件。');
+          }
+        };
+        reader.readAsText(file);
+      };
+      
+      // 处理分布生成
+      const handleDistributionGenerate = function(type) {
+        const params = {
+          type,
+          params: {},
+          sampleSize: 1000
+        };
+        
+        // 设置默认参数
+        switch (type) {
+          case 'normal':
+            params.params = { mean: 0, stdDev: 1 };
+            break;
+          case 'uniform':
+            params.params = { min: 0, max: 1 };
+            break;
+          case 'exponential':
+            params.params = { lambda: 1 };
+            break;
+          case 'poisson':
+            params.params = { rate: 5 };
+            break;
+        }
+        
+        const generatedData = generateDistributionData(params);
+        setData(generatedData);
+      };
+      
+      // 处理AI生成数据
+      const handleAIGenerateData = function() {
+        // 这里是一个模拟实现，实际应用中应该连接到AI API
+        const mockData = [];
+        for (let i = 0; i < 500; i++) {
+          mockData.push(20 + Math.random() * 60); // 生成20-80之间的随机数
+        }
+        setData(mockData);
+        alert('AI生成数据功能：这里是模拟数据，实际应用中应连接到AI API。');
+      };
+      
+      React.useEffect(function() {
+        if (data.length > 0) {
+          analyzeData();
+        }
+      }, [data]);
+      
+      // 生成示例数据（用于初次加载时展示功能）
+      React.useEffect(function() {
+        // 只有在没有数据时才生成示例数据
+        if (data.length === 0) {
+          // 生成正态分布的示例数据，便于首次访问时展示功能
+          const params = {
+            type: 'normal',
+            params: { mean: 50, stdDev: 15 },
+            sampleSize: 1000
+          };
+          const exampleData = generateDistributionData(params);
+          setData(exampleData);
+        }
+      }, []);
+      
+      // 应用主渲染
+      return React.createElement(
+        'div',
+        { className: 'min-h-screen flex flex-col' },
+        
+        // 顶部导航栏
+        React.createElement(
+          'header',
+          { className: 'bg-white shadow-sm sticky top-0 z-10' },
+          React.createElement(
+            'div',
+            { className: 'container mx-auto px-4 py-4 flex justify-between items-center' },
+            React.createElement(
+              'div',
+              { className: 'flex items-center space-x-2' },
+              React.createElement('i', { className: 'fa fa-bar-chart text-2xl text-primary' }),
+              React.createElement('h1', { className: 'text-xl font-bold text-gray-800' }, '数据分析师Web应用')
+            ),
+            
+            // 主导航
+            React.createElement(
+              'nav',
+              { className: 'hidden md:flex items-center space-x-6' },
+              React.createElement(
+                'button',
+                {
+                  onClick: () => setCurrentView('analysis'),
+                  className: `flex items-center font-medium ${currentView === 'analysis' ? 'text-primary' : 'text-gray-600 hover:text-primary'}`
+                },
+                React.createElement('i', { className: 'fa fa-line-chart mr-2' }),
+                '数据分析'
+              ),
+              React.createElement(
+                'button',
+                {
+                  onClick: () => setCurrentView('tutorial'),
+                  className: `flex items-center font-medium ${currentView === 'tutorial' ? 'text-primary' : 'text-gray-600 hover:text-primary'}`
+                },
+                React.createElement('i', { className: 'fa fa-book mr-2' }),
+                '使用教程'
+              ),
+              React.createElement(
+                'button',
+                {
+                  onClick: () => setCurrentView('settings'),
+                  className: `flex items-center font-medium ${currentView === 'settings' ? 'text-primary' : 'text-gray-600 hover:text-primary'}`
+                },
+                React.createElement('i', { className: 'fa fa-cog mr-2' }),
+                '设置'
+              )
+            ),
+            
+            // 移动端菜单按钮
+            React.createElement(
+              'button',
+              { className: 'md:hidden text-gray-500' },
+              React.createElement('i', { className: 'fa fa-bars text-xl' })
+            )
+          )
+        ),
+        
+        // 主内容区域
+        React.createElement(
+          'main',
+          { className: 'flex-grow container mx-auto px-4 py-8' },
+          
+          // 数据分析视图
+          currentView === 'analysis' && React.createElement(
+            'div',
+            { className: 'space-y-8' },
+            React.createElement(
+              'div',
+              { className: 'grid grid-cols-1 lg:grid-cols-3 gap-6' },
+              React.createElement(
+                'div',
+                { className: 'lg:col-span-2 space-y-8' },
+                React.createElement(DataInputSection, {
+                  inputMethod,
+                  setInputMethod,
+                  handleFileUpload,
+                  handleDistributionGenerate,
+                  handleAIGenerateData,
+                  data
+                }),
+                React.createElement(AnalysisResultSection, {
+                  activeTab,
+                  setActiveTab,
+                  analysisResult,
+                  data
+                })
+              ),
+              
+              // 侧边栏：AI助手和数据信息
+              React.createElement(
+                'div',
+                { className: 'space-y-6' },
+                
+                // 数据概览
+                React.createElement(
+                  'div',
+                  { className: 'bg-white rounded-xl shadow-card p-6 transition-all-300 hover:shadow-card-hover' },
+                  React.createElement('h3', { className: 'text-lg font-bold mb-4 flex items-center' },
+                    React.createElement('i', { className: 'fa fa-database text-primary mr-2' }),
+                    '数据概览'
+                  ),
+                  React.createElement(
+                    'div',
+                    { className: 'space-y-3' },
+                    React.createElement(
+                      'div',
+                      null,
+                      React.createElement('p', { className: 'text-sm text-gray-500' }, '数据点数量'),
+                      React.createElement('p', { className: 'text-2xl font-bold' }, data.length)
+                    ),
+                    React.createElement(
+                      'div',
+                      null,
+                      React.createElement('p', { className: 'text-sm text-gray-500' }, '数据范围'),
+                      React.createElement('p', { className: 'text-lg font-medium' },
+                        data.length > 0 
+                          ? `${Math.min(...data).toFixed(2)} - ${Math.max(...data).toFixed(2)}` 
+                          : '--' 
+                      )
+                    ),
+                    React.createElement(
+                      'div',
+                      null,
+                      React.createElement('p', { className: 'text-sm text-gray-500' }, '数据类型'),
+                      React.createElement('p', { className: 'text-lg font-medium' },
+                        data.length > 0 ? '数值型数据' : '--'
+                      )
+                    )
+                  )
+                ),
+                
+                // AI助手
+                React.createElement(AIModelChat, {
+                  analysisResult,
+                  data
+                })
+              )
+            )
+          ),
+          
+          // 教程视图
+          currentView === 'tutorial' && React.createElement(
+            'div',
+            null,
+            React.createElement(TutorialSection, null)
+          ),
+          
+          // 设置视图
+          currentView === 'settings' && React.createElement(
+            'div',
+            null,
+            React.createElement(AliyunAPIConfig, null)
+          )
+        ),
+        
+        // 页脚
+        React.createElement(
+          'footer',
+          { className: 'bg-gray-800 text-white py-8' },
+          React.createElement(
+            'div',
+            { className: 'container mx-auto px-4' },
+            React.createElement(
+              'div',
+              { className: 'flex flex-col md:flex-row justify-between items-center' },
+              React.createElement(
+                'div',
+                { className: 'mb-4 md:mb-0' },
+                React.createElement('p', { className: 'text-sm text-gray-400' }, '© 2023 数据分析师Web应用. 保留所有权利.')
+              ),
+              React.createElement(
+                'div',
+                { className: 'flex space-x-4' },
+                React.createElement(
+                  'a',
+                  { href: '#', className: 'text-gray-400 hover:text-white transition-colors' },
+                  React.createElement('i', { className: 'fa fa-github text-xl' })
+                ),
+                React.createElement(
+                  'a',
+                  { href: '#', className: 'text-gray-400 hover:text-white transition-colors' },
+                  React.createElement('i', { className: 'fa fa-twitter text-xl' })
+                ),
+                React.createElement(
+                  'a',
+                  { href: '#', className: 'text-gray-400 hover:text-white transition-colors' },
+                  React.createElement('i', { className: 'fa fa-linkedin text-xl' })
+                )
+              )
+            )
+          )
+        )
+      );
+    };
+
+    // 渲染应用 - 使用React 18的createRoot API
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(DataAnalysisApp, null));
+  </script>
+</body>
+</html>
