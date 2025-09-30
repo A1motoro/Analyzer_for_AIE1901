@@ -1,10 +1,24 @@
-// 主应用组件定义
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
 
+// 类型定义
+declare global {
+  interface Window {
+    calculateBasicStats(data: number[]): any;
+    generateDistributionData(params: any): number[];
+    parseCSVContent(content: string): number[];
+    calculateMLE(data: number[]): any;
+    calculateMoM(data: number[]): any;
+    mountApp(): void;
+  }
+}
+
+// 主应用组件定义
 const DataAnalysisApp = () => {
-  const [activeTab, setActiveTab] = React.useState('basic');
-  const [inputMethod, setInputMethod] = React.useState('upload');
-  const [data, setData] = React.useState<number[]>([]);
-  const [analysisResult, setAnalysisResult] = React.useState({});
+  const [activeTab, setActiveTab] = useState('basic');
+  const [inputMethod, setInputMethod] = useState('upload');
+  const [data, setData] = useState<number[]>([]);
+  const [analysisResult, setAnalysisResult] = useState({});
   
   // 处理数据分析
   const analyzeData = () => {
@@ -78,7 +92,7 @@ const DataAnalysisApp = () => {
     alert('AI生成数据功能：这里是模拟数据，实际应用中应连接到AI API。');
   };
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (data.length > 0) {
       analyzeData();
     }
@@ -416,7 +430,12 @@ const AnalysisResultSection = ({
 
 // 将组件挂载到DOM
 function mountApp() {
-  if (window.calculateBasicStats && window.generateDistributionData && window.parseCSVContent && window.calculateMLE && window.calculateMoM) {
+  // 检查必要的工具函数是否已加载
+  if (typeof window.calculateBasicStats === 'function' &&
+      typeof window.generateDistributionData === 'function' &&
+      typeof window.parseCSVContent === 'function' &&
+      typeof window.calculateMLE === 'function' &&
+      typeof window.calculateMoM === 'function') {
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(
       React.createElement(React.StrictMode, null,
