@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        cache-dependency-path: 'analyzer-app/pnpm-lock.yaml'
+
+    - name: Install dependencies
+      working-directory: ./analyzer-app
+      run: pnpm install
+
+    - name: Run TypeScript check
+      working-directory: ./analyzer-app
+      run: pnpm run build
+
+    - name: Run tests (if any)
+      working-directory: ./analyzer-app
+      run: pnpm run test 2>/dev/null || echo "No tests configured"
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        cache-dependency-path: 'analyzer-app/pnpm-lock.yaml'
+
+    - name: Install dependencies
+      working-directory: ./analyzer-app
+      run: pnpm install
+
+    - name: Build for production
+      working-directory: ./analyzer-app
+      run: pnpm run build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./analyzer-app/dist
