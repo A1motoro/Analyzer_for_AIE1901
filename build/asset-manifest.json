@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.js": "/analyze/static/js/main.b186718e.js",
-    "index.html": "/analyze/index.html",
-    "main.b186718e.js.map": "/analyze/static/js/main.b186718e.js.map"
+    "main.js": "/analyzer_for_aie1901/static/js/main.b186718e.js",
+    "index.html": "/analyzer_for_aie1901/index.html",
+    "main.b186718e.js.map": "/analyzer_for_aie1901/static/js/main.b186718e.js.map"
   },
   "entrypoints": [
     "static/js/main.b186718e.js"
