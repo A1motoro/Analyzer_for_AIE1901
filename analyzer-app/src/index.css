@@ -34,105 +34,110 @@ html {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* 自定义工具类 */
-@layer utilities {
-  .content-auto {
-    content-visibility: auto;
-  }
-  .card-shadow {
-    box-shadow: var(--shadow-lg);
-  }
-  .card-shadow-hover {
-    box-shadow: var(--shadow-xl);
-  }
-  .transition-all-300 {
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .transition-all-500 {
-    transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .text-balance {
-    text-wrap: balance;
-  }
+@tailwind utilities;
 
-  /* 玻璃拟态效果 */
-  .glass {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  .glass-dark {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+/* 直接定义自定义类，不使用@layer */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-  /* 渐变背景 */
-  .gradient-primary {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  }
-  .gradient-secondary {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
-  }
-  .gradient-accent {
-    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-  }
-  .gradient-bg {
-    background: linear-gradient(135deg, var(--color-neutral) 0%, var(--color-neutral-light) 100%);
-  }
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-  /* 发光效果 */
-  .glow-primary {
-    box-shadow: var(--shadow-glow);
-  }
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
 
-  /* 动画 */
-  .animate-fade-in {
-    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .animate-slide-up {
-    animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .animate-slide-in-left {
-    animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .animate-slide-in-right {
-    animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  .animate-bounce-gentle {
-    animation: bounceGentle 2s infinite;
-  }
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
+}
 
-  /* 悬停效果 */
-  .hover-lift {
-    transform: translateY(0);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .hover-lift:hover {
-    transform: translateY(-2px);
-  }
+.gradient-accent {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+}
 
-  /* 滚动条美化 */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-primary-light) transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: var(--color-primary-light);
-    border-radius: 3px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary);
-  }
+.gradient-bg {
+  background: linear-gradient(135deg, var(--color-neutral) 0%, var(--color-neutral-light) 100%);
+}
+
+.glow-primary {
+  box-shadow: var(--shadow-glow);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 2s infinite;
+}
+
+.hover-lift {
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.card-shadow {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-shadow-hover {
+  box-shadow: var(--shadow-xl);
+}
+
+.transition-all-300 {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-all-500 {
+  transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-light) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-primary-light);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 
 /* 自定义动画 */
