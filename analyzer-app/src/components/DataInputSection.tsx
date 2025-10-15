@@ -19,16 +19,21 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
   data
 }) => {
   return (
-    <section className="bg-white rounded-xl shadow-card p-6 mb-8 transition-all-300 hover:shadow-card-hover animate-slide-up">
-      <h2 className="text-xl font-bold mb-4">数据输入</h2>
+    <section className="glass rounded-2xl p-8 mb-8 transition-all-500 hover-lift card-shadow hover:card-shadow-hover animate-slide-up">
+      <h2 className="text-2xl font-bold mb-6 flex items-center text-neutral-dark">
+        <div className="p-3 rounded-xl gradient-accent text-white mr-4">
+          <i className="fa fa-upload"></i>
+        </div>
+        数据输入
+      </h2>
 
       {/* 输入方法切换标签 */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex flex-wrap gap-3 mb-8 p-2 rounded-xl bg-white/50">
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${
+          className={`flex items-center px-6 py-3 rounded-xl font-medium transition-all-300 hover-lift ${
             inputMethod === 'upload'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'gradient-primary text-white shadow-lg glow-primary'
+              : 'bg-white/60 text-neutral-dark hover:bg-white hover:text-primary'
           }`}
           onClick={() => setInputMethod('upload')}
         >
@@ -36,10 +41,10 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           文件上传
         </button>
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${
+          className={`flex items-center px-6 py-3 rounded-xl font-medium transition-all-300 hover-lift ${
             inputMethod === 'distribution'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'gradient-secondary text-white shadow-lg'
+              : 'bg-white/60 text-neutral-dark hover:bg-white hover:text-secondary'
           }`}
           onClick={() => setInputMethod('distribution')}
         >
@@ -47,10 +52,10 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           分布生成
         </button>
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${
+          className={`flex items-center px-6 py-3 rounded-xl font-medium transition-all-300 hover-lift ${
             inputMethod === 'ai'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'gradient-accent text-white shadow-lg'
+              : 'bg-white/60 text-neutral-dark hover:bg-white hover:text-accent'
           }`}
           onClick={() => setInputMethod('ai')}
         >
@@ -61,8 +66,8 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
 
       {/* 文件上传区域 */}
       {inputMethod === 'upload' && (
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all-300">
+        <div className="space-y-6">
+          <div className="relative border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-all-500 hover-lift group">
             <input
               type="file"
               accept=".csv"
@@ -71,10 +76,15 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
               id="fileUpload"
             />
             <label htmlFor="fileUpload" className="cursor-pointer">
-              <i className="fa fa-file-text-o text-5xl text-gray-400 mb-4"></i>
-              <br />
-              <span className="font-medium text-primary">点击上传CSV文件</span>
-              <p className="text-sm text-gray-500 mt-2">或拖拽文件到此处</p>
+              <div className="p-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-primary mb-4 inline-block group-hover:scale-110 transition-transform duration-300">
+                <i className="fa fa-file-text-o text-4xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-primary mb-2">点击上传CSV文件</h3>
+              <p className="text-neutral-dark/70">或拖拽文件到此处</p>
+              <div className="mt-4 text-sm text-neutral-dark/50">
+                <i className="fa fa-info-circle mr-1"></i>
+                支持 .csv 格式文件
+              </div>
             </label>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
