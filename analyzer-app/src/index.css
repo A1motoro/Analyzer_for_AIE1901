@@ -196,3 +196,32 @@ html {
     background-position: 200% 0;
   }
 }
+
+/* 直接样式测试 - 如果这些生效，说明CSS加载正常 */
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+h1, h2, h3 {
+  color: #1e293b;
+}
+
+/* 强制应用主要颜色 */
+.text-primary {
+  color: #6366f1 !important;
+}
+
+.bg-primary {
+  background-color: #6366f1 !important;
+}
+
+.border-primary {
+  border-color: #6366f1 !important;
+}
