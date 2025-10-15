@@ -28,19 +28,27 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.2
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
-
-      - name: List build directory
-        run: |
-          echo "📁 Build directory contents:"
-          ls -la build/
-          echo "📁 Static JS directory contents:"
-          ls -la build/static/js/ || echo "static/js directory not found"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -49,25 +57,14 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './build'
-          retention-days: 1
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Verify deployment
-        run: |
-          echo "Deployment URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "Verifying deployment..."
-          if curl -f -s ${{ steps.deployment.outputs.page_url }} > /dev/null; then
-            echo "✅ Main page accessible"
-            # Check if JS file exists
-            JS_URL="${{ steps.deployment.outputs.page_url }}/static/js/main.b186718e.js"
-            if curl -f -s "$JS_URL" > /dev/null; then
-              echo "✅ JavaScript file accessible: $JS_URL"
-            else
-              echo "❌ JavaScript file NOT accessible: $JS_URL"
-            fi
-          else
-            echo "❌ Main page NOT accessible"
-          fi
