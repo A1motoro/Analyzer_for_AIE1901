@@ -1,21 +1,53 @@
 ﻿# 数据分析师Web应用
 
-## 🚀 部署状态
+一个简单易用的数据分析工具，支持CSV文件上传、分布数据生成和AI数据生成，提供基本统计分析和MLE/MoM参数估计功能。
 
-应用已成功部署到：**https://a1motoro.github.io/analyzer_for_aie1901/**
+## 🚀 快速开始
 
-## 📊 性能优化说明
+### 环境要求
+- Node.js 16+
+- pnpm 包管理器
 
-### HTTP头警告
-由于使用GitHub Pages，以下HTTP头无法直接控制（这是正常现象）：
-- `x-content-type-options` - 由GitHub Pages自动设置
-- `cache-control` - GitHub Pages使用自己的缓存策略
+### 本地开发
+```bash
+# 安装依赖
+pnpm install
 
-### 兼容性说明
-- `meta[name=theme-color]` - 在Chrome/Edge/Safari中正常工作
-- 浏览器前缀警告来自CDN资源，现代浏览器会自动处理
+# 启动开发服务器
+pnpm start
+```
 
-### 性能建议
-- 静态资源缓存策略由GitHub Pages管理
-- Cache busting通过文件哈希自动实现
-- 这是单页应用的正常行为
+### 构建生产版本
+```bash
+pnpm run build
+```
+
+### 部署
+应用通过GitHub Actions自动部署到：**https://a1motoro.github.io/analyzer_for_aie1901/**
+
+## 📊 功能特点
+
+### 数据输入方式
+1. **CSV文件上传**：支持上传CSV格式的数据文件进行分析
+2. **分布数据生成**：支持生成多种统计分布的数据
+   - 正态分布、均匀分布、指数分布、泊松分布
+3. **AI数据生成**：模拟AI生成数据
+
+### 数据分析功能
+1. **基本统计分析**：均值、中位数、众数、方差、标准差、偏度、峰度
+2. **MLE/MoM参数估计**：最大似然估计和矩法估计
+3. **数据可视化**：直方图、散点图等
+
+## 🛠️ 技术栈
+
+- React 18 + TypeScript
+- Tailwind CSS (CDN)
+- Font Awesome
+- Chart.js (用于数据可视化)
+
+## 📋 部署说明
+
+- 使用GitHub Actions自动构建和部署
+- 采用pnpm作为包管理器
+- 支持缓存优化构建速度
+- 自动部署到GitHub Pages项目页面
