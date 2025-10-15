@@ -24,12 +24,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.2
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: |
+          cd analyzer-app
+          pnpm install --frozen-lockfile
+
+      - name: Build React App
+        run: |
+          cd analyzer-app
+          pnpm run build
+
       - name: Prepare deployment
         run: |
-          # 复制数据分析师app文件作为主页
-          cp "数据分析师app（ai功能待提升）.html" index.html
-          echo "✅ 部署文件已准备就绪"
-          ls -la *.html
+          echo "✅ React应用构建完成"
+          ls -la analyzer-app/dist/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -37,8 +68,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-          include-hidden-files: false
+          path: './analyzer-app/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
