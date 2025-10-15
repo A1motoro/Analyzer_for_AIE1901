@@ -41,12 +41,12 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
     if (files.length > 0) {
       const file = files[0];
       if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
-        // 创建一个新的File对象并模拟input change事件
+        // 创建一个模拟的input change事件
         const fakeEvent = {
           target: {
-            files: [file]
+            files: [file] as unknown as HTMLInputElement['files']
           }
-        } as React.ChangeEvent<HTMLInputElement>;
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
         handleFileUpload(fakeEvent);
       } else {
         alert('请上传CSV格式的文件');
@@ -216,6 +216,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
               </div>
             </div>
           )}
+        </div>
         </div>
       )}
 
