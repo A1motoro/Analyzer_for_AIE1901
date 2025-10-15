@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tailwind CSS v4 自定义配置 */
+@theme {
+  --color-primary: #165DFF;
+  --color-secondary: #36CFC9;
+  --color-accent: #722ED1;
+  --color-neutral: #F5F7FA;
+  --color-neutral-dark: #1D2129;
+
+  --font-family-sans: Inter, system-ui, sans-serif;
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
 /* 自定义工具类 */
 @layer utilities {
   .content-auto {
