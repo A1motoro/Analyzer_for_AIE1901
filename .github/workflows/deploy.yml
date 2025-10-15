@@ -35,6 +35,13 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: List build directory
+        run: |
+          echo "📁 Build directory contents:"
+          ls -la build/
+          echo "📁 Static JS directory contents:"
+          ls -la build/static/js/ || echo "static/js directory not found"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -52,4 +59,15 @@ jobs:
         run: |
           echo "Deployment URL: ${{ steps.deployment.outputs.page_url }}"
           echo "Verifying deployment..."
-          curl -f -s ${{ steps.deployment.outputs.page_url }} > /dev/null && echo "✅ Deployment successful" || echo "❌ Deployment failed"
+          if curl -f -s ${{ steps.deployment.outputs.page_url }} > /dev/null; then
+            echo "✅ Main page accessible"
+            # Check if JS file exists
+            JS_URL="${{ steps.deployment.outputs.page_url }}/static/js/main.b186718e.js"
+            if curl -f -s "$JS_URL" > /dev/null; then
+              echo "✅ JavaScript file accessible: $JS_URL"
+            else
+              echo "❌ JavaScript file NOT accessible: $JS_URL"
+            fi
+          else
+            echo "❌ Main page NOT accessible"
+          fi
