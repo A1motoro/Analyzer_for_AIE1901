@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.1.0",
     "@tailwindcss/postcss": "^4.1.14",
     "@types/chart.js": "^4.0.1",
     "autoprefixer": "^10.4.21",
