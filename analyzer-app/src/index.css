@@ -5,8 +5,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind CSS v4 自定义配置 */
-@theme {
+/* 自定义CSS变量 */
+:root {
   --color-primary: #6366f1;
   --color-primary-light: #a5b4fc;
   --color-primary-dark: #4338ca;
@@ -22,14 +22,16 @@
   --color-neutral-dark: #1e293b;
   --color-neutral-darker: #0f172a;
 
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
-
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+/* 字体设置 */
+html {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* 自定义工具类 */
