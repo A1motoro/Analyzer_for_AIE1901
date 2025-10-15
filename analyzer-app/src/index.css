@@ -433,6 +433,8 @@ input:focus, textarea:focus {
   position: relative;
   min-height: 200px;
   border-color: var(--monokai-bg-lighter);
+  border-style: dashed;
+  border-width: 2px;
   background: rgba(62, 61, 50, 0.3);
   backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

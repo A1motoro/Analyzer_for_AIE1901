@@ -108,25 +108,26 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
 
       {/* 文件上传区域 */}
       {inputMethod === 'upload' && (
-        <div className="space-y-6">
-          {/* 主要上传区域 */}
-          <div className="upload-zone relative">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="fileUpload"
-            />
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl space-y-6">
+            {/* 主要上传区域 */}
+            <div className="upload-zone relative">
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="fileUpload"
+              />
 
-            {/* 虚线边框容器 */}
-            <label
-              htmlFor="fileUpload"
-              className="upload-area block cursor-pointer"
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
+              {/* 虚线边框容器 - 直接绑定点击事件 */}
+              <div
+                className="upload-area block cursor-pointer"
+                onClick={() => document.getElementById('fileUpload')?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
               <div className={`upload-content flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed transition-all duration-300 hover:border-monokai-orange hover:bg-monokai-light/20 group ${isDragOver ? 'drag-over' : ''}`}>
                 {/* 上传图标区域 */}
                 <div className="upload-icon mb-6 relative">
@@ -140,27 +141,39 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                   </div>
                 </div>
 
-                {/* 文字内容 */}
+                {/* 文字内容和信息按钮 */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group-hover:text-monokai-orange text-center" style={{ color: 'var(--monokai-fg)' }}>
+                  <h3 className="text-xl font-bold mb-3 transition-colors duration-300 group-hover:text-monokai-orange" style={{ color: 'var(--monokai-fg)' }}>
                     上传CSV数据文件
                   </h3>
-                  <p className="text-monokai-gray mb-3 text-base">
-                    将文件拖拽到此处，或 <span className="text-monokai-orange font-medium">点击选择文件</span>
+                  <p className="text-monokai-gray mb-4 text-base">
+                    将文件拖拽到此处，或点击上传
                   </p>
-                  <div className="flex items-center justify-center">
+
+                  {/* 文件格式信息按钮 */}
+                  <div className="flex justify-center mb-4">
                     <div className="relative group/info">
-                      <div className="flex items-center text-sm text-monokai-dim cursor-help">
-                        <i className="fa fa-info-circle mr-1 text-monokai-blue"></i>
-                        <span>支持 .csv 格式</span>
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-monokai-light border border-monokai text-monokai-blue cursor-help hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-200">
+                        <span className="text-xs font-bold">i</span>
                       </div>
                       {/* 悬停显示详细信息 */}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-monokai-dark text-monokai-fg text-xs rounded-lg border border-monokai shadow-lg opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-3 bg-monokai-dark text-monokai-fg text-sm rounded-lg border border-monokai shadow-xl opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none z-20 min-w-max">
                         <div className="text-center">
-                          <div className="font-medium mb-1 text-monokai-blue">文件格式要求</div>
-                          <div>• 支持CSV格式的文件</div>
-                          <div>• 第一列应为数值数据</div>
-                          <div>• 第一行为可选的标题行</div>
+                          <div className="font-medium mb-2 text-monokai-orange">📄 文件格式要求</div>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex items-center">
+                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
+                              支持CSV格式的文件
+                            </div>
+                            <div className="flex items-center">
+                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
+                              第一列应为数值数据
+                            </div>
+                            <div className="flex items-center">
+                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
+                              第一行为可选的标题行
+                            </div>
+                          </div>
                         </div>
                         {/* 小箭头 */}
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-monokai-dark"></div>
@@ -172,7 +185,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 {/* 底部装饰线 */}
                 <div className="mt-6 w-16 h-0.5 bg-monokai-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-            </label>
+            </div>
           </div>
 
           {data.length > 0 && (
