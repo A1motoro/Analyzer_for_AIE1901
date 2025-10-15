@@ -4,18 +4,38 @@
 
 ## 快速开始
 
-### 启动本地服务器
+### 环境要求
 
-1. 确保您的计算机上已安装Python
-2. 打开命令提示符（Windows）或终端（Mac/Linux）
-3. 导航到本项目目录
-4. 运行以下命令启动HTTP服务器：
+- Node.js 16+
+- pnpm 包管理器
+
+### 安装依赖
 
 ```bash
-python -m http.server 8000
+pnpm install
 ```
 
-5. 打开浏览器，访问 `http://localhost:8000/simple_app.html`
+### 启动开发服务器
+
+```bash
+pnpm start
+```
+
+应用将在 `http://localhost:3000` 启动。
+
+### 构建生产版本
+
+```bash
+pnpm run build
+```
+
+### 部署到GitHub Pages
+
+```bash
+pnpm run deploy
+```
+
+应用将部署到 `https://a1motoro.github.io/analyze`
 
 ## 功能特点
 
@@ -65,7 +85,14 @@ python -m http.server 8000
 
 ## 开发说明
 
-如果您想进一步开发或修改此应用，可以直接编辑 `simple_app.html` 文件。所有的代码都集中在这个文件中，便于理解和维护。
+项目结构：
+- `src/App.tsx` - 主应用组件
+- `src/index.tsx` - 应用入口点
+- `src/utils.ts` - 工具函数
+- `src/types.ts` - TypeScript类型定义
+- `public/index.html` - HTML模板
+
+**重要：** 此项目配置为仅使用pnpm包管理器。请勿使用npm、yarn或其他包管理器。
 
 ## 注意事项
 

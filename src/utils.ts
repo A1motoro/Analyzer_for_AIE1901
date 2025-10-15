@@ -1,3 +1,18 @@
+// 使文件成为模块
+export {};
+
+// 类型定义
+declare global {
+  interface Window {
+    calculateBasicStats(data: number[]): any;
+    generateDistributionData(params: any): number[];
+    parseCSVContent(content: string): number[];
+    calculateMLE(data: number[]): any;
+    calculateMoM(data: number[]): any;
+    mountApp(): void;
+  }
+}
+
 /**
  * 计算基本统计量
  * @param data 输入数据数组

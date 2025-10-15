@@ -35,7 +35,7 @@ const DataAnalysisApp = () => {
   };
   
   // 处理文件上传
-  const handleFileUpload = (e) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -54,7 +54,7 @@ const DataAnalysisApp = () => {
   };
   
   // 处理分布生成
-  const handleDistributionGenerate = (type) => {
+  const handleDistributionGenerate = (type: string) => {
     const params = {
       type,
       params: {} as Record<string, number>,
@@ -169,6 +169,15 @@ const DataAnalysisApp = () => {
 
 // 数据输入区域组件
 // 数据输入区域组件
+interface DataInputSectionProps {
+  inputMethod: string;
+  setInputMethod: (method: string) => void;
+  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDistributionGenerate: (type: string) => void;
+  handleAIGenerateData: () => void;
+  data: number[];
+}
+
 const DataInputSection = ({
   inputMethod,
   setInputMethod,
@@ -176,7 +185,7 @@ const DataInputSection = ({
   handleDistributionGenerate,
   handleAIGenerateData,
   data
-}) => {
+}: DataInputSectionProps) => {
   return (
     <section className="bg-white rounded-xl card-shadow p-6 mb-8">
       <h2 className="text-xl font-bold mb-4">数据输入</h2>
@@ -298,12 +307,19 @@ const DataInputSection = ({
 };
 
 // 分析结果区域组件
+interface AnalysisResultSectionProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  analysisResult: any;
+  data: number[];
+}
+
 const AnalysisResultSection = ({
   activeTab,
   setActiveTab,
   analysisResult,
   data
-}) => {
+}: AnalysisResultSectionProps) => {
   return (
     <section className="bg-white rounded-xl card-shadow p-6">
       <h2 className="text-xl font-bold mb-4">数据分析结果</h2>
@@ -436,7 +452,12 @@ function mountApp() {
       typeof window.parseCSVContent === 'function' &&
       typeof window.calculateMLE === 'function' &&
       typeof window.calculateMoM === 'function') {
-    const root = ReactDOM.createRoot(document.getElementById('root'));
+    const rootElement = document.getElementById('root');
+    if (!rootElement) {
+      console.error('找不到root元素');
+      return;
+    }
+    const root = ReactDOM.createRoot(rootElement);
     root.render(
       React.createElement(React.StrictMode, null,
         React.createElement(DataAnalysisApp, null)
@@ -450,3 +471,6 @@ function mountApp() {
 
 // 在全局对象上注册mountApp函数，以便在编译完成后调用
 window.mountApp = mountApp;
+
+// 导出主组件
+export { DataAnalysisApp };
