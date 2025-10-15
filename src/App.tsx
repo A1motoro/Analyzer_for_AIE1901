@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
 // 类型定义
@@ -21,18 +21,18 @@ const DataAnalysisApp = () => {
   const [analysisResult, setAnalysisResult] = useState({});
   
   // 处理数据分析
-  const analyzeData = () => {
+  const analyzeData = useCallback(() => {
     if (data.length === 0) return;
     const basicStats = window.calculateBasicStats(data);
-      const mleParams = window.calculateMLE(data);
-      const momParams = window.calculateMoM(data);
-    
+    const mleParams = window.calculateMLE(data);
+    const momParams = window.calculateMoM(data);
+
     setAnalysisResult({
       ...basicStats,
       mleParams,
       momParams
     });
-  };
+  }, [data]);
   
   // 处理文件上传
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +96,7 @@ const DataAnalysisApp = () => {
     if (data.length > 0) {
       analyzeData();
     }
-  }, [data]);
+  }, [data, analyzeData]);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -108,10 +108,10 @@ const DataAnalysisApp = () => {
             <h1 className="text-xl font-bold text-neutral-dark">数据分析师</h1>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <a href="#" className="text-primary font-medium">主页</a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-all-300">文档</a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-all-300">教程</a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-all-300">关于</a>
+            <button className="text-primary font-medium">主页</button>
+            <button className="text-gray-600 hover:text-primary transition-all-300">文档</button>
+            <button className="text-gray-600 hover:text-primary transition-all-300">教程</button>
+            <button className="text-gray-600 hover:text-primary transition-all-300">关于</button>
           </nav>
           <button className="md:hidden text-gray-600">
             <i className="fa fa-bars text-xl"></i>
@@ -150,15 +150,15 @@ const DataAnalysisApp = () => {
               <p className="text-gray-600 text-sm">© 2023 数据分析师Web应用. 保留所有权利.</p>
             </div>
             <div className="flex space-x-6">
-              <a href="#" className="text-gray-500 hover:text-primary transition-all-300">
+              <button className="text-gray-500 hover:text-primary transition-all-300">
                 <i className="fa fa-github text-xl"></i>
-              </a>
-              <a href="#" className="text-gray-500 hover:text-primary transition-all-300">
+              </button>
+              <button className="text-gray-500 hover:text-primary transition-all-300">
                 <i className="fa fa-twitter text-xl"></i>
-              </a>
-              <a href="#" className="text-gray-500 hover:text-primary transition-all-300">
+              </button>
+              <button className="text-gray-500 hover:text-primary transition-all-300">
                 <i className="fa fa-linkedin text-xl"></i>
-              </a>
+              </button>
             </div>
           </div>
         </div>
