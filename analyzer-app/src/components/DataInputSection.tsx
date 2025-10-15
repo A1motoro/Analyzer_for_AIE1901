@@ -142,15 +142,30 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
 
                 {/* 文字内容 */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group-hover:text-monokai-orange" style={{ color: 'var(--monokai-fg)' }}>
+                  <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group-hover:text-monokai-orange text-center" style={{ color: 'var(--monokai-fg)' }}>
                     上传CSV数据文件
                   </h3>
                   <p className="text-monokai-gray mb-3 text-base">
                     将文件拖拽到此处，或 <span className="text-monokai-orange font-medium">点击选择文件</span>
                   </p>
-                  <div className="flex items-center justify-center text-sm text-monokai-dim">
-                    <i className="fa fa-info-circle mr-2"></i>
-                    <span>支持 .csv 格式，包含数值数据</span>
+                  <div className="flex items-center justify-center">
+                    <div className="relative group/info">
+                      <div className="flex items-center text-sm text-monokai-dim cursor-help">
+                        <i className="fa fa-info-circle mr-1 text-monokai-blue"></i>
+                        <span>支持 .csv 格式</span>
+                      </div>
+                      {/* 悬停显示详细信息 */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-monokai-dark text-monokai-fg text-xs rounded-lg border border-monokai shadow-lg opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                        <div className="text-center">
+                          <div className="font-medium mb-1 text-monokai-blue">文件格式要求</div>
+                          <div>• 支持CSV格式的文件</div>
+                          <div>• 第一列应为数值数据</div>
+                          <div>• 第一行为可选的标题行</div>
+                        </div>
+                        {/* 小箭头 */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-monokai-dark"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -160,29 +175,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
             </label>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-monokai rounded-lg p-4 border border-monokai">
-              <div className="flex items-center mb-3">
-                <i className="fa fa-info-circle mr-2" style={{ color: 'var(--monokai-blue)' }}></i>
-                <span className="font-medium" style={{ color: 'var(--monokai-fg)' }}>文件格式要求</span>
-              </div>
-              <ul className="space-y-2 text-sm text-monokai-gray">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: 'var(--monokai-green)' }}></span>
-                  支持CSV格式的文件
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: 'var(--monokai-green)' }}></span>
-                  第一列应为数值数据
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: 'var(--monokai-green)' }}></span>
-                  第一行为可选的标题行
-                </li>
-              </ul>
-            </div>
-
-            {data.length > 0 && (
+          {data.length > 0 && (
               <div className="upload-success bg-gradient-to-r from-monokai-green/10 to-monokai-blue/10 rounded-lg p-6 border border-monokai-green/30">
                 <div className="flex items-center">
                   <div className="success-icon-container mr-4">
@@ -202,10 +195,9 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                       <span>数据已准备好进行分析</span>
                     </div>
                   </div>
-                  <div className="ml-4">
-                    <div className="flex items-center text-monokai-green">
-                      <i className="fa fa-circle text-xs mr-2 animate-pulse"></i>
-                      <span className="text-sm font-medium">就绪</span>
+                  <div className="ml-4 flex items-center">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-monokai-green/20">
+                      <i className="fa fa-check-circle text-monokai-green text-lg"></i>
                     </div>
                   </div>
                 </div>

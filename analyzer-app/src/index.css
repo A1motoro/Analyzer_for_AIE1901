@@ -495,6 +495,11 @@ input:focus, textarea:focus {
   }
 }
 
+/* 信息提示样式 */
+.group\/info:hover .group-hover\/info\:opacity-100 {
+  opacity: 1;
+}
+
 /* Font Awesome图标 */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
