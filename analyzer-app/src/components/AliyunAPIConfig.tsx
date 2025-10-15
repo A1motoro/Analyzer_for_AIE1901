@@ -24,9 +24,8 @@ const AliyunAPIConfig: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-card p-6 mb-6 animate-fade-in">
-      <h3 className="text-lg font-bold mb-4 flex items-center">
-        <i className="fa fa-cloud text-primary mr-2"></i>
+    <div className="bg-white rounded-xl shadow-card p-6 mb-12 animate-fade-in">
+      <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--monokai-fg)' }}>
         阿里云API配置
       </h3>
 

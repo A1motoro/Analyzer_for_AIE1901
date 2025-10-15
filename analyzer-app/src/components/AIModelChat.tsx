@@ -151,8 +151,7 @@ const AIModelChat: React.FC<AIModelChatProps> = ({ analysisResult, data }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 h-[500px] flex flex-col animate-fade-in">
-      <h3 className="text-lg font-bold mb-4 flex items-center">
-        <i className="fa fa-robot text-primary mr-2"></i>
+      <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--monokai-fg)' }}>
         大模型分析助手
       </h3>
 

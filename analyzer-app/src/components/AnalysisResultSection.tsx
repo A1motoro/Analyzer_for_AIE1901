@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 
 // 注册Chart.js组件
@@ -17,11 +17,13 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
   analysisResult,
   data
 }) => {
+  const histogramRef = useRef<HTMLCanvasElement>(null);
+  const scatterRef = useRef<HTMLCanvasElement>(null);
   // 在组件挂载后创建图表
   useEffect(() => {
-    if (data.length > 0) {
+    if (data.length > 0 && activeTab === 'basic') {
       // 创建直方图
-      const histogramCtx = document.getElementById('histogram') as HTMLCanvasElement;
+      const histogramCtx = histogramRef.current;
       if (histogramCtx) {
         // 销毁已存在的图表
         const existingChart = Chart.getChart(histogramCtx);
@@ -32,7 +34,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
         // 计算直方图数据
         const min = Math.min(...data);
         const max = Math.max(...data);
-        const binCount = Math.ceil(Math.sqrt(data.length));
+        const binCount = Math.min(15, Math.ceil(Math.sqrt(data.length))); // 限制最大bin数为15
         const binWidth = (max - min) / binCount;
         const bins = new Array(binCount).fill(0);
 
@@ -52,9 +54,9 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
             datasets: [{
               label: '数据分布',
               data: bins,
-              backgroundColor: 'rgba(22, 93, 255, 0.6)',
-              borderColor: 'rgba(22, 93, 255, 1)',
-              borderWidth: 1
+              backgroundColor: '#66d9ef',
+              borderWidth: 0,
+              hoverBackgroundColor: '#ae81ff'
             }]
           },
           options: {
@@ -63,7 +65,12 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: '数据直方图'
+                text: '数据分布直方图',
+                color: '#f8f8f2',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
               },
               legend: {
                 display: false
@@ -74,13 +81,27 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: '频率'
+                  text: '频次',
+                  color: '#f8f8f2'
+                },
+                ticks: {
+                  color: '#90908a'
+                },
+                grid: {
+                  color: '#49483e'
                 }
               },
               x: {
                 title: {
                   display: true,
-                  text: '数值区间'
+                  text: '数值区间',
+                  color: '#f8f8f2'
+                },
+                ticks: {
+                  color: '#90908a'
+                },
+                grid: {
+                  color: '#49483e'
                 }
               }
             }
@@ -89,7 +110,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       }
 
       // 创建散点图
-      const scatterCtx = document.getElementById('scatter') as HTMLCanvasElement;
+      const scatterCtx = scatterRef.current;
       if (scatterCtx) {
         // 销毁已存在的图表
         const existingChart = Chart.getChart(scatterCtx);
@@ -109,10 +130,11 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
             datasets: [{
               label: '数据点',
               data: scatterData,
-              backgroundColor: 'rgba(54, 207, 201, 0.6)',
-              borderColor: 'rgba(54, 207, 201, 1)',
-              borderWidth: 1,
-              pointRadius: 3
+              backgroundColor: '#ae81ff',
+              borderWidth: 0,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              hoverBackgroundColor: '#f92672'
             }]
           },
           options: {
@@ -121,7 +143,12 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: '数据散点图'
+                text: '数据散点分布图',
+                color: '#f8f8f2',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
               },
               legend: {
                 display: false
@@ -131,13 +158,27 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
               y: {
                 title: {
                   display: true,
-                  text: '数值'
+                  text: '数值',
+                  color: '#f8f8f2'
+                },
+                ticks: {
+                  color: '#90908a'
+                },
+                grid: {
+                  color: '#49483e'
                 }
               },
               x: {
                 title: {
                   display: true,
-                  text: '索引'
+                  text: '数据索引',
+                  color: '#f8f8f2'
+                },
+                ticks: {
+                  color: '#90908a'
+                },
+                grid: {
+                  color: '#49483e'
                 }
               }
             }
@@ -145,19 +186,26 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
         });
       }
     }
-  }, [data]);
+  }, [data, activeTab]);
 
   return (
-    <section className="bg-white rounded-xl shadow-card p-6 mb-8 transition-all-300 hover:shadow-card-hover animate-slide-up">
-      <h2 className="text-xl font-bold mb-4">数据分析结果</h2>
+    <section className="bg-monokai-light rounded-2xl p-8 mb-12 border border-monokai shadow-monokai transition-all duration-300 hover:shadow-lg">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--monokai-fg)' }}>
+          数据分析结果
+        </h2>
+        <p className="text-sm text-monokai-gray">
+          深入分析您的数据特征和统计特性
+        </p>
+      </div>
 
       {/* 分析类型切换标签 */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex mb-8 bg-monokai border border-monokai rounded-lg p-1">
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${
+          className={`flex items-center px-6 py-3 rounded-md font-medium text-sm transition-all duration-300 flex-1 ${
             activeTab === 'basic'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-monokai-orange text-monokai-bg shadow-md'
+              : 'text-monokai-gray hover:bg-monokai hover:text-monokai-fg'
           }`}
           onClick={() => setActiveTab('basic')}
         >
@@ -165,196 +213,386 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
           基本统计分析
         </button>
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-all-300 ${
+          className={`flex items-center px-6 py-3 rounded-md font-medium text-sm transition-all duration-300 flex-1 ${
             activeTab === 'mle-mom'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-monokai-purple text-monokai-bg shadow-md'
+              : 'text-monokai-gray hover:bg-monokai hover:text-monokai-fg'
           }`}
           onClick={() => setActiveTab('mle-mom')}
         >
           <i className="fa fa-flask mr-2"></i>
-          MLE/MoM分析
+          参数估计分析
         </button>
       </div>
 
       {/* 基本统计分析结果 */}
       {activeTab === 'basic' && (
-        <div className="space-y-6">
-          {/* 统计指标卡片 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* 均值 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">均值</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.mean?.toFixed(4)}</p>
+        <div className="space-y-8">
+          {/* 核心统计指标 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="bg-monokai rounded-lg p-6 border border-monokai hover:border-monokai-blue transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
+                  <i className="fa fa-crosshairs text-sm"></i>
+                </div>
+                <span className="text-xs text-monokai-gray font-medium">MEAN</span>
+              </div>
+              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-blue)' }}>
+                {analysisResult.mean?.toFixed(4)}
+              </p>
+              <p className="text-sm text-monokai-gray">平均值</p>
             </div>
 
-            {/* 中位数 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">中位数</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.median?.toFixed(4)}</p>
+            <div className="bg-monokai rounded-lg p-6 border border-monokai hover:border-monokai-green transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--monokai-green)', color: 'var(--monokai-bg)' }}>
+                  <i className="fa fa-balance-scale text-sm"></i>
+                </div>
+                <span className="text-xs text-monokai-gray font-medium">MEDIAN</span>
+              </div>
+              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-green)' }}>
+                {analysisResult.median?.toFixed(4)}
+              </p>
+              <p className="text-sm text-monokai-gray">中位数</p>
             </div>
 
-            {/* 标准差 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">标准差</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.stdDev?.toFixed(4)}</p>
+            <div className="bg-monokai rounded-lg p-6 border border-monokai hover:border-monokai-orange transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--monokai-orange)', color: 'var(--monokai-bg)' }}>
+                  <i className="fa fa-chart-line text-sm"></i>
+                </div>
+                <span className="text-xs text-monokai-gray font-medium">STD DEV</span>
+              </div>
+              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-orange)' }}>
+                {analysisResult.stdDev?.toFixed(4)}
+              </p>
+              <p className="text-sm text-monokai-gray">标准差</p>
             </div>
 
-            {/* 方差 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">方差</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.variance?.toFixed(4)}</p>
-            </div>
-          </div>
-
-          {/* 更多统计指标 */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* 众数 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">众数</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.mode?.toFixed(4)}</p>
-            </div>
-
-            {/* 偏度 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">偏度</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.skewness?.toFixed(4)}</p>
-            </div>
-
-            {/* 峰度 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all-300">
-              <p className="text-sm text-gray-500">峰度</p>
-              <p className="text-2xl font-bold mt-1">{analysisResult.kurtosis?.toFixed(4)}</p>
-            </div>
-          </div>
-
-          {/* 统计指标解释 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
-            <p className="font-medium mb-2">📊 统计指标解释</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div>• <span className="font-medium">均值</span>：数据的集中趋势度量</div>
-              <div>• <span className="font-medium">中位数</span>：排序后位于中间的数值，不受极端值影响</div>
-              <div>• <span className="font-medium">标准差</span>：数据离散程度的度量</div>
-              <div>• <span className="font-medium">偏度</span>：衡量数据分布的不对称性</div>
-              <div>• <span className="font-medium">峰度</span>：衡量数据分布的陡峭程度</div>
+            <div className="bg-monokai rounded-lg p-6 border border-monokai hover:border-monokai-purple transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--monokai-purple)', color: 'var(--monokai-bg)' }}>
+                  <i className="fa fa-square text-sm"></i>
+                </div>
+                <span className="text-xs text-monokai-gray font-medium">VARIANCE</span>
+              </div>
+              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-purple)' }}>
+                {analysisResult.variance?.toFixed(4)}
+              </p>
+              <p className="text-sm text-monokai-gray">方差</p>
             </div>
           </div>
 
-          {/* 可视化图表 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 直方图 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="h-80">
-                <canvas id="histogram"></canvas>
+          {/* 高级统计指标 */}
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--monokai-fg)' }}>
+              高级统计特性
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 rounded-lg bg-monokai border border-monokai">
+                <p className="text-sm text-monokai-gray mb-2">众数 (Mode)</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--monokai-yellow)' }}>
+                  {analysisResult.mode?.toFixed(4)}
+                </p>
+              </div>
+
+              <div className="text-center p-4 rounded-lg bg-monokai border border-monokai">
+                <p className="text-sm text-monokai-gray mb-2">偏度 (Skewness)</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--monokai-pink)' }}>
+                  {analysisResult.skewness?.toFixed(4)}
+                </p>
+              </div>
+
+              <div className="text-center p-4 rounded-lg bg-monokai border border-monokai">
+                <p className="text-sm text-monokai-gray mb-2">峰度 (Kurtosis)</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--monokai-blue)' }}>
+                  {analysisResult.kurtosis?.toFixed(4)}
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* 散点图 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="h-80">
-                <canvas id="scatter"></canvas>
+          {/* 数据可视化 */}
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <h3 className="text-lg font-semibold mb-6" style={{ color: 'var(--monokai-fg)' }}>
+              数据可视化分析
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 直方图 */}
+              <div className="bg-monokai-dark rounded-lg p-4">
+                <div className="h-96">
+                  <canvas ref={histogramRef}></canvas>
+                </div>
+              </div>
+
+              {/* 散点图 */}
+              <div className="bg-monokai-dark rounded-lg p-4">
+                <div className="h-96">
+                  <canvas ref={scatterRef}></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 统计概念解释 */}
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--monokai-fg)' }}>
+              统计概念指南
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-blue)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-blue)' }}>均值 (Mean)</p>
+                    <p className="text-sm text-monokai-gray">所有数据点的算术平均值</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-green)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-green)' }}>中位数 (Median)</p>
+                    <p className="text-sm text-monokai-gray">排序后位于中间位置的值</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-orange)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-orange)' }}>标准差 (Std Dev)</p>
+                    <p className="text-sm text-monokai-gray">衡量数据分散程度的统计量</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-purple)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-purple)' }}>方差 (Variance)</p>
+                    <p className="text-sm text-monokai-gray">标准差的平方，衡量数据变异性</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-pink)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-pink)' }}>偏度 (Skewness)</p>
+                    <p className="text-sm text-monokai-gray">描述分布不对称程度的指标</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 rounded-full mt-2 mr-3" style={{ backgroundColor: 'var(--monokai-yellow)' }}></div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--monokai-yellow)' }}>峰度 (Kurtosis)</p>
+                    <p className="text-sm text-monokai-gray">衡量分布尾部厚度的统计量</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* MLE/MoM分析结果 */}
+      {/* 参数估计分析结果 */}
       {activeTab === 'mle-mom' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* MLE参数估计 */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-              <i className="fa fa-bar-chart mr-2"></i>
-              最大似然估计 (MLE)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* MLE均值 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计均值</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{analysisResult.mleParams?.mean?.toFixed(4)}</p>
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--monokai-blue)' }}>
+                最大似然估计 (MLE)
+              </h3>
+              <p className="text-sm text-monokai-gray">
+                Maximum Likelihood Estimation - 基于概率的最大化
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计均值</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-blue)' }}>
+                  {analysisResult.mleParams?.mean?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">μ̂</p>
               </div>
 
-              {/* MLE方差 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计方差</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{analysisResult.mleParams?.variance?.toFixed(4)}</p>
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计方差</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-green)' }}>
+                  {analysisResult.mleParams?.variance?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">σ²̂</p>
               </div>
 
-              {/* MLE标准差 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计标准差</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{analysisResult.mleParams?.stdDev?.toFixed(4)}</p>
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计标准差</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-orange)' }}>
+                  {analysisResult.mleParams?.stdDev?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">σ̂</p>
               </div>
             </div>
           </div>
 
           {/* MoM参数估计 */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-              <i className="fa fa-calculator mr-2"></i>
-              矩法估计 (MoM)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* MoM均值 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计均值</p>
-                <p className="text-2xl font-bold mt-1 text-purple-600">{analysisResult.momParams?.mean?.toFixed(4)}</p>
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--monokai-purple)' }}>
+                矩法估计 (MoM)
+              </h3>
+              <p className="text-sm text-monokai-gray">
+                Method of Moments - 基于样本矩的估计方法
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计均值</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-purple)' }}>
+                  {analysisResult.momParams?.mean?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">μ̃</p>
               </div>
 
-              {/* MoM方差 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计方差</p>
-                <p className="text-2xl font-bold mt-1 text-purple-600">{analysisResult.momParams?.variance?.toFixed(4)}</p>
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计方差</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-pink)' }}>
+                  {analysisResult.momParams?.variance?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">σ²̃</p>
               </div>
 
-              {/* MoM标准差 */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <p className="text-sm text-gray-500">估计标准差</p>
-                <p className="text-2xl font-bold mt-1 text-purple-600">{analysisResult.momParams?.stdDev?.toFixed(4)}</p>
+              <div className="bg-monokai-dark rounded-lg p-4 border border-monokai text-center hover:scale-105 transition-all duration-300">
+                <p className="text-sm text-monokai-gray mb-2">估计标准差</p>
+                <p className="text-3xl font-bold mb-1" style={{ color: 'var(--monokai-yellow)' }}>
+                  {analysisResult.momParams?.stdDev?.toFixed(6)}
+                </p>
+                <p className="text-xs text-monokai-dim">σ̃</p>
               </div>
             </div>
           </div>
 
           {/* 估计方法比较 */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">估计方法比较</h3>
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <div className="flex items-center mb-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl mr-4" style={{ backgroundColor: 'var(--monokai-yellow)', color: 'var(--monokai-bg)' }}>
+                <i className="fa fa-balance-scale text-lg"></i>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold" style={{ color: 'var(--monokai-fg)' }}>
+                  参数估计方法比较
+                </h3>
+                <p className="text-sm text-monokai-gray mt-1">
+                  对比MLE与MoM两种经典参数估计方法的差异
+                </p>
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">参数</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最大似然估计</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">矩法估计</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">差异</th>
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-monokai">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-monokai-gray uppercase tracking-wider">参数</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-monokai-gray uppercase tracking-wider">最大似然估计</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-monokai-gray uppercase tracking-wider">矩法估计</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-monokai-gray uppercase tracking-wider">绝对差异</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-monokai">
                   {/* 均值比较 */}
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">均值</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{analysisResult.mleParams?.mean?.toFixed(6)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{analysisResult.momParams?.mean?.toFixed(6)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((analysisResult.mleParams?.mean || 0) - (analysisResult.momParams?.mean || 0)).toFixed(8)}</td>
+                  <tr className="hover:bg-monokai-light transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--monokai-fg)' }}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: 'var(--monokai-blue)' }}></div>
+                        均值 (μ)
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-blue)' }}>
+                      {analysisResult.mleParams?.mean?.toFixed(8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-purple)' }}>
+                      {analysisResult.momParams?.mean?.toFixed(8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-orange)' }}>
+                      {Math.abs((analysisResult.mleParams?.mean || 0) - (analysisResult.momParams?.mean || 0)).toFixed(10)}
+                    </td>
                   </tr>
                   {/* 方差比较 */}
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">方差</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{analysisResult.mleParams?.variance?.toFixed(6)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{analysisResult.momParams?.variance?.toFixed(6)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((analysisResult.mleParams?.variance || 0) - (analysisResult.momParams?.variance || 0)).toFixed(8)}</td>
+                  <tr className="hover:bg-monokai-light transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--monokai-fg)' }}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: 'var(--monokai-green)' }}></div>
+                        方差 (σ²)
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-blue)' }}>
+                      {analysisResult.mleParams?.variance?.toFixed(8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-purple)' }}>
+                      {analysisResult.momParams?.variance?.toFixed(8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono" style={{ color: 'var(--monokai-orange)' }}>
+                      {Math.abs((analysisResult.mleParams?.variance || 0) - (analysisResult.momParams?.variance || 0)).toFixed(10)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* MLE和MoM方法解释 */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
-            <p className="font-medium mb-2">🔬 参数估计方法解释</p>
-            <div>
-              <p className="mb-2">• <span className="font-medium">最大似然估计 (MLE)</span>：寻找最可能产生观测数据的参数值</p>
-              <p>• <span className="font-medium">矩法估计 (MoM)</span>：通过匹配样本矩和理论矩来估计参数</p>
+          {/* 参数估计方法详解 */}
+          <div className="bg-monokai rounded-lg p-6 border border-monokai">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--monokai-fg)' }}>
+                参数估计方法详解
+              </h3>
+              <p className="text-sm text-monokai-gray">
+                深入理解两种经典的参数估计方法
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mr-4" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
+                    <i className="fa fa-brain text-sm"></i>
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-2" style={{ color: 'var(--monokai-blue)' }}>
+                      最大似然估计 (MLE)
+                    </h4>
+                    <p className="text-sm text-monokai-gray leading-relaxed">
+                      寻找最可能产生观测数据的参数值。通过最大化似然函数来确定参数，使得在当前参数下观测到现有数据的概率最大。
+                    </p>
+                    <div className="mt-3 p-3 rounded bg-monokai-dark border border-monokai">
+                      <p className="text-xs text-monokai-dim font-mono">
+                        L(θ|x) = ∏ f(xᵢ|θ) → max
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mr-4" style={{ backgroundColor: 'var(--monokai-purple)', color: 'var(--monokai-bg)' }}>
+                    <i className="fa fa-calculator text-sm"></i>
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-2" style={{ color: 'var(--monokai-purple)' }}>
+                      矩法估计 (MoM)
+                    </h4>
+                    <p className="text-sm text-monokai-gray leading-relaxed">
+                      通过匹配样本矩和理论矩来估计参数。设置样本矩等于理论矩，然后求解参数。
+                    </p>
+                    <div className="mt-3 p-3 rounded bg-monokai-dark border border-monokai">
+                      <p className="text-xs text-monokai-dim font-mono">
+                        E[X] = μ̂, Var(X) = σ̂²
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

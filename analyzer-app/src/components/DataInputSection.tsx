@@ -7,7 +7,9 @@ interface DataInputSectionProps {
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleDistributionGenerate: (type: string) => void;
   handleAIGenerateData: () => void;
+  handleClearData: () => void;
   data: number[];
+  isUserUploadedData: boolean;
 }
 
 const DataInputSection: React.FC<DataInputSectionProps> = ({
@@ -16,7 +18,9 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
   handleFileUpload,
   handleDistributionGenerate,
   handleAIGenerateData,
-  data
+  handleClearData,
+  data,
+  isUserUploadedData
 }) => {
   const [isDragOver, setIsDragOver] = React.useState(false);
 
@@ -54,19 +58,14 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
     }
   };
   return (
-    <section className="bg-monokai-light rounded-2xl p-8 mb-8 border border-monokai shadow-monokai transition-all duration-300 hover:shadow-lg">
-      <div className="flex items-center mb-8">
-        <div className="flex items-center justify-center w-12 h-12 rounded-xl mr-4" style={{ backgroundColor: 'var(--monokai-orange)', color: 'var(--monokai-bg)' }}>
-          <i className="fa fa-database text-lg"></i>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--monokai-fg)' }}>
-            数据输入
-          </h2>
-          <p className="text-sm text-monokai-gray mt-1">
-            选择您的数据输入方式，开始数据分析之旅
-          </p>
-        </div>
+    <section className="bg-monokai-light rounded-2xl p-8 mb-12 border border-monokai shadow-monokai transition-all duration-300 hover:shadow-lg">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--monokai-fg)' }}>
+          数据输入
+        </h2>
+        <p className="text-sm text-monokai-gray">
+          选择您的数据输入方式，开始数据分析之旅
+        </p>
       </div>
 
       {/* 输入方法切换标签 */}
@@ -109,7 +108,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
       {/* 文件上传区域 */}
       {inputMethod === 'upload' && (
         <div className="flex justify-center">
-          <div className="w-full max-w-2xl space-y-6">
+          <div className="w-full max-w-2xl space-y-8">
             {/* 主要上传区域 */}
             <div className="upload-zone relative">
               <input
@@ -120,100 +119,79 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 id="fileUpload"
               />
 
-              {/* 虚线边框容器 - 直接绑定点击事件 */}
+              {/* 虚线边框容器 */}
               <div
-                className="upload-area block cursor-pointer"
+                className="upload-area block cursor-pointer relative"
                 onClick={() => document.getElementById('fileUpload')?.click()}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-              <div className={`upload-content flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed transition-all duration-300 hover:border-monokai-orange hover:bg-monokai-light/20 group ${isDragOver ? 'drag-over' : ''}`}>
-                {/* 上传图标区域 */}
-                <div className="upload-icon mb-6 relative">
-                  <div className="w-20 h-20 rounded-full bg-monokai-light border-2 border-monokai flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:border-monokai-orange group-hover:shadow-lg">
-                    <i className="fa fa-cloud-upload-alt text-3xl transition-colors duration-300 group-hover:text-monokai-orange" style={{ color: 'var(--monokai-blue)' }}></i>
-                  </div>
-
-                  {/* 装饰性元素 */}
-                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-monokai-orange flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <i className="fa fa-plus text-xs" style={{ color: 'var(--monokai-bg)' }}></i>
-                  </div>
-                </div>
-
-                {/* 文字内容和信息按钮 */}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold mb-3 transition-colors duration-300 group-hover:text-monokai-orange" style={{ color: 'var(--monokai-fg)' }}>
-                    上传CSV数据文件
-                  </h3>
-                  <p className="text-monokai-gray mb-4 text-base">
-                    将文件拖拽到此处，或点击上传
-                  </p>
-
-                  {/* 文件格式信息按钮 */}
-                  <div className="flex justify-center mb-4">
-                    <div className="relative group/info">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-monokai-light border border-monokai text-monokai-blue cursor-help hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-200">
-                        <span className="text-xs font-bold">i</span>
-                      </div>
-                      {/* 悬停显示详细信息 */}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-3 bg-monokai-dark text-monokai-fg text-sm rounded-lg border border-monokai shadow-xl opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none z-20 min-w-max">
-                        <div className="text-center">
-                          <div className="font-medium mb-2 text-monokai-orange">📄 文件格式要求</div>
-                          <div className="space-y-1 text-xs">
-                            <div className="flex items-center">
-                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
-                              支持CSV格式的文件
-                            </div>
-                            <div className="flex items-center">
-                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
-                              第一列应为数值数据
-                            </div>
-                            <div className="flex items-center">
-                              <span className="w-2 h-2 rounded-full bg-monokai-green mr-2"></span>
-                              第一行为可选的标题行
-                            </div>
-                          </div>
-                        </div>
-                        {/* 小箭头 */}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-monokai-dark"></div>
-                      </div>
-                    </div>
+                <div className={`upload-content flex flex-col items-center justify-center p-16 rounded-2xl border-2 border-dashed transition-all duration-300 hover:border-monokai-orange hover:bg-monokai-light/20 group ${isDragOver ? 'drag-over' : ''}`}>
+                  {/* 主要内容 - 确保完全居中 */}
+                  <div className="text-center w-full">
+                    <h3 className="text-2xl font-bold mb-4 transition-colors duration-300 group-hover:text-monokai-orange" style={{ color: 'var(--monokai-fg)' }}>
+                      上传数据文件
+                    </h3>
+                    <p className="text-monokai-gray text-base">
+                      将文件拖拽到此处，或点击上传
+                    </p>
                   </div>
                 </div>
-
-                {/* 底部装饰线 */}
-                <div className="mt-6 w-16 h-0.5 bg-monokai-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </div>
-          </div>
 
-          {data.length > 0 && (
-            <div className="upload-success bg-gradient-to-r from-monokai-green/10 to-monokai-blue/10 rounded-lg p-6 border border-monokai-green/30">
-              <div className="flex items-center">
-                <div className="success-icon-container mr-4">
-                  <div className="w-12 h-12 rounded-full bg-monokai-green flex items-center justify-center shadow-lg">
-                    <i className="fa fa-check text-white text-lg"></i>
+          {/* 数据导入成功状态提示框 - 仅在用户真正上传数据时显示 */}
+          {isUserUploadedData && data.length > 0 && (
+            <div className="upload-success-card relative overflow-hidden rounded-2xl p-6 border border-monokai-green/30 bg-gradient-to-r from-monokai-green/5 to-monokai-blue/5 shadow-lg animate-pulse-custom">
+              {/* 脉冲背景效果 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-monokai-green/10 to-monokai-blue/10 rounded-2xl animate-pulse-custom"></div>
+
+              {/* 主要内容 */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    {/* 成功图标 */}
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-monokai-green shadow-lg mr-4 animate-bounce">
+                      <i className="fa fa-check text-white text-xl"></i>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-monokai-green mb-1">
+                        数据导入成功！
+                      </h4>
+                      <p className="text-monokai-gray text-sm">
+                        已成功加载 {data.length} 个数据点
+                      </p>
+                    </div>
                   </div>
+
+                  {/* 删除按钮 */}
+                  <button
+                    onClick={handleClearData}
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-monokai-pink/20 hover:bg-monokai-pink/30 transition-all duration-200 group"
+                    title="删除数据"
+                  >
+                    <i className="fa fa-trash text-monokai-pink group-hover:text-white text-base"></i>
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-lg font-bold mb-1" style={{ color: 'var(--monokai-green)' }}>
-                    数据导入成功！
-                  </h4>
-                  <p className="text-monokai-gray mb-2">
-                    已成功加载 <span className="font-mono font-bold text-monokai-orange">{data.length}</span> 个数据点
-                  </p>
-                  <div className="flex items-center text-sm text-monokai-dim">
-                    <i className="fa fa-chart-line mr-2"></i>
-                    <span>数据已准备好进行分析</span>
+
+                {/* 状态指示器 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex items-center text-monokai-green">
+                      <i className="fa fa-circle text-xs mr-2 animate-pulse-custom"></i>
+                      <span className="text-sm font-medium">数据已就绪，可进行分析</span>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-4 flex items-center">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-monokai-green/20">
-                    <i className="fa fa-check-circle text-monokai-green text-lg"></i>
+                  <div className="text-xs text-monokai-dim">
+                    <i className="fa fa-clock-o mr-1"></i>
+                    实时更新
                   </div>
                 </div>
               </div>
+
+              {/* 装饰性脉冲环 */}
+              <div className="absolute inset-0 rounded-2xl border-2 border-monokai-green/20 animate-ping"></div>
             </div>
           )}
         </div>
@@ -222,7 +200,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
 
       {/* 分布生成区域 */}
       {inputMethod === 'distribution' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="text-center">
             <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--monokai-fg)' }}>
               选择概率分布类型
@@ -232,48 +210,36 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <button
-              className="bg-monokai rounded-lg p-6 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
+              className="bg-monokai rounded-lg p-4 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
               onClick={() => handleDistributionGenerate('normal')}
             >
-              <div className="p-3 rounded-full mb-3 transition-all duration-300 group-hover:scale-110" style={{ backgroundColor: 'var(--monokai-orange)', color: 'var(--monokai-bg)' }}>
-                <i className="fa fa-chart-area text-xl"></i>
-              </div>
-              <span className="font-medium mb-1" style={{ color: 'var(--monokai-fg)' }}>正态分布</span>
+              <span className="font-medium mb-1 text-sm" style={{ color: 'var(--monokai-fg)' }}>正态分布</span>
               <span className="text-xs text-monokai-gray">N(μ, σ²)</span>
             </button>
 
             <button
-              className="bg-monokai rounded-lg p-6 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
+              className="bg-monokai rounded-lg p-4 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
               onClick={() => handleDistributionGenerate('uniform')}
             >
-              <div className="p-3 rounded-full mb-3 transition-all duration-300 group-hover:scale-110" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
-                <i className="fa fa-chart-bar text-xl"></i>
-              </div>
-              <span className="font-medium mb-1" style={{ color: 'var(--monokai-fg)' }}>均匀分布</span>
+              <span className="font-medium mb-1 text-sm" style={{ color: 'var(--monokai-fg)' }}>均匀分布</span>
               <span className="text-xs text-monokai-gray">U(a, b)</span>
             </button>
 
             <button
-              className="bg-monokai rounded-lg p-6 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
+              className="bg-monokai rounded-lg p-4 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
               onClick={() => handleDistributionGenerate('exponential')}
             >
-              <div className="p-3 rounded-full mb-3 transition-all duration-300 group-hover:scale-110" style={{ backgroundColor: 'var(--monokai-green)', color: 'var(--monokai-bg)' }}>
-                <i className="fa fa-chart-line text-xl"></i>
-              </div>
-              <span className="font-medium mb-1" style={{ color: 'var(--monokai-fg)' }}>指数分布</span>
+              <span className="font-medium mb-1 text-sm" style={{ color: 'var(--monokai-fg)' }}>指数分布</span>
               <span className="text-xs text-monokai-gray">Exp(λ)</span>
             </button>
 
             <button
-              className="bg-monokai rounded-lg p-6 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
+              className="bg-monokai rounded-lg p-4 hover:bg-monokai-light border border-monokai transition-all duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center group"
               onClick={() => handleDistributionGenerate('poisson')}
             >
-              <div className="p-3 rounded-full mb-3 transition-all duration-300 group-hover:scale-110" style={{ backgroundColor: 'var(--monokai-purple)', color: 'var(--monokai-bg)' }}>
-                <i className="fa fa-dot-circle-o text-xl"></i>
-              </div>
-              <span className="font-medium mb-1" style={{ color: 'var(--monokai-fg)' }}>泊松分布</span>
+              <span className="font-medium mb-1 text-sm" style={{ color: 'var(--monokai-fg)' }}>泊松分布</span>
               <span className="text-xs text-monokai-gray">Poisson(λ)</span>
             </button>
           </div>
@@ -289,14 +255,9 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           </div>
 
           {data.length > 0 && (
-            <div className="bg-monokai rounded-lg p-4 border border-monokai flex items-center">
-              <div className="p-3 rounded-full mr-4" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
-                <i className="fa fa-magic"></i>
-              </div>
-              <div>
-                <p className="font-medium" style={{ color: 'var(--monokai-blue)' }}>数据生成成功</p>
-                <p className="text-sm text-monokai-gray">{data.length} 个随机数据点已生成</p>
-              </div>
+            <div className="bg-monokai rounded-lg p-4 border border-monokai">
+              <p className="font-medium" style={{ color: 'var(--monokai-blue)' }}>数据生成成功</p>
+              <p className="text-sm text-monokai-gray">{data.length} 个随机数据点已生成</p>
             </div>
           )}
         </div>
@@ -304,7 +265,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
 
       {/* AI生成区域 */}
       {inputMethod === 'ai' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 mx-auto" style={{
               background: `linear-gradient(135deg, var(--monokai-purple), var(--monokai-pink))`,
