@@ -176,34 +176,33 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           </div>
 
           {data.length > 0 && (
-              <div className="upload-success bg-gradient-to-r from-monokai-green/10 to-monokai-blue/10 rounded-lg p-6 border border-monokai-green/30">
-                <div className="flex items-center">
-                  <div className="success-icon-container mr-4">
-                    <div className="w-12 h-12 rounded-full bg-monokai-green flex items-center justify-center shadow-lg">
-                      <i className="fa fa-check text-white text-lg"></i>
-                    </div>
+            <div className="upload-success bg-gradient-to-r from-monokai-green/10 to-monokai-blue/10 rounded-lg p-6 border border-monokai-green/30">
+              <div className="flex items-center">
+                <div className="success-icon-container mr-4">
+                  <div className="w-12 h-12 rounded-full bg-monokai-green flex items-center justify-center shadow-lg">
+                    <i className="fa fa-check text-white text-lg"></i>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold mb-1" style={{ color: 'var(--monokai-green)' }}>
-                      数据导入成功！
-                    </h4>
-                    <p className="text-monokai-gray mb-2">
-                      已成功加载 <span className="font-mono font-bold text-monokai-orange">{data.length}</span> 个数据点
-                    </p>
-                    <div className="flex items-center text-sm text-monokai-dim">
-                      <i className="fa fa-chart-line mr-2"></i>
-                      <span>数据已准备好进行分析</span>
-                    </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg font-bold mb-1" style={{ color: 'var(--monokai-green)' }}>
+                    数据导入成功！
+                  </h4>
+                  <p className="text-monokai-gray mb-2">
+                    已成功加载 <span className="font-mono font-bold text-monokai-orange">{data.length}</span> 个数据点
+                  </p>
+                  <div className="flex items-center text-sm text-monokai-dim">
+                    <i className="fa fa-chart-line mr-2"></i>
+                    <span>数据已准备好进行分析</span>
                   </div>
-                  <div className="ml-4 flex items-center">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-monokai-green/20">
-                      <i className="fa fa-check-circle text-monokai-green text-lg"></i>
-                    </div>
+                </div>
+                <div className="ml-4 flex items-center">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-monokai-green/20">
+                    <i className="fa fa-check-circle text-monokai-green text-lg"></i>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
