@@ -4,7 +4,7 @@
 
 🌐 **在线体验**
 - **正式版本**: https://a1motoro.github.io/Analyzer_for_AIE1901/
-- **开发预览**: https://a1motoro.github.io/Analyzer_for_AIE1901/develop/
+- **开发预览**: https://a1motoro.github.io/Analyzer_for_AIE1901/develop/ *(最后更新: 2025年)*
 
 ## 🚀 快速开始
 
