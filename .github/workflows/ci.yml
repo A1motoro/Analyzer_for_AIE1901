@@ -14,17 +14,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
+    - name: Setup Node.js and pnpm
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'pnpm'
-        cache-dependency-path: 'analyzer-app/pnpm-lock.yaml'
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.15.0
+    - name: Install pnpm
+      run: npm install -g pnpm@8.15.0
 
     - name: Install dependencies
       working-directory: ./analyzer-app
@@ -47,17 +43,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
+    - name: Setup Node.js and pnpm
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'pnpm'
-        cache-dependency-path: 'analyzer-app/pnpm-lock.yaml'
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.15.0
+    - name: Install pnpm
+      run: npm install -g pnpm@8.15.0
 
     - name: Install dependencies
       working-directory: ./analyzer-app
@@ -83,17 +75,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
+    - name: Setup Node.js and pnpm
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'pnpm'
-        cache-dependency-path: 'analyzer-app/pnpm-lock.yaml'
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8.15.0
+    - name: Install pnpm
+      run: npm install -g pnpm@8.15.0
 
     - name: Install dependencies
       working-directory: ./analyzer-app
