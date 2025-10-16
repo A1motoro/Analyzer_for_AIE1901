@@ -2,7 +2,9 @@
 
 一个现代化、美观的数据分析工具，采用VSCode Monokai配色方案，支持CSV文件上传、分布数据生成和AI数据生成，提供完整的统计分析和可视化功能。
 
-🌐 **在线体验**: https://a1motoro.github.io/Analyzer_for_AIE1901/
+🌐 **在线体验**
+- **正式版本**: https://a1motoro.github.io/Analyzer_for_AIE1901/
+- **开发预览**: https://a1motoro.github.io/Analyzer_for_AIE1901/develop/
 
 ## 🚀 快速开始
 
@@ -80,8 +82,10 @@ pnpm run build
 项目使用GitHub Actions实现自动CI/CD：
 
 1. **代码质量检查**: 每次推送自动运行TypeScript检查和构建测试
-2. **自动部署**: 推送到main分支时自动部署到GitHub Pages
-3. **预览部署**: develop分支的更改可在Actions中查看构建结果
+2. **自动部署**:
+   - `main` 分支 → 正式版本 (`/`)
+   - `develop` 分支 → 开发预览 (`/develop/`)
+3. **预览功能**: 团队成员可以实时预览develop分支的最新功能
 
 ## 📁 项目结构
 
