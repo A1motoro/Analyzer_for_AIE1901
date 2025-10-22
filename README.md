@@ -91,8 +91,8 @@ pnpm run build
    - 推送代码到 `develop` 分支 → 部署到开发预览版本
 
 3. **访问地址**:
-   - **正式版本**: `https://[username].github.io/Analyzer_for_AIE1901/`
-   - **开发预览**: `https://[username].github.io/Analyzer_for_AIE1901/develop/`
+- **正式版本**: `https://A1motoro.github.io/Analyzer_for_AIE1901/`
+- **开发预览**: `https://A1motoro.github.io/Analyzer_for_AIE1901/develop/`
 
 ### CI/CD 工作流
 
