@@ -1,29 +1,29 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
-/* VSCode Monokai 配色方案 CSS变量 */
+/* VSCode Dark 主题 CSS变量（默认暗色） */
 :root {
-  /* Monokai 背景色 */
-  --monokai-bg: #272822;
+  /* VSCode Dark 背景色 */
+  --monokai-bg: #1e1e1e;
   --monokai-bg-dark: #1e1e1e;
-  --monokai-bg-light: #3e3d32;
-  --monokai-bg-lighter: #49483e;
+  --monokai-bg-light: #252526;
+  --monokai-bg-lighter: #2d2d30;
 
-  /* Monokai 前景色 */
-  --monokai-fg: #f8f8f2;
-  --monokai-fg-dim: #75715e;
+  /* VSCode Dark 前景色 */
+  --monokai-fg: #cccccc;
+  --monokai-fg-dim: #8c8c8c;
 
-  /* Monokai 强调色 */
+  /* VSCode Dark 强调色 */
   --monokai-orange: #fd971f;     /* 关键词、函数 */
-  --monokai-yellow: #e6db74;     /* 字符串 */
-  --monokai-green: #a6e22e;      /* 成功状态 */
-  --monokai-blue: #66d9ef;       /* 类型、类 */
-  --monokai-purple: #ae81ff;     /* 数字、常量 */
-  --monokai-pink: #f92672;       /* 错误、重要 */
-  --monokai-gray: #90908a;       /* 次要文字 */
+  --monokai-yellow: #dcdcaa;     /* 字符串 */
+  --monokai-green: #4ec9b0;      /* 成功状态 */
+  --monokai-blue: #4fc3f7;       /* 类型、类 */
+  --monokai-purple: #4fc3f7;     /* 数字、常量 */
+  --monokai-pink: #f44747;       /* 错误、重要 */
+  --monokai-gray: #8c8c8c;       /* 次要文字 */
 
   /* 透明度和阴影 */
-  --monokai-overlay: rgba(39, 40, 34, 0.95);
-  --monokai-glass: rgba(39, 40, 34, 0.85);
+  --monokai-overlay: rgba(0, 0, 0, 0.8);
+  --monokai-glass: rgba(30, 30, 30, 0.85);
   --monokai-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, Modal, Radio, Space, Typography, Divider, Button, Drawer } from 'antd';
 import DataInputSection from './components/DataInputSection';
 import AnalysisResultSection from './components/AnalysisResultSection';
 import AIModelChat from './components/AIModelChat';
 import TutorialSection from './components/TutorialSection';
 import AliyunAPIConfig from './components/AliyunAPIConfig';
-import ThemeSettingsDrawer from './components/ThemeSettingsDrawer';
-import { antdTheme, lightTheme } from './theme';
+import { darkTheme, lightTheme } from './theme';
 import {
   calculateBasicStats,
   parseCSVContent,
@@ -30,9 +29,10 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'analysis' | 'tutorial' | 'settings'>('analysis');
   const [isUserUploadedData, setIsUserUploadedData] = useState(false);
 
-  // 主题和配置栏状态
+  // 主题、设置和抽屉状态
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // 初始化主题
   useEffect(() => {
@@ -51,46 +51,47 @@ const App: React.FC = () => {
   const applyTheme = (newTheme: 'dark' | 'light') => {
     const root = document.documentElement;
     if (newTheme === 'light') {
-      // 应用亮色主题的CSS变量
+      // 应用VSCode Light主题的CSS变量
       root.style.setProperty('--monokai-bg', '#ffffff');
-      root.style.setProperty('--monokai-bg-dark', '#f0f2f5');
-      root.style.setProperty('--monokai-bg-light', '#f8f9fa');
+      root.style.setProperty('--monokai-bg-dark', '#ffffff');
+      root.style.setProperty('--monokai-bg-light', '#f3f3f3');
       root.style.setProperty('--monokai-bg-lighter', '#ffffff');
-      root.style.setProperty('--monokai-fg', '#1c1e21');
-      root.style.setProperty('--monokai-fg-dim', '#8a8d91');
-      root.style.setProperty('--monokai-orange', '#409eff');
-      root.style.setProperty('--monokai-yellow', '#e6a23c');
-      root.style.setProperty('--monokai-green', '#42b883');
-      root.style.setProperty('--monokai-blue', '#409eff');
-      root.style.setProperty('--monokai-purple', '#409eff');
-      root.style.setProperty('--monokai-pink', '#f56c6c');
-      root.style.setProperty('--monokai-gray', '#65676b');
+      root.style.setProperty('--monokai-fg', '#000000');
+      root.style.setProperty('--monokai-fg-dim', '#6c6c6c');
+      root.style.setProperty('--monokai-orange', '#007acc');
+      root.style.setProperty('--monokai-yellow', '#c79100');
+      root.style.setProperty('--monokai-green', '#107c10');
+      root.style.setProperty('--monokai-blue', '#007acc');
+      root.style.setProperty('--monokai-purple', '#007acc');
+      root.style.setProperty('--monokai-pink', '#d13438');
+      root.style.setProperty('--monokai-gray', '#6c6c6c');
       root.style.setProperty('--monokai-overlay', 'rgba(0, 0, 0, 0.45)');
       root.style.setProperty('--monokai-glass', 'rgba(255, 255, 255, 0.85)');
       root.style.setProperty('--monokai-shadow', '0 4px 20px rgba(0, 0, 0, 0.08)');
     } else {
-      // 恢复暗色主题的CSS变量
-      root.style.setProperty('--monokai-bg', '#272822');
+      // 应用VSCode Dark主题的CSS变量
+      root.style.setProperty('--monokai-bg', '#1e1e1e');
       root.style.setProperty('--monokai-bg-dark', '#1e1e1e');
-      root.style.setProperty('--monokai-bg-light', '#3e3d32');
-      root.style.setProperty('--monokai-bg-lighter', '#49483e');
-      root.style.setProperty('--monokai-fg', '#f8f8f2');
-      root.style.setProperty('--monokai-fg-dim', '#75715e');
+      root.style.setProperty('--monokai-bg-light', '#252526');
+      root.style.setProperty('--monokai-bg-lighter', '#2d2d30');
+      root.style.setProperty('--monokai-fg', '#cccccc');
+      root.style.setProperty('--monokai-fg-dim', '#8c8c8c');
       root.style.setProperty('--monokai-orange', '#fd971f');
-      root.style.setProperty('--monokai-yellow', '#e6db74');
-      root.style.setProperty('--monokai-green', '#a6e22e');
-      root.style.setProperty('--monokai-blue', '#66d9ef');
-      root.style.setProperty('--monokai-purple', '#ae81ff');
-      root.style.setProperty('--monokai-pink', '#f92672');
-      root.style.setProperty('--monokai-gray', '#90908a');
-      root.style.setProperty('--monokai-overlay', 'rgba(39, 40, 34, 0.95)');
-      root.style.setProperty('--monokai-glass', 'rgba(39, 40, 34, 0.85)');
+      root.style.setProperty('--monokai-yellow', '#dcdcaa');
+      root.style.setProperty('--monokai-green', '#4ec9b0');
+      root.style.setProperty('--monokai-blue', '#4fc3f7');
+      root.style.setProperty('--monokai-purple', '#4fc3f7');
+      root.style.setProperty('--monokai-pink', '#f44747');
+      root.style.setProperty('--monokai-gray', '#8c8c8c');
+      root.style.setProperty('--monokai-overlay', 'rgba(0, 0, 0, 0.8)');
+      root.style.setProperty('--monokai-glass', 'rgba(30, 30, 30, 0.85)');
       root.style.setProperty('--monokai-shadow', '0 4px 20px rgba(0, 0, 0, 0.3)');
     }
   };
 
   // 主题切换处理函数
-  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('app-theme', newTheme);
     applyTheme(newTheme);
@@ -236,7 +237,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ConfigProvider theme={theme === 'dark' ? antdTheme : lightTheme}>
+    <ConfigProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
       <div className="min-h-screen">
       {/* Hero Section - 全屏 */}
       <section className="hero-section relative">
@@ -247,29 +248,6 @@ const App: React.FC = () => {
           <div className="hero-bg-circle"></div>
         </div>
 
-        {/* 右上角功能按钮 - 在hero section背景上 */}
-        <div className="absolute top-6 right-6 z-30 flex items-center space-x-3">
-          <button
-            onClick={() => {
-              console.log('点击教程按钮');
-              setCurrentView('tutorial');
-            }}
-            className="w-14 h-14 rounded-full bg-monokai/90 backdrop-blur-md border-2 border-monokai-blue/50 flex items-center justify-center text-monokai-blue hover:bg-monokai-blue hover:text-monokai-bg transition-all duration-300 shadow-xl hover:shadow-monokai hover:scale-110"
-            title="使用教程"
-          >
-            <i className="fa fa-info-circle text-2xl"></i>
-          </button>
-          <button
-            onClick={() => {
-              console.log('点击设置按钮');
-              setCurrentView('settings');
-            }}
-            className="w-14 h-14 rounded-full bg-monokai/90 backdrop-blur-md border-2 border-monokai-orange/50 flex items-center justify-center text-monokai-orange hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-300 shadow-xl hover:shadow-monokai hover:scale-110"
-            title="设置"
-          >
-            <i className="fa fa-cog text-2xl"></i>
-          </button>
-        </div>
 
         {/* Hero 内容 */}
         <div className="hero-content">
@@ -408,26 +386,6 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* 右侧配置栏切换按钮 */}
-      <button
-        onClick={() => setSettingsDrawerOpen(true)}
-        className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-monokai rounded-l-lg shadow-lg hover:bg-monokai-light transition-colors"
-        style={{
-          backgroundColor: 'var(--monokai-purple)',
-          color: 'var(--monokai-bg)',
-        }}
-        title="界面配置"
-      >
-        <i className="fa fa-cog text-lg"></i>
-      </button>
-
-      {/* 主题设置抽屉 */}
-      <ThemeSettingsDrawer
-        open={settingsDrawerOpen}
-        onClose={() => setSettingsDrawerOpen(false)}
-        currentTheme={theme}
-        onThemeChange={handleThemeChange}
-      />
 
       {/* 页脚 */}
       <footer className="bg-monokai-dark border-t border-monokai py-12">
@@ -465,6 +423,286 @@ const App: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* 设置模态框 */}
+      <Modal
+        title={
+          <Space>
+            <span>⚙️ 设置</span>
+          </Space>
+        }
+        open={settingsOpen}
+        onCancel={() => setSettingsOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setSettingsOpen(false)}>
+            关闭
+          </Button>
+        ]}
+        width={400}
+        centered
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* 主题选择 */}
+          <div>
+            <Typography.Title level={5}>🎨 主题选择</Typography.Title>
+            <Radio.Group
+              value={theme}
+              onChange={() => {
+                toggleTheme();
+                setSettingsOpen(false);
+              }}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    border: `2px solid ${theme === 'dark' ? 'var(--monokai-orange)' : 'transparent'}`,
+                    borderRadius: '8px',
+                    background: theme === 'dark' ? 'var(--monokai-bg-light)' : 'var(--monokai-bg-lighter)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    if (theme !== 'dark') toggleTheme();
+                    setSettingsOpen(false);
+                  }}
+                >
+                  <Radio value="dark" style={{ marginRight: '12px' }} />
+                  <div style={{ flex: 1 }}>
+                    <Space>
+                      <span>🌙</span>
+                      <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
+                        暗色主题 (VSCode Dark)
+                      </Typography.Text>
+                    </Space>
+                    <Typography.Text style={{
+                      fontSize: '12px',
+                      color: 'var(--monokai-gray)',
+                      display: 'block',
+                      marginTop: '4px'
+                    }}>
+                      护眼的深色主题，适合长时间使用
+                    </Typography.Text>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    border: `2px solid ${theme === 'light' ? 'var(--monokai-blue)' : 'transparent'}`,
+                    borderRadius: '8px',
+                    background: theme === 'light' ? 'var(--monokai-bg-light)' : 'var(--monokai-bg-lighter)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    if (theme !== 'light') toggleTheme();
+                    setSettingsOpen(false);
+                  }}
+                >
+                  <Radio value="light" style={{ marginRight: '12px' }} />
+                  <div style={{ flex: 1 }}>
+                    <Space>
+                      <span>☀️</span>
+                      <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
+                        亮色主题 (VSCode Light)
+                      </Typography.Text>
+                    </Space>
+                    <Typography.Text style={{
+                      fontSize: '12px',
+                      color: 'var(--monokai-gray)',
+                      display: 'block',
+                      marginTop: '4px'
+                    }}>
+                      清爽的亮色界面，适合明亮环境
+                    </Typography.Text>
+                  </div>
+                </div>
+              </Space>
+            </Radio.Group>
+          </div>
+
+          <Divider />
+
+          {/* 其他设置 */}
+          <div>
+            <Typography.Title level={5}>🔧 其他设置</Typography.Title>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Button
+                type="text"
+                block
+                style={{
+                  textAlign: 'left',
+                  color: 'var(--monokai-gray)',
+                  border: 'none',
+                  background: 'transparent',
+                }}
+                onClick={() => {
+                  localStorage.removeItem('app-theme');
+                  window.location.reload();
+                }}
+              >
+                🔄 重置为默认设置
+              </Button>
+            </Space>
+          </div>
+        </Space>
+      </Modal>
+
+      {/* 右侧功能抽屉切换按钮 */}
+      <button
+        onClick={() => setDrawerOpen(true)}
+        style={{
+          position: 'fixed',
+          right: '0',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 1000,
+          padding: '12px',
+          backgroundColor: 'var(--monokai-purple)',
+          color: 'var(--monokai-bg)',
+          border: 'none',
+          borderTopLeftRadius: '8px',
+          borderBottomLeftRadius: '8px',
+          boxShadow: 'var(--monokai-shadow)',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
+          e.currentTarget.style.backgroundColor = 'var(--monokai-orange)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+          e.currentTarget.style.backgroundColor = 'var(--monokai-purple)';
+        }}
+        title="打开功能面板"
+      >
+        <i className="fa fa-arrow-left text-lg"></i>
+      </button>
+
+      {/* 右侧功能抽屉 */}
+      <Drawer
+        title={
+          <Space>
+            <span>🎛️ 功能面板</span>
+          </Space>
+        }
+        placement="right"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        width={300}
+        bodyStyle={{
+          padding: '24px',
+          background: theme === 'dark' ? 'var(--monokai-bg-light)' : 'var(--monokai-bg-lighter)',
+        }}
+        headerStyle={{
+          background: theme === 'dark' ? 'var(--monokai-bg-lighter)' : 'var(--monokai-bg-light)',
+          borderBottom: theme === 'dark' ? '1px solid var(--monokai-bg-lighter)' : '1px solid var(--monokai-gray)',
+        }}
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* 功能按钮 */}
+          <div>
+            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>🚀 快捷功能</Typography.Title>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              {/* 教程按钮 */}
+              <Button
+                type="text"
+                block
+                icon={<i className="fa fa-info-circle mr-2"></i>}
+                onClick={() => {
+                  setCurrentView('tutorial');
+                  setDrawerOpen(false);
+                }}
+                style={{
+                  textAlign: 'left',
+                  height: '48px',
+                  color: 'var(--monokai-blue)',
+                  border: '1px solid var(--monokai-blue)',
+                  background: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
+                className="hover:bg-monokai-blue hover:text-monokai-bg transition-all duration-200"
+              >
+                <span className="ml-2">使用教程</span>
+              </Button>
+
+              {/* 设置按钮 */}
+              <Button
+                type="text"
+                block
+                icon={<i className="fa fa-cog mr-2"></i>}
+                onClick={() => {
+                  setSettingsOpen(true);
+                  setDrawerOpen(false);
+                }}
+                style={{
+                  textAlign: 'left',
+                  height: '48px',
+                  color: 'var(--monokai-purple)',
+                  border: '1px solid var(--monokai-purple)',
+                  background: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
+                className="hover:bg-monokai-purple hover:text-monokai-bg transition-all duration-200"
+              >
+                <span className="ml-2">系统设置</span>
+              </Button>
+
+              {/* 主题切换按钮 */}
+              <Button
+                type="text"
+                block
+                icon={theme === 'dark' ? <i className="fa fa-sun-o mr-2"></i> : <i className="fa fa-moon-o mr-2"></i>}
+                onClick={() => {
+                  toggleTheme();
+                  setDrawerOpen(false);
+                }}
+                style={{
+                  textAlign: 'left',
+                  height: '48px',
+                  color: 'var(--monokai-orange)',
+                  border: '1px solid var(--monokai-orange)',
+                  background: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
+                className="hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-200"
+              >
+                <span className="ml-2">
+                  {theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+                </span>
+              </Button>
+            </Space>
+          </div>
+
+          <Divider style={{
+            borderColor: theme === 'dark' ? 'var(--monokai-bg-lighter)' : 'var(--monokai-gray)'
+          }} />
+
+          {/* 信息 */}
+          <div>
+            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>ℹ️ 关于</Typography.Title>
+            <Typography.Text style={{
+              fontSize: '12px',
+              color: 'var(--monokai-gray)',
+              lineHeight: '1.5'
+            }}>
+              数据分析师Web应用提供现代化的数据分析体验，
+              支持多种统计方法和AI辅助分析。
+            </Typography.Text>
+          </div>
+        </Space>
+      </Drawer>
       </div>
     </ConfigProvider>
   );

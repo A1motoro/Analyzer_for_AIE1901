@@ -1,42 +1,43 @@
 import type { ThemeConfig } from 'antd';
 
-export const antdTheme: ThemeConfig = {
+// VSCode Dark (Monokai) 主题配置
+export const darkTheme: ThemeConfig = {
   token: {
-    // 主色调 - 使用 monokai 橙色
+    // 主色调 - VSCode Monokai 橙色
     colorPrimary: '#fd971f',
 
-    // 背景色 - 增强对比度的monokai主题色
-    colorBgBase: '#272822',        // 主背景
-    colorBgContainer: '#2f2e27',   // 容器背景 - 更深的对比
-    colorBgElevated: '#49483e',    // 提升的背景
+    // 背景色 - VSCode Dark 配色
+    colorBgBase: '#1e1e1e',        // 主背景
+    colorBgContainer: '#252526',   // 容器背景
+    colorBgElevated: '#2d2d30',    // 提升的背景
     colorBgLayout: '#1e1e1e',      // 布局背景
 
-    // 文字颜色 - 增强对比度
-    colorText: '#f8f8f2',          // 主要文字 - 高对比度白色
-    colorTextSecondary: '#c8c8c2', // 次要文字 - 更亮的灰色
-    colorTextTertiary: '#90908a',  // 三级文字 - 中等灰色
-    colorTextQuaternary: '#49483e', // 四级文字
+    // 文字颜色 - VSCode Dark 配色
+    colorText: '#cccccc',          // 主要文字
+    colorTextSecondary: '#cccccc', // 次要文字
+    colorTextTertiary: '#8c8c8c',  // 三级文字
+    colorTextQuaternary: '#6c6c6c', // 四级文字
 
     // 边框颜色
-    colorBorder: '#49483e',
-    colorBorderSecondary: '#3e3d32',
+    colorBorder: '#3e3e42',
+    colorBorderSecondary: '#2d2d30',
 
-    // 成功、警告、错误颜色
-    colorSuccess: '#a6e22e',
-    colorWarning: '#e6db74',
-    colorError: '#f92672',
-    colorInfo: '#66d9ef',
+    // 状态颜色 - VSCode 配色
+    colorSuccess: '#4ec9b0',
+    colorWarning: '#dcdcaa',
+    colorError: '#f44747',
+    colorInfo: '#4fc3f7',
 
-    // 其他颜色
-    colorLink: '#66d9ef',
-    colorLinkHover: '#ae81ff',
+    // 链接颜色
+    colorLink: '#4fc3f7',
+    colorLinkHover: '#5cbaff',
 
     // 字体设置
     fontFamily: `'Microsoft YaHei', '微软雅黑', 'PingFang SC', 'Hiragino Sans GB',
       'Source Han Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif`,
 
     // 圆角
-    borderRadius: 8,
+    borderRadius: 6,
 
     // 阴影
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
@@ -45,168 +46,168 @@ export const antdTheme: ThemeConfig = {
   components: {
     // Card 组件配置
     Card: {
-      colorBgContainer: '#2f2e27',   // 使用新的容器背景色
-      colorBorderSecondary: '#49483e',
+      colorBgContainer: '#252526',
+      colorBorderSecondary: '#3e3e42',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
     },
 
     // Button 组件配置
     Button: {
-      colorBgContainer: '#2f2e27',   // 使用新的容器背景色
-      colorBorder: '#49483e',
-      colorText: '#f8f8f2',
+      colorBgContainer: '#252526',
+      colorBorder: '#3e3e42',
+      colorText: '#cccccc',
       borderRadius: 6,
     },
 
     // Tabs 组件配置
     Tabs: {
-      colorBgContainer: '#2f2e27',   // 使用新的容器背景色
-      colorBorderSecondary: '#49483e',
-      colorText: '#f8f8f2',
+      colorBgContainer: '#252526',
+      colorBorderSecondary: '#3e3e42',
+      colorText: '#cccccc',
     },
 
     // Table 组件配置
     Table: {
-      colorBgContainer: '#2f2e27',   // 使用新的容器背景色
-      colorBorderSecondary: '#49483e',
-      colorText: '#f8f8f2',
-      colorTextHeading: '#f8f8f2',
-      colorBgElevated: '#49483e',
+      colorBgContainer: '#252526',
+      colorBorderSecondary: '#3e3e42',
+      colorText: '#cccccc',
+      colorTextHeading: '#cccccc',
+      colorBgElevated: '#2d2d30',
     },
 
     // Statistic 组件配置
     Statistic: {
-      colorText: '#f8f8f2',
-      colorTextDescription: '#c8c8c2',  // 使用更亮的次要文字色
+      colorText: '#cccccc',
+      colorTextDescription: '#cccccc',
     },
 
     // Input 组件配置
     Input: {
-      colorBgContainer: '#2f2e27',   // 使用新的容器背景色
-      colorBorder: '#49483e',
-      colorText: '#f8f8f2',
-      colorTextPlaceholder: '#c8c8c2',  // 使用更亮的占位符色
+      colorBgContainer: '#252526',
+      colorBorder: '#3e3e42',
+      colorText: '#cccccc',
+      colorTextPlaceholder: '#8c8c8c',
     },
 
     // Modal 组件配置
     Modal: {
-      colorBgElevated: '#2f2e27',    // 使用新的容器背景色
-      colorBgMask: 'rgba(39, 40, 34, 0.8)',
-      colorText: '#f8f8f2',
-      colorTextHeading: '#f8f8f2',
+      colorBgElevated: '#252526',
+      colorBgMask: 'rgba(0, 0, 0, 0.8)',
+      colorText: '#cccccc',
+      colorTextHeading: '#cccccc',
     },
 
     // Layout 组件配置
     Layout: {
       colorBgHeader: '#1e1e1e',
-      colorBgBody: '#272822',
-      colorBgTrigger: '#2f2e27',     // 使用新的容器背景色
+      colorBgBody: '#1e1e1e',
+      colorBgTrigger: '#252526',
     },
   },
 };
 
-// 亮色主题配置
+// VSCode Light 主题配置
 export const lightTheme: ThemeConfig = {
   token: {
-    // 主色调 - 保持一致
-    colorPrimary: '#fd971f',
+    // 主色调 - VSCode Light 蓝色
+    colorPrimary: '#007acc',
 
-    // 背景色 - 亮色主题
-    colorBgBase: '#ffffff',        // 主背景 - 白色
-    colorBgContainer: '#f8f9fa',   // 容器背景 - 浅灰白
-    colorBgElevated: '#ffffff',    // 提升的背景 - 白色
-    colorBgLayout: '#f0f2f5',      // 布局背景 - 浅灰
+    // 背景色 - VSCode Light 配色
+    colorBgBase: '#ffffff',        // 主背景
+    colorBgContainer: '#f3f3f3',   // 容器背景
+    colorBgElevated: '#ffffff',    // 提升的背景
+    colorBgLayout: '#ffffff',      // 布局背景
 
-    // 文字颜色 - 深色文字适合亮色背景
-    colorText: '#1c1e21',          // 主要文字 - 深灰黑
-    colorTextSecondary: '#65676b', // 次要文字 - 中等灰色
-    colorTextTertiary: '#8a8d91',  // 三级文字 - 浅灰色
-    colorTextQuaternary: '#bcc0c4', // 四级文字 - 更浅的灰色
+    // 文字颜色 - VSCode Light 配色
+    colorText: '#000000',          // 主要文字
+    colorTextSecondary: '#6c6c6c', // 次要文字
+    colorTextTertiary: '#cccccc',  // 三级文字
+    colorTextQuaternary: '#cccccc', // 四级文字
 
     // 边框颜色
-    colorBorder: '#dadde1',
-    colorBorderSecondary: '#e4e6ea',
+    colorBorder: '#e5e5e5',
+    colorBorderSecondary: '#cccccc',
 
-    // 成功、警告、错误颜色 - 调整为适合亮色主题
-    colorSuccess: '#42b883',
-    colorWarning: '#e6a23c',
-    colorError: '#f56c6c',
-    colorInfo: '#409eff',
+    // 状态颜色 - VSCode Light 配色
+    colorSuccess: '#107c10',
+    colorWarning: '#c79100',
+    colorError: '#d13438',
+    colorInfo: '#007acc',
 
-    // 其他颜色
-    colorLink: '#409eff',
-    colorLinkHover: '#66b1ff',
+    // 链接颜色
+    colorLink: '#007acc',
+    colorLinkHover: '#005a9e',
 
     // 字体设置
     fontFamily: `'Microsoft YaHei', '微软雅黑', 'PingFang SC', 'Hiragino Sans GB',
       'Source Han Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif`,
 
     // 圆角
-    borderRadius: 8,
+    borderRadius: 6,
 
-    // 阴影 - 调整为适合亮色主题
+    // 阴影
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
     boxShadowSecondary: '0 2px 8px rgba(0, 0, 0, 0.04)',
   },
   components: {
-    // Card 组件配置 - 亮色主题
+    // Card 组件配置
     Card: {
       colorBgContainer: '#ffffff',
-      colorBorderSecondary: '#dadde1',
+      colorBorderSecondary: '#e5e5e5',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     },
 
-    // Button 组件配置 - 亮色主题
+    // Button 组件配置
     Button: {
       colorBgContainer: '#ffffff',
-      colorBorder: '#dadde1',
-      colorText: '#1c1e21',
+      colorBorder: '#e5e5e5',
+      colorText: '#000000',
       borderRadius: 6,
     },
 
-    // Tabs 组件配置 - 亮色主题
+    // Tabs 组件配置
     Tabs: {
-      colorBgContainer: '#f8f9fa',
-      colorBorderSecondary: '#dadde1',
-      colorText: '#1c1e21',
+      colorBgContainer: '#f3f3f3',
+      colorBorderSecondary: '#e5e5e5',
+      colorText: '#000000',
     },
 
-    // Table 组件配置 - 亮色主题
+    // Table 组件配置
     Table: {
       colorBgContainer: '#ffffff',
-      colorBorderSecondary: '#dadde1',
-      colorText: '#1c1e21',
-      colorTextHeading: '#1c1e21',
-      colorBgElevated: '#f8f9fa',
+      colorBorderSecondary: '#e5e5e5',
+      colorText: '#000000',
+      colorTextHeading: '#000000',
+      colorBgElevated: '#f3f3f3',
     },
 
-    // Statistic 组件配置 - 亮色主题
+    // Statistic 组件配置
     Statistic: {
-      colorText: '#1c1e21',
-      colorTextDescription: '#65676b',
+      colorText: '#000000',
+      colorTextDescription: '#6c6c6c',
     },
 
-    // Input 组件配置 - 亮色主题
+    // Input 组件配置
     Input: {
       colorBgContainer: '#ffffff',
-      colorBorder: '#dadde1',
-      colorText: '#1c1e21',
-      colorTextPlaceholder: '#8a8d91',
+      colorBorder: '#e5e5e5',
+      colorText: '#000000',
+      colorTextPlaceholder: '#cccccc',
     },
 
-    // Modal 组件配置 - 亮色主题
+    // Modal 组件配置
     Modal: {
       colorBgElevated: '#ffffff',
       colorBgMask: 'rgba(0, 0, 0, 0.45)',
-      colorText: '#1c1e21',
-      colorTextHeading: '#1c1e21',
+      colorText: '#000000',
+      colorTextHeading: '#000000',
     },
 
-    // Layout 组件配置 - 亮色主题
+    // Layout 组件配置
     Layout: {
       colorBgHeader: '#ffffff',
-      colorBgBody: '#f0f2f5',
-      colorBgTrigger: '#f8f9fa',
+      colorBgBody: '#ffffff',
+      colorBgTrigger: '#f3f3f3',
     },
   },
 };
