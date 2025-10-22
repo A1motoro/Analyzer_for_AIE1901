@@ -16,6 +16,7 @@ import StatisticsGuide from './StatisticsGuide';
 import HypothesisTesting from './HypothesisTesting';
 import ConfidenceIntervals from './ConfidenceIntervals';
 import PowerAnalysis from './PowerAnalysis';
+import ROHEResults from './ROHEResults';
 
 interface AnalysisResultSectionProps {
   activeTab: string;
@@ -96,6 +97,18 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       ),
       children: (
         <PowerAnalysis data={data} analysisResult={analysisResult} />
+      ),
+    },
+    {
+      key: 'rohe-analysis',
+      label: (
+        <Space>
+          <ExperimentOutlined />
+          ROHE分析
+        </Space>
+      ),
+      children: (
+        <ROHEResults roheAnalysis={analysisResult.roheAnalysis} />
       ),
     },
   ];

@@ -4,6 +4,7 @@ import AnalysisResultSection from './components/AnalysisResultSection';
 import AIModelChat from './components/AIModelChat';
 import TutorialSection from './components/TutorialSection';
 import AliyunAPIConfig from './components/AliyunAPIConfig';
+import ThemeSettingsDrawer from './components/ThemeSettingsDrawer';
 import {
   calculateBasicStats,
   parseCSVContent,
@@ -15,7 +16,8 @@ import {
   calculateMLEForDistributions,
   calculateGammaMoM,
   calculateBootstrapConfidenceInterval,
-  analyzeDistribution
+  analyzeDistribution,
+  performROHEAnalysis
 } from './utils';
 
 const App: React.FC = () => {
@@ -25,6 +27,18 @@ const App: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<any>({});
   const [currentView, setCurrentView] = useState<'analysis' | 'tutorial' | 'settings'>('analysis');
   const [isUserUploadedData, setIsUserUploadedData] = useState(false);
+
+  // 主题和配置栏状态
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
+
+  // 主题切换处理函数
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    // 这里可以添加主题切换的逻辑，比如更新CSS变量等
+    // 暂时先保存到localStorage
+    localStorage.setItem('app-theme', newTheme);
+  };
 
   // 处理数据分析
   const analyzeData = () => {
@@ -50,6 +64,9 @@ const App: React.FC = () => {
     // 计算小样本Bootstrap置信区间
     const bootstrapInterval = calculateBootstrapConfidenceInterval(data);
 
+    // 执行ROHE分析
+    const roheAnalysis = performROHEAnalysis(data);
+
     // 计算分布特征分析（偏度、峰度、正态性检验等）
     const distributionAnalysis = analyzeDistribution(data);
 
@@ -68,6 +85,7 @@ const App: React.FC = () => {
       distributionsMLE,
       gammaMoM,
       bootstrapInterval,
+      roheAnalysis,
       distributionAnalysis,
       userExamples
     });
@@ -332,6 +350,27 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* 右侧配置栏切换按钮 */}
+      <button
+        onClick={() => setSettingsDrawerOpen(true)}
+        className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-monokai rounded-l-lg shadow-lg hover:bg-monokai-light transition-colors"
+        style={{
+          backgroundColor: 'var(--monokai-purple)',
+          color: 'var(--monokai-bg)',
+        }}
+        title="界面配置"
+      >
+        <i className="fa fa-cog text-lg"></i>
+      </button>
+
+      {/* 主题设置抽屉 */}
+      <ThemeSettingsDrawer
+        open={settingsDrawerOpen}
+        onClose={() => setSettingsDrawerOpen(false)}
+        currentTheme={theme}
+        onThemeChange={handleThemeChange}
+      />
 
       {/* 页脚 */}
       <footer className="bg-monokai-dark border-t border-monokai py-12">

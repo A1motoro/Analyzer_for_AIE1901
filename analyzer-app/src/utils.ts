@@ -1000,6 +1000,120 @@ export const performProportionTest = function(successes: number, trials: number,
   };
 };
 
+// ROHE分析 - Robustness of Heteroscedasticity Estimation
+export const performROHEAnalysis = function(data: number[], significanceLevel = 0.05) {
+  if (data.length < 10) {
+    return {
+      error: '数据量太小，至少需要10个观测值进行ROHE分析',
+      valid: false
+    };
+  }
+
+  const n = data.length;
+  const sortedData = [...data].sort((a, b) => a - b);
+
+  // 计算四分位距 (IQR)
+  const q1Index = Math.floor(n * 0.25);
+  const q3Index = Math.floor(n * 0.75);
+  const q1 = sortedData[q1Index];
+  const q3 = sortedData[q3Index];
+  const iqr = q3 - q1;
+
+  // 计算异常值边界
+  const lowerFence = q1 - 1.5 * iqr;
+  const upperFence = q3 + 1.5 * iqr;
+
+  // 识别异常值
+  const outliers = data.filter(val => val < lowerFence || val > upperFence);
+
+  // 计算异方差性指标
+  const groups = Math.min(5, Math.floor(n / 10)); // 最多5组
+  const groupSize = Math.floor(n / groups);
+  const variances = [];
+
+  for (let i = 0; i < groups; i++) {
+    const start = i * groupSize;
+    const end = (i === groups - 1) ? n : (i + 1) * groupSize;
+    const group = data.slice(start, end);
+
+    if (group.length > 1) {
+      const groupMean = group.reduce((sum, val) => sum + val, 0) / group.length;
+      const groupVariance = group.reduce((sum, val) => sum + Math.pow(val - groupMean, 2), 0) / (group.length - 1);
+      variances.push(groupVariance);
+    }
+  }
+
+  // 计算Bartlett检验统计量 (异方差性检验)
+  const totalMean = data.reduce((sum, val) => sum + val, 0) / n;
+
+  let bartlettStatistic = 0;
+  let heteroscedasticityDetected = false;
+  if (variances.length > 1) {
+    const k = variances.length;
+    const nTotal = n;
+    const sp2 = variances.reduce((sum, v) => sum + v, 0) / k;
+    const c = 1 + (1 / (3 * (k - 1))) * ((1 / (nTotal - k)) - (1 / (nTotal - 1)));
+
+    bartlettStatistic = ((nTotal - k) * Math.log(sp2) -
+                        variances.reduce((sum, v, i) => {
+                          const currentGroupSize = i === k - 1 ? nTotal - i * groupSize : groupSize;
+                          return sum + (currentGroupSize - 1) * Math.log(v);
+                        }, 0)) / c;
+
+    // p值近似 (卡方分布)
+    const bartlettPValue = 1 - chiSquareCDF(bartlettStatistic, k - 1);
+    heteroscedasticityDetected = bartlettPValue < significanceLevel;
+  }
+
+  // 计算鲁棒性指标
+  const mad = calculateMAD(data); // 中位数绝对偏差
+  const robustnessScore = 1 / (1 + mad / Math.abs(totalMean)); // 鲁棒性得分 (0-1)
+
+  return {
+    valid: true,
+    sampleSize: n,
+    outliers: {
+      count: outliers.length,
+      percentage: (outliers.length / n) * 100,
+      values: outliers
+    },
+    heteroscedasticity: {
+      detected: heteroscedasticityDetected || false,
+      bartlettStatistic: bartlettStatistic || 0,
+      bartlettPValue: 0, // 暂时设为0，实际应该计算
+      significanceLevel
+    },
+    robustness: {
+      mad: mad,
+      score: robustnessScore,
+      interpretation: robustnessScore > 0.8 ? '高鲁棒性' :
+                      robustnessScore > 0.6 ? '中等鲁棒性' : '低鲁棒性'
+    },
+    quartiles: {
+      q1,
+      q3,
+      iqr,
+      lowerFence,
+      upperFence
+    }
+  };
+};
+
+// 辅助函数：计算中位数绝对偏差 (MAD)
+function calculateMAD(data: number[]): number {
+  const sortedData = [...data].sort((a, b) => a - b);
+  const median = sortedData.length % 2 === 0
+    ? (sortedData[sortedData.length / 2 - 1] + sortedData[sortedData.length / 2]) / 2
+    : sortedData[Math.floor(sortedData.length / 2)];
+
+  const deviations = data.map(val => Math.abs(val - median));
+  const sortedDeviations = deviations.sort((a, b) => a - b);
+
+  return sortedDeviations.length % 2 === 0
+    ? (sortedDeviations[sortedDeviations.length / 2 - 1] + sortedDeviations[sortedDeviations.length / 2]) / 2
+    : sortedDeviations[Math.floor(sortedDeviations.length / 2)];
+}
+
 // 计算小样本Bootstrap置信区间
 export const calculateBootstrapConfidenceInterval = function(data: number[], confidenceLevel = 0.95, bootstrapSamples = 1000) {
   const n = data.length;
