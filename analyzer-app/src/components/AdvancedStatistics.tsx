@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Tag, Alert, Tabs, Progress } from 'antd';
+import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Tag, Alert, Tabs } from 'antd';
 import {
   BulbOutlined,
   QuestionCircleOutlined,
@@ -9,7 +9,7 @@ import {
   ExperimentOutlined
 } from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 interface AdvancedStatisticsProps {

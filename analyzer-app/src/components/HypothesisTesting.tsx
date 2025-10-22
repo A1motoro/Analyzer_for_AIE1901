@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Select, InputNumber, Button, Alert, Tabs, Divider } from 'antd';
+import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider } from 'antd';
 import {
   ExperimentOutlined,
-  CalculatorOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  BarChartOutlined,
-  InfoCircleOutlined
+  CloseCircleOutlined
 } from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 
@@ -18,7 +15,7 @@ interface HypothesisTestingProps {
   data: number[];
 }
 
-const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ analysisResult, data }) => {
+const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('one-sample');
   const [testType, setTestType] = useState('mean');
   const [nullValue, setNullValue] = useState(0);
@@ -235,7 +232,7 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ analysisResult, d
             {/* 检验结果 */}
             {testResult && (
               <Card title="检验结果" style={{ backgroundColor: '#49483e' }}>
-                <Space direction="vertical" size="medium" style={{ width: '100%' }}>
+                <Space direction="vertical" size={16} style={{ width: '100%' }}>
                   <Row gutter={16}>
                     <Col xs={24} md={8}>
                       <Statistic
@@ -269,7 +266,11 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ analysisResult, d
                             自由度
                           </Text>
                         }
-                        value={testResult.df || testResult.df1 && testResult.df2 ? `${testResult.df1}, ${testResult.df2}` : 'N/A'}
+                        value={
+                          'df' in testResult ? testResult.df :
+                          'df1' in testResult && 'df2' in testResult ? `${testResult.df1}, ${testResult.df2}` :
+                          'N/A'
+                        }
                         valueStyle={{ color: '#fd971f', fontSize: '18px' }}
                       />
                     </Col>

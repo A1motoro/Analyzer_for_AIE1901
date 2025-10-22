@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Button, Alert, Tabs, Divider, Progress } from 'antd';
+import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider, Progress } from 'antd';
 import {
-  ThunderboltOutlined,
-  CalculatorOutlined,
-  ExperimentOutlined,
-  BarChartOutlined,
-  InfoCircleOutlined
+  ThunderboltOutlined
 } from '@ant-design/icons';
 import {
   calculatePowerOneSampleT,
@@ -16,7 +12,7 @@ import {
   calculateSampleSizeProportionTest
 } from '../utils';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 
@@ -25,7 +21,7 @@ interface PowerAnalysisProps {
   analysisResult: any;
 }
 
-const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) => {
+const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('power');
   const [testType, setTestType] = useState('one-sample-t');
   const [effectSize, setEffectSize] = useState(0.5);
@@ -41,13 +37,13 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) =
 
     switch (testType) {
       case 'one-sample-t':
-        result = calculatePowerOneSampleT(sampleSize, effectSize, alpha, alternative);
+        result = calculatePowerOneSampleT(sampleSize, effectSize, alpha, alternative as 'two-sided' | 'less' | 'greater');
         break;
       case 'two-sample-t':
-        result = calculatePowerTwoSampleT(sampleSize, sampleSize, effectSize, alpha, true, alternative);
+        result = calculatePowerTwoSampleT(sampleSize, sampleSize, effectSize, alpha, true, alternative as 'two-sided' | 'less' | 'greater');
         break;
       case 'proportion':
-        result = calculatePowerProportionTest(sampleSize, p0, p1, alpha, alternative);
+        result = calculatePowerProportionTest(sampleSize, p0, p1, alpha, alternative as 'two-sided' | 'less' | 'greater');
         break;
       default:
         return null;
@@ -61,13 +57,13 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) =
 
     switch (testType) {
       case 'one-sample-t':
-        result = calculateSampleSizeOneSampleT(effectSize, alpha, power, alternative);
+        result = calculateSampleSizeOneSampleT(effectSize, alpha, power, alternative as 'two-sided' | 'less' | 'greater');
         break;
       case 'two-sample-t':
-        result = calculateSampleSizeTwoSampleT(effectSize, alpha, power, true, alternative);
+        result = calculateSampleSizeTwoSampleT(effectSize, alpha, power, true, alternative as 'two-sided' | 'less' | 'greater');
         break;
       case 'proportion':
-        result = calculateSampleSizeProportionTest(p0, p1, alpha, power, alternative);
+        result = calculateSampleSizeProportionTest(p0, p1, alpha, power, alternative as 'two-sided' | 'less' | 'greater');
         break;
       default:
         return null;
@@ -360,7 +356,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) =
             <Col xs={24} md={8}>
               <Statistic
                 title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>所需样本量</Text>}
-                value={sampleSizeResult.sampleSize || sampleSizeResult.sampleSizePerGroup}
+                value={'sampleSize' in sampleSizeResult ? sampleSizeResult.sampleSize : sampleSizeResult.sampleSizePerGroup}
                 valueStyle={{ color: '#a6e22e', fontSize: '24px' }}
               />
             </Col>
@@ -380,19 +376,19 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) =
             </Col>
           </Row>
 
-          {sampleSizeResult.totalSampleSize && (
+          {'totalSampleSize' in sampleSizeResult && sampleSizeResult.totalSampleSize && (
             <Row gutter={16} style={{ marginBottom: '16px' }}>
               <Col xs={24} md={12}>
                 <Statistic
                   title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>每组样本量</Text>}
-                  value={sampleSizeResult.sampleSizePerGroup}
+                  value={'sampleSizePerGroup' in sampleSizeResult ? sampleSizeResult.sampleSizePerGroup : 'N/A'}
                   valueStyle={{ color: '#ae81ff', fontSize: '18px' }}
                 />
               </Col>
               <Col xs={24} md={12}>
                 <Statistic
                   title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>总样本量</Text>}
-                  value={sampleSizeResult.totalSampleSize}
+                  value={'totalSampleSize' in sampleSizeResult ? sampleSizeResult.totalSampleSize : 'N/A'}
                   valueStyle={{ color: '#f92672', fontSize: '18px' }}
                 />
               </Col>
@@ -414,7 +410,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data, analysisResult }) =
                   • 检测效应量为 {sampleSizeResult.effectSize?.toFixed(3) || 'N/A'} 的差异
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 需要的最小样本量为 {sampleSizeResult.sampleSize || sampleSizeResult.sampleSizePerGroup} 个观测值
+                  • 需要的最小样本量为 {'sampleSize' in sampleSizeResult ? sampleSizeResult.sampleSize : sampleSizeResult.sampleSizePerGroup} 个观测值
                 </Text>
               </Space>
             }
