@@ -4,7 +4,19 @@ import AnalysisResultSection from './components/AnalysisResultSection';
 import AIModelChat from './components/AIModelChat';
 import TutorialSection from './components/TutorialSection';
 import AliyunAPIConfig from './components/AliyunAPIConfig';
-import { calculateBasicStats, parseCSVContent, generateDistributionData, calculateMLE, calculateMoM } from './utils';
+import {
+  calculateBasicStats,
+  parseCSVContent,
+  generateDistributionData,
+  calculateMLE,
+  calculateMoM,
+  calculateConfidenceInterval,
+  calculateWilsonConfidenceInterval,
+  calculateMLEForDistributions,
+  calculateGammaMoM,
+  calculateBootstrapConfidenceInterval,
+  analyzeDistribution
+} from './utils';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('basic');
@@ -21,10 +33,43 @@ const App: React.FC = () => {
     const mleParams = calculateMLE(data);
     const momParams = calculateMoM(data);
 
+    // 集成新增的统计分析功能
+    const confidenceInterval = calculateConfidenceInterval(data);
+
+    // 假设数据是二项分布的结果（0或1），计算Wilson置信区间
+    const successCount = data.filter(val => val === 1).length;
+    const totalCount = data.length;
+    const wilsonInterval = calculateWilsonConfidenceInterval(successCount, totalCount);
+
+    // 计算多种分布的MLE参数估计
+    const distributionsMLE = calculateMLEForDistributions(data);
+
+    // 计算Gamma分布的矩估计
+    const gammaMoM = calculateGammaMoM(basicStats.mean, basicStats.variance);
+
+    // 计算小样本Bootstrap置信区间
+    const bootstrapInterval = calculateBootstrapConfidenceInterval(data);
+
+    // 计算分布特征分析（偏度、峰度、正态性检验等）
+    const distributionAnalysis = analyzeDistribution(data);
+
+    // 添加用户特定例子的数据（用于演示）
+    const userExamples = {
+      meanConfidenceInterval: calculateConfidenceInterval(new Array(27).fill(1478), 0.95, 36 * 36 as any),
+      wilsonIntervalExample: calculateWilsonConfidenceInterval(40, 100, 0.95)
+    };
+
     setAnalysisResult({
       ...basicStats,
       mleParams,
-      momParams
+      momParams,
+      confidenceInterval,
+      wilsonInterval,
+      distributionsMLE,
+      gammaMoM,
+      bootstrapInterval,
+      distributionAnalysis,
+      userExamples
     });
   };
 
@@ -118,13 +163,40 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="hero-section">
+      {/* Hero Section - 全屏 */}
+      <section className="hero-section relative">
+        {/* 背景装饰 */}
         <div className="hero-bg-decoration">
           <div className="hero-bg-circle"></div>
           <div className="hero-bg-circle"></div>
           <div className="hero-bg-circle"></div>
         </div>
+
+        {/* 右上角功能按钮 - 在hero section背景上 */}
+        <div className="absolute top-6 right-6 z-30 flex items-center space-x-3">
+          <button
+            onClick={() => {
+              console.log('点击教程按钮');
+              setCurrentView('tutorial');
+            }}
+            className="w-14 h-14 rounded-full bg-monokai/90 backdrop-blur-md border-2 border-monokai-blue/50 flex items-center justify-center text-monokai-blue hover:bg-monokai-blue hover:text-monokai-bg transition-all duration-300 shadow-xl hover:shadow-monokai hover:scale-110"
+            title="使用教程"
+          >
+            <i className="fa fa-info-circle text-2xl"></i>
+          </button>
+          <button
+            onClick={() => {
+              console.log('点击设置按钮');
+              setCurrentView('settings');
+            }}
+            className="w-14 h-14 rounded-full bg-monokai/90 backdrop-blur-md border-2 border-monokai-orange/50 flex items-center justify-center text-monokai-orange hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-300 shadow-xl hover:shadow-monokai hover:scale-110"
+            title="设置"
+          >
+            <i className="fa fa-cog text-2xl"></i>
+          </button>
+        </div>
+
+        {/* Hero 内容 */}
         <div className="hero-content">
           <h1 className="hero-title">
             <span style={{ color: 'var(--monokai-orange)' }}>数据分析师</span> Web应用
@@ -134,7 +206,16 @@ const App: React.FC = () => {
           </p>
           <div className="hero-buttons">
             <button
-              onClick={() => setCurrentView('analysis')}
+              onClick={() => {
+                setCurrentView('analysis');
+                // 自动滚动到分析区域
+                setTimeout(() => {
+                  const analysisSection = document.querySelector('.analysis-section');
+                  if (analysisSection) {
+                    analysisSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
               className="hero-primary-btn"
             >
               <i className="fa fa-rocket mr-2"></i>
@@ -151,64 +232,12 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* 顶部导航栏 */}
-      <header className="bg-monokai border-b border-monokai shadow-monokai sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--monokai-fg)' }}>数据分析师Web应用</h1>
-            <p className="text-sm text-monokai-gray">AI驱动的数据分析平台</p>
-          </div>
-
-          {/* 主导航 */}
-          <nav className="hidden md:flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentView('analysis')}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition ${
-                currentView === 'analysis'
-                  ? 'bg-monokai-light text-monokai-orange border-monokai'
-                  : 'text-monokai-gray hover:bg-monokai-light'
-              }`}
-            >
-              <i className="fa fa-line-chart mr-2"></i>
-              数据分析
-            </button>
-            <button
-              onClick={() => setCurrentView('tutorial')}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition ${
-                currentView === 'tutorial'
-                  ? 'bg-monokai-light text-monokai-orange border-monokai'
-                  : 'text-monokai-gray hover:bg-monokai-light'
-              }`}
-            >
-              <i className="fa fa-book mr-2"></i>
-              使用教程
-            </button>
-            <button
-              onClick={() => setCurrentView('settings')}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition ${
-                currentView === 'settings'
-                  ? 'bg-monokai-light text-monokai-orange border-monokai'
-                  : 'text-monokai-gray hover:bg-monokai-light'
-              }`}
-            >
-              <i className="fa fa-cog mr-2"></i>
-              设置
-            </button>
-          </nav>
-
-          {/* 移动端菜单按钮 */}
-          <button className="md:hidden p-2 rounded-lg text-monokai-gray hover:bg-monokai-light transition">
-            <i className="fa fa-bars text-xl"></i>
-          </button>
-        </div>
-      </header>
-
       {/* 主内容区域 */}
       <main className="flex-grow bg-monokai">
         <div className="container mx-auto px-4 py-8">
           {/* 数据分析视图 */}
           {currentView === 'analysis' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="analysis-section grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-12">
                 <DataInputSection
                   inputMethod={inputMethod}

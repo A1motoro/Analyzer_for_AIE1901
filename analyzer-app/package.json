@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@tailwindcss/postcss": "^4.1.14",
     "@types/chart.js": "^4.0.1",
+    "antd": "^5.27.6",
     "autoprefixer": "^10.4.21",
     "chart.js": "^4.5.1",
     "postcss": "^8.5.6",
