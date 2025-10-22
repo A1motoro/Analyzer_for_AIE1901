@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { ConfigProvider } from 'antd';
 import DataInputSection from './components/DataInputSection';
 import AnalysisResultSection from './components/AnalysisResultSection';
 import AIModelChat from './components/AIModelChat';
 import TutorialSection from './components/TutorialSection';
 import AliyunAPIConfig from './components/AliyunAPIConfig';
 import ThemeSettingsDrawer from './components/ThemeSettingsDrawer';
+import { antdTheme, lightTheme } from './theme';
 import {
   calculateBasicStats,
   parseCSVContent,
@@ -32,12 +34,48 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
 
+  // 初始化主题
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('app-theme') as 'dark' | 'light' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      // 应用保存的主题
+      applyTheme(savedTheme);
+    } else {
+      // 默认应用暗色主题
+      applyTheme('dark');
+    }
+  }, []);
+
+  // 应用主题的辅助函数
+  const applyTheme = (newTheme: 'dark' | 'light') => {
+    const root = document.documentElement;
+    if (newTheme === 'light') {
+      // 应用亮色主题的CSS变量
+      root.style.setProperty('--monokai-bg', '#ffffff');
+      root.style.setProperty('--monokai-fg', '#1c1e21');
+      root.style.setProperty('--monokai-purple', '#409eff');
+      root.style.setProperty('--monokai-gray', '#65676b');
+      root.style.setProperty('--monokai-dim', '#8a8d91');
+      root.style.setProperty('--monokai-dark', '#f0f2f5');
+      root.style.setProperty('--monokai-light', '#f8f9fa');
+    } else {
+      // 恢复暗色主题的CSS变量
+      root.style.setProperty('--monokai-bg', '#272822');
+      root.style.setProperty('--monokai-fg', '#f8f8f2');
+      root.style.setProperty('--monokai-purple', '#fd971f');
+      root.style.setProperty('--monokai-gray', '#90908a');
+      root.style.setProperty('--monokai-dim', '#75715e');
+      root.style.setProperty('--monokai-dark', '#1e1e1e');
+      root.style.setProperty('--monokai-light', '#3e3d32');
+    }
+  };
+
   // 主题切换处理函数
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
-    // 这里可以添加主题切换的逻辑，比如更新CSS变量等
-    // 暂时先保存到localStorage
     localStorage.setItem('app-theme', newTheme);
+    applyTheme(newTheme);
   };
 
   // 处理数据分析
@@ -180,7 +218,8 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <ConfigProvider theme={theme === 'dark' ? antdTheme : lightTheme}>
+      <div className="min-h-screen">
       {/* Hero Section - 全屏 */}
       <section className="hero-section relative">
         {/* 背景装饰 */}
@@ -408,7 +447,8 @@ const App: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </ConfigProvider>
   );
 };
 
