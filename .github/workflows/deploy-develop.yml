@@ -1,8 +1,8 @@
-name: Deploy HTML App
+name: Deploy Develop Branch
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
   workflow_dispatch:
 
 permissions:
@@ -11,13 +11,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-develop"
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  deploy-develop:
     environment:
-      name: github-pages
+      name: github-pages-develop
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
@@ -52,17 +52,17 @@ jobs:
           cd analyzer-app
           pnpm install --frozen-lockfile
 
-      - name: Build React App
+      - name: Build React App for Develop
         run: |
           cd analyzer-app
-          echo "Building for main branch with base path /Analyzer_for_AIE1901/"
+          echo "Building for develop branch with base path /Analyzer_for_AIE1901/develop/"
           export GITHUB_REF="${{ github.ref }}"
           export NODE_ENV="production"
           pnpm run build
 
       - name: Prepare deployment
         run: |
-          echo "✅ React应用构建完成"
+          echo "✅ React应用构建完成 (Develop)"
           ls -la analyzer-app/dist/
 
       - name: Setup Pages
@@ -73,8 +73,7 @@ jobs:
         with:
           path: './analyzer-app/dist'
           retention-days: 1
-          name: github-pages-${{ github.ref_name }}
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (Develop)
         id: deployment
         uses: actions/deploy-pages@v4

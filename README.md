@@ -79,12 +79,27 @@ pnpm run build
 
 ## 📋 部署说明
 
+### GitHub Pages 配置
+
+1. **启用 GitHub Pages**:
+   - 进入仓库的 **Settings** 页面
+   - 找到 **Pages** 部分
+   - 在 **Source** 中选择 **GitHub Actions**
+
+2. **自动部署流程**:
+   - 推送代码到 `main` 分支 → 部署到正式版本
+   - 推送代码到 `develop` 分支 → 部署到开发预览版本
+
+3. **访问地址**:
+   - **正式版本**: `https://[username].github.io/Analyzer_for_AIE1901/`
+   - **开发预览**: `https://[username].github.io/Analyzer_for_AIE1901/develop/`
+
+### CI/CD 工作流
+
 项目使用GitHub Actions实现自动CI/CD：
 
 1. **代码质量检查**: 每次推送自动运行TypeScript检查和构建测试
-2. **自动部署**:
-   - `main` 分支 → 正式版本 (`/`)
-   - `develop` 分支 → 开发预览 (`/develop/`)
+2. **自动部署**: 分支推送触发自动构建和部署
 3. **预览功能**: 团队成员可以实时预览develop分支的最新功能
 
 ## 📁 项目结构
