@@ -53,21 +53,39 @@ const App: React.FC = () => {
     if (newTheme === 'light') {
       // 应用亮色主题的CSS变量
       root.style.setProperty('--monokai-bg', '#ffffff');
+      root.style.setProperty('--monokai-bg-dark', '#f0f2f5');
+      root.style.setProperty('--monokai-bg-light', '#f8f9fa');
+      root.style.setProperty('--monokai-bg-lighter', '#ffffff');
       root.style.setProperty('--monokai-fg', '#1c1e21');
+      root.style.setProperty('--monokai-fg-dim', '#8a8d91');
+      root.style.setProperty('--monokai-orange', '#409eff');
+      root.style.setProperty('--monokai-yellow', '#e6a23c');
+      root.style.setProperty('--monokai-green', '#42b883');
+      root.style.setProperty('--monokai-blue', '#409eff');
       root.style.setProperty('--monokai-purple', '#409eff');
+      root.style.setProperty('--monokai-pink', '#f56c6c');
       root.style.setProperty('--monokai-gray', '#65676b');
-      root.style.setProperty('--monokai-dim', '#8a8d91');
-      root.style.setProperty('--monokai-dark', '#f0f2f5');
-      root.style.setProperty('--monokai-light', '#f8f9fa');
+      root.style.setProperty('--monokai-overlay', 'rgba(0, 0, 0, 0.45)');
+      root.style.setProperty('--monokai-glass', 'rgba(255, 255, 255, 0.85)');
+      root.style.setProperty('--monokai-shadow', '0 4px 20px rgba(0, 0, 0, 0.08)');
     } else {
       // 恢复暗色主题的CSS变量
       root.style.setProperty('--monokai-bg', '#272822');
+      root.style.setProperty('--monokai-bg-dark', '#1e1e1e');
+      root.style.setProperty('--monokai-bg-light', '#3e3d32');
+      root.style.setProperty('--monokai-bg-lighter', '#49483e');
       root.style.setProperty('--monokai-fg', '#f8f8f2');
-      root.style.setProperty('--monokai-purple', '#fd971f');
+      root.style.setProperty('--monokai-fg-dim', '#75715e');
+      root.style.setProperty('--monokai-orange', '#fd971f');
+      root.style.setProperty('--monokai-yellow', '#e6db74');
+      root.style.setProperty('--monokai-green', '#a6e22e');
+      root.style.setProperty('--monokai-blue', '#66d9ef');
+      root.style.setProperty('--monokai-purple', '#ae81ff');
+      root.style.setProperty('--monokai-pink', '#f92672');
       root.style.setProperty('--monokai-gray', '#90908a');
-      root.style.setProperty('--monokai-dim', '#75715e');
-      root.style.setProperty('--monokai-dark', '#1e1e1e');
-      root.style.setProperty('--monokai-light', '#3e3d32');
+      root.style.setProperty('--monokai-overlay', 'rgba(39, 40, 34, 0.95)');
+      root.style.setProperty('--monokai-glass', 'rgba(39, 40, 34, 0.85)');
+      root.style.setProperty('--monokai-shadow', '0 4px 20px rgba(0, 0, 0, 0.3)');
     }
   };
 
