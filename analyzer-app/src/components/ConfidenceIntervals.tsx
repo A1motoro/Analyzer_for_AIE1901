@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider, Tag } from 'antd';
+import { Card, Statistic, Row, Col, Typography, Space, Select, Alert, Tabs, Divider, Tag } from 'antd';
 import {
-  BarChartOutlined,
-  CalculatorOutlined,
-  ExperimentOutlined,
-  InfoCircleOutlined
+  CalculatorOutlined
 } from '@ant-design/icons';
 import {
   calculateTwoSampleMeanCI,
@@ -13,7 +10,7 @@ import {
   calculateVarianceCI
 } from '../utils';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 

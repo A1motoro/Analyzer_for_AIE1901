@@ -186,7 +186,7 @@ export const tQuantileApprox = function(df: number, p: number) {
 };
 
 // 计算总体均值置信区间，自动选择z或t方法
-export const calculateConfidenceInterval = function(data: number[], confidenceLevel = 0.95, knownVariance = null) {
+export const calculateConfidenceInterval = function(data: number[], confidenceLevel = 0.95, knownVariance: number | null = null) {
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
   let stdDev, standardError, criticalValue, interval;
@@ -885,6 +885,118 @@ export const calculateSampleSizeProportionTest = function(
     alternative,
     zAlpha,
     zBeta
+  };
+};
+
+// 假设检验函数
+
+// 单样本t检验
+export const performOneSampleTTest = function(sampleData: number[], mu0: number, alpha: number, alt: string) {
+  const n = sampleData.length;
+  const sampleMean = sampleData.reduce((sum, val) => sum + val, 0) / n;
+  const sampleVariance = sampleData.reduce((sum, val) => sum + Math.pow(val - sampleMean, 2), 0) / (n - 1);
+  const sampleStd = Math.sqrt(sampleVariance);
+
+  const tStatistic = (sampleMean - mu0) / (sampleStd / Math.sqrt(n));
+  const df = n - 1;
+
+  // 近似计算p值 (使用标准正态分布近似)
+  let pValue;
+  switch (alt) {
+    case 'less':
+      pValue = tStatistic <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * tStatistic - 0.416 * tStatistic * tStatistic);
+      break;
+    case 'greater':
+      pValue = tStatistic >= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * Math.abs(tStatistic) - 0.416 * tStatistic * tStatistic);
+      break;
+    default: // two-sided
+      const absT = Math.abs(tStatistic);
+      pValue = 2 * (absT <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * absT - 0.416 * absT * absT));
+  }
+
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: tStatistic,
+    df,
+    pValue,
+    rejectNull,
+    sampleMean,
+    sampleStd,
+    nullValue: mu0,
+    significanceLevel: alpha,
+    alternative: alt
+  };
+};
+
+// 方差F检验
+export const performVarianceFTest = function(sampleData1: number[], sampleData2: number[], alpha: number) {
+  const n1 = sampleData1.length;
+  const n2 = sampleData2.length;
+
+  const mean1 = sampleData1.reduce((sum, val) => sum + val, 0) / n1;
+  const mean2 = sampleData2.reduce((sum, val) => sum + val, 0) / n2;
+
+  const var1 = sampleData1.reduce((sum, val) => sum + Math.pow(val - mean1, 2), 0) / (n1 - 1);
+  const var2 = sampleData2.reduce((sum, val) => sum + Math.pow(val - mean2, 2), 0) / (n2 - 1);
+
+  // 确保较大的方差在分子
+  const [largerVar, smallerVar, largerN, smallerN] = var1 >= var2 ?
+    [var1, var2, n1, n2] : [var2, var1, n2, n1];
+
+  const fStatistic = largerVar / smallerVar;
+  const df1 = largerN - 1;
+  const df2 = smallerN - 1;
+
+  // 近似p值 (使用F分布近似)
+  const pValue = 1 - Math.exp(-0.5 * fStatistic);
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: fStatistic,
+    df1,
+    df2,
+    pValue,
+    rejectNull,
+    variance1: var1,
+    variance2: var2,
+    significanceLevel: alpha
+  };
+};
+
+// 比例检验
+export const performProportionTest = function(successes: number, trials: number, p0: number, alpha: number, alt: string) {
+  const sampleProportion = successes / trials;
+  const standardError = Math.sqrt(p0 * (1 - p0) / trials);
+
+  const zStatistic = (sampleProportion - p0) / standardError;
+
+  // 计算p值
+  let pValue;
+  switch (alt) {
+    case 'less':
+      pValue = zStatistic <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * zStatistic - 0.416 * zStatistic * zStatistic);
+      break;
+    case 'greater':
+      pValue = zStatistic >= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * Math.abs(zStatistic) - 0.416 * zStatistic * zStatistic);
+      break;
+    default: // two-sided
+      const absZ = Math.abs(zStatistic);
+      pValue = 2 * (absZ <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * absZ - 0.416 * absZ * absZ));
+  }
+
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: zStatistic,
+    pValue,
+    rejectNull,
+    sampleProportion,
+    nullProportion: p0,
+    successes,
+    trials,
+    significanceLevel: alpha,
+    alternative: alt
   };
 };
 

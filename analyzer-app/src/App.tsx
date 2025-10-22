@@ -55,7 +55,7 @@ const App: React.FC = () => {
 
     // 添加用户特定例子的数据（用于演示）
     const userExamples = {
-      meanConfidenceInterval: calculateConfidenceInterval(new Array(27).fill(1478), 0.95, 36 * 36 as any),
+      meanConfidenceInterval: calculateConfidenceInterval(new Array(27).fill(1478), 0.95, 36 * 36),
       wilsonIntervalExample: calculateWilsonConfidenceInterval(40, 100, 0.95)
     };
 
