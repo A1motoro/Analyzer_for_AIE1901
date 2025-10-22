@@ -53,7 +53,7 @@ code {
 /* Hero Section 样式 */
 .hero-section {
   background: linear-gradient(135deg, var(--monokai-bg-dark) 0%, var(--monokai-bg) 100%);
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -482,6 +482,31 @@ input:focus, textarea:focus {
 
 .animate-pulse-custom {
   animation: monokaiPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 小标题区域样式 */
+.subtitle-section {
+  background: linear-gradient(135deg, var(--monokai-bg-light) 0%, var(--monokai-bg) 100%);
+  border-bottom: 1px solid var(--monokai-bg-lighter);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero Section 导航栏样式 */
+.hero-nav {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(39, 40, 34, 0.8);
+}
+
+.hero-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(39, 40, 34, 0.8);
+  z-index: -1;
 }
 
 /* 上传成功卡片样式 */

@@ -55,6 +55,7 @@ jobs:
       - name: Build React App for Develop
         run: |
           cd analyzer-app
+          echo "Building for develop branch with base path /Analyzer_for_AIE1901/develop/"
           export GITHUB_REF="${{ github.ref }}"
           export NODE_ENV="production"
           pnpm run build

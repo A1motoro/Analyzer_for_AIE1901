@@ -2,7 +2,7 @@ name: Deploy HTML App
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -55,6 +55,7 @@ jobs:
       - name: Build React App
         run: |
           cd analyzer-app
+          echo "Building for main branch with base path /Analyzer_for_AIE1901/"
           export GITHUB_REF="${{ github.ref }}"
           export NODE_ENV="production"
           pnpm run build
@@ -72,6 +73,7 @@ jobs:
         with:
           path: './analyzer-app/dist'
           retention-days: 1
+          name: github-pages-${{ github.ref_name }}
 
       - name: Deploy to GitHub Pages
         id: deployment
