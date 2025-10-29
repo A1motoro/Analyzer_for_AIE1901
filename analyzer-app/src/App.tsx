@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ConfigProvider, Modal, Radio, Space, Typography, Divider, Button, Drawer } from 'antd';
+import { useTranslation } from 'react-i18next';
 import DataInputSection from './components/DataInputSection';
 import AnalysisResultSection from './components/AnalysisResultSection';
 import AIModelChat from './components/AIModelChat';
@@ -22,6 +23,7 @@ import {
 } from './utils';
 
 const App: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('basic');
   const [inputMethod, setInputMethod] = useState('upload');
   const [data, setData] = useState<number[]>([]);
@@ -33,6 +35,9 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // 当前语言
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'zh');
 
   // 初始化主题
   useEffect(() => {
@@ -95,6 +100,13 @@ const App: React.FC = () => {
     setTheme(newTheme);
     localStorage.setItem('app-theme', newTheme);
     applyTheme(newTheme);
+  };
+
+  // 语言切换处理函数
+  const changeLanguage = (language: string) => {
+    i18n.changeLanguage(language);
+    setCurrentLanguage(language);
+    setSettingsOpen(false);
   };
 
   // 处理数据分析
@@ -161,8 +173,8 @@ const App: React.FC = () => {
         setData(parsedData);
         setIsUserUploadedData(true);
       } catch (error) {
-        console.error('文件解析错误:', error);
-        alert('文件解析错误，请确保上传的是有效的CSV文件。');
+        console.error(t('fileError.title'), error);
+        alert(t('fileError.message'));
       }
     };
     reader.readAsText(file);
@@ -252,10 +264,10 @@ const App: React.FC = () => {
         {/* Hero 内容 */}
         <div className="hero-content">
           <h1 className="hero-title">
-            <span style={{ color: 'var(--monokai-orange)' }}>数据分析师</span> Web应用
+            <span style={{ color: 'var(--monokai-orange)' }}>{t('app.title')}</span> {t('appInfo.webApp')}
           </h1>
           <p className="hero-subtitle">
-            基于AI驱动的数据分析平台，支持多种数据源输入、统计分析、可视化展示和智能数据生成
+            {t('app.subtitle')}
           </p>
           <div className="hero-buttons">
             <button
@@ -272,14 +284,14 @@ const App: React.FC = () => {
               className="hero-primary-btn"
             >
               <i className="fa fa-rocket mr-2"></i>
-              开始分析
+              {t('app.nav.analysis')}
             </button>
             <button
               onClick={() => setCurrentView('tutorial')}
               className="hero-secondary-btn"
             >
               <i className="fa fa-book mr-2"></i>
-              学习教程
+              {t('tutorial.title')}
             </button>
           </div>
         </div>
@@ -320,13 +332,13 @@ const App: React.FC = () => {
                     <div className="p-2 rounded-lg mr-3" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
                       <i className="fa fa-database"></i>
                     </div>
-                    数据概览
+                    {t('appInfo.dataOverview')}
                   </h3>
                   <div className="space-y-4">
                     <div className="p-4 rounded-xl bg-monokai border border-monokai">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-blue)' }}>数据点数量</p>
+                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-blue)' }}>{t('appInfo.dataPoints')}</p>
                           <p className="text-3xl font-bold" style={{ color: 'var(--monokai-fg)' }}>{data.length}</p>
                         </div>
                         <div className="p-3 rounded-full" style={{ backgroundColor: 'var(--monokai-blue)', color: 'var(--monokai-bg)' }}>
@@ -338,7 +350,7 @@ const App: React.FC = () => {
                     <div className="p-4 rounded-xl bg-monokai border border-monokai">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-green)' }}>数据范围</p>
+                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-green)' }}>{t('appInfo.dataRange')}</p>
                           <p className="text-lg font-semibold" style={{ color: 'var(--monokai-fg)' }}>
                             {data.length > 0
                               ? `${Math.min(...data).toFixed(2)} - ${Math.max(...data).toFixed(2)}`
@@ -355,9 +367,9 @@ const App: React.FC = () => {
                     <div className="p-4 rounded-xl bg-monokai border border-monokai">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-purple)' }}>数据类型</p>
+                          <p className="text-sm font-medium" style={{ color: 'var(--monokai-purple)' }}>{t('appInfo.dataType')}</p>
                           <p className="text-lg font-semibold" style={{ color: 'var(--monokai-fg)' }}>
-                            {data.length > 0 ? '数值型数据' : '--'}
+                            {data.length > 0 ? t('appInfo.numericData') : '--'}
                           </p>
                         </div>
                         <div className="p-3 rounded-full" style={{ backgroundColor: 'var(--monokai-purple)', color: 'var(--monokai-bg)' }}>
@@ -391,13 +403,13 @@ const App: React.FC = () => {
       <footer className="bg-monokai-dark border-t border-monokai py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0 text-center md:text-left">
-              <div className="mb-3">
-                <h3 className="text-lg font-bold" style={{ color: 'var(--monokai-fg)' }}>数据分析师Web应用</h3>
-                <p className="text-sm text-monokai-gray">AI驱动的数据分析平台</p>
+              <div className="mb-6 md:mb-0 text-center md:text-left">
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold" style={{ color: 'var(--monokai-fg)' }}>{t('app.title')} {t('appInfo.webApp')}</h3>
+                  <p className="text-sm text-monokai-gray">{t('app.description')}</p>
+                </div>
+                <p className="text-sm text-monokai-dim">{t('app.footer')}</p>
               </div>
-              <p className="text-sm text-monokai-dim">© 2024 数据分析师Web应用. 保留所有权利.</p>
-            </div>
             <div className="flex space-x-4">
               <a href="https://github.com/A1motoro/Analyzer_for_AIE1901" target="_blank" rel="noopener noreferrer"
                 className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
@@ -415,10 +427,10 @@ const App: React.FC = () => {
           {/* 装饰性分割线 */}
           <div className="mt-8 pt-8 border-t border-monokai">
             <div className="flex justify-center space-x-8 text-sm text-monokai-dim">
-              <span>🚀 现代化设计</span>
-              <span>🤖 AI驱动</span>
-              <span>📊 数据可视化</span>
-              <span>⚡ 高性能</span>
+              <span>{t('appInfo.modernDesign')}</span>
+              <span>{t('appInfo.aiDriven')}</span>
+              <span>{t('appInfo.dataVisualization')}</span>
+              <span>{t('appInfo.highPerformance')}</span>
             </div>
           </div>
         </div>
@@ -428,14 +440,14 @@ const App: React.FC = () => {
       <Modal
         title={
           <Space>
-            <span>⚙️ 设置</span>
+            <span>⚙️ {t('settings.title')}</span>
           </Space>
         }
         open={settingsOpen}
         onCancel={() => setSettingsOpen(false)}
         footer={[
           <Button key="close" onClick={() => setSettingsOpen(false)}>
-            关闭
+            {t('common.close')}
           </Button>
         ]}
         width={400}
@@ -444,7 +456,7 @@ const App: React.FC = () => {
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           {/* 主题选择 */}
           <div>
-            <Typography.Title level={5}>🎨 主题选择</Typography.Title>
+            <Typography.Title level={5}>🎨 {t('settings.theme')}</Typography.Title>
             <Radio.Group
               value={theme}
               onChange={() => {
@@ -474,7 +486,7 @@ const App: React.FC = () => {
                     <Space>
                       <span>🌙</span>
                       <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
-                        暗色主题 (VSCode Dark)
+                        {t('settings.dark')}
                       </Typography.Text>
                     </Space>
                     <Typography.Text style={{
@@ -483,7 +495,7 @@ const App: React.FC = () => {
                       display: 'block',
                       marginTop: '4px'
                     }}>
-                      护眼的深色主题，适合长时间使用
+                      {t('settings.darkDesc')}
                     </Typography.Text>
                   </div>
                 </div>
@@ -508,7 +520,7 @@ const App: React.FC = () => {
                     <Space>
                       <span>☀️</span>
                       <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
-                        亮色主题 (VSCode Light)
+                        {t('settings.light')}
                       </Typography.Text>
                     </Space>
                     <Typography.Text style={{
@@ -517,8 +529,68 @@ const App: React.FC = () => {
                       display: 'block',
                       marginTop: '4px'
                     }}>
-                      清爽的亮色界面，适合明亮环境
+                      {t('settings.lightDesc')}
                     </Typography.Text>
+                  </div>
+                </div>
+              </Space>
+            </Radio.Group>
+          </div>
+
+          <Divider />
+
+          {/* 语言选择 */}
+          <div>
+            <Typography.Title level={5}>🌐 {t('settings.language')}</Typography.Title>
+            <Radio.Group
+              value={currentLanguage}
+              onChange={(e) => changeLanguage(e.target.value)}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    border: `2px solid ${currentLanguage === 'zh' ? 'var(--monokai-green)' : 'transparent'}`,
+                    borderRadius: '8px',
+                    background: currentLanguage === 'zh' ? 'var(--monokai-bg-light)' : 'var(--monokai-bg-lighter)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => changeLanguage('zh')}
+                >
+                  <Radio value="zh" style={{ marginRight: '12px' }} />
+                  <div style={{ flex: 1 }}>
+                    <Space>
+                      <span>🇨🇳</span>
+                      <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
+                        {t('settings.chinese')}
+                      </Typography.Text>
+                    </Space>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    border: `2px solid ${currentLanguage === 'en' ? 'var(--monokai-blue)' : 'transparent'}`,
+                    borderRadius: '8px',
+                    background: currentLanguage === 'en' ? 'var(--monokai-bg-light)' : 'var(--monokai-bg-lighter)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => changeLanguage('en')}
+                >
+                  <Radio value="en" style={{ marginRight: '12px' }} />
+                  <div style={{ flex: 1 }}>
+                    <Space>
+                      <span>🇺🇸</span>
+                      <Typography.Text strong style={{ color: 'var(--monokai-fg)' }}>
+                        {t('settings.english')}
+                      </Typography.Text>
+                    </Space>
                   </div>
                 </div>
               </Space>
@@ -529,7 +601,7 @@ const App: React.FC = () => {
 
           {/* 其他设置 */}
           <div>
-            <Typography.Title level={5}>🔧 其他设置</Typography.Title>
+            <Typography.Title level={5}>🔧 {t('settings.other')}</Typography.Title>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Button
                 type="text"
@@ -541,12 +613,12 @@ const App: React.FC = () => {
                   background: 'transparent',
                 }}
                 onClick={() => {
-                  localStorage.removeItem('app-theme');
-                  window.location.reload();
-                }}
-              >
-                🔄 重置为默认设置
-              </Button>
+                localStorage.removeItem('app-theme');
+                window.location.reload();
+              }}
+            >
+              🔄 {t('appInfo.resetDefault')}
+            </Button>
             </Space>
           </div>
         </Space>
@@ -579,7 +651,7 @@ const App: React.FC = () => {
           e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
           e.currentTarget.style.backgroundColor = 'var(--monokai-purple)';
         }}
-        title="打开功能面板"
+        title={t('appInfo.openPanel')}
       >
         <i className="fa fa-arrow-left text-lg"></i>
       </button>
@@ -588,7 +660,7 @@ const App: React.FC = () => {
       <Drawer
         title={
           <Space>
-            <span>🎛️ 功能面板</span>
+            <span>🎛️ {t('appInfo.functionPanel')}</span>
           </Space>
         }
         placement="right"
@@ -607,7 +679,7 @@ const App: React.FC = () => {
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           {/* 功能按钮 */}
           <div>
-            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>🚀 快捷功能</Typography.Title>
+            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>🚀 {t('appInfo.quickFunctions')}</Typography.Title>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               {/* 教程按钮 */}
               <Button
@@ -630,7 +702,7 @@ const App: React.FC = () => {
                 }}
                 className="hover:bg-monokai-blue hover:text-monokai-bg transition-all duration-200"
               >
-                <span className="ml-2">使用教程</span>
+                <span className="ml-2">{t('appInfo.tutorial')}</span>
               </Button>
 
               {/* 设置按钮 */}
@@ -654,7 +726,7 @@ const App: React.FC = () => {
                 }}
                 className="hover:bg-monokai-purple hover:text-monokai-bg transition-all duration-200"
               >
-                <span className="ml-2">系统设置</span>
+                <span className="ml-2">{t('appInfo.systemSettings')}</span>
               </Button>
 
               {/* 主题切换按钮 */}
@@ -679,7 +751,7 @@ const App: React.FC = () => {
                 className="hover:bg-monokai-orange hover:text-monokai-bg transition-all duration-200"
               >
                 <span className="ml-2">
-                  {theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+                  {theme === 'dark' ? t('appInfo.switchToLight') : t('appInfo.switchToDark')}
                 </span>
               </Button>
             </Space>
@@ -691,14 +763,13 @@ const App: React.FC = () => {
 
           {/* 信息 */}
           <div>
-            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>ℹ️ 关于</Typography.Title>
+            <Typography.Title level={5} style={{ color: 'var(--monokai-fg)' }}>ℹ️ {t('appInfo.about')}</Typography.Title>
             <Typography.Text style={{
               fontSize: '12px',
               color: 'var(--monokai-gray)',
               lineHeight: '1.5'
             }}>
-              数据分析师Web应用提供现代化的数据分析体验，
-              支持多种统计方法和AI辅助分析。
+              {t('appInfo.aboutDesc')}
             </Typography.Text>
           </div>
         </Space>

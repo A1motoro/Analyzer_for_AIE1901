@@ -6,6 +6,7 @@ import {
   BarChartOutlined,
   ThunderboltOutlined
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 // 导入子组件
 import { CoreStatistics } from './StatisticCard';
@@ -16,7 +17,6 @@ import StatisticsGuide from './StatisticsGuide';
 import HypothesisTesting from './HypothesisTesting';
 import ConfidenceIntervals from './ConfidenceIntervals';
 import PowerAnalysis from './PowerAnalysis';
-import ROHEResults from './ROHEResults';
 
 interface AnalysisResultSectionProps {
   activeTab: string;
@@ -31,6 +31,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
   analysisResult,
   data
 }) => {
+  const { t } = useTranslation();
   const { Title, Paragraph } = Typography;
 
   const tabItems = [
@@ -39,7 +40,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       label: (
         <Space>
           <CalculatorOutlined />
-          基本统计分析
+          {t('analysis.basicStats')}
         </Space>
       ),
       children: (
@@ -56,7 +57,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       label: (
         <Space>
           <ExperimentOutlined />
-          参数估计分析
+          {t('analysis.parameterEstimation')}
         </Space>
       ),
       children: (
@@ -68,7 +69,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       label: (
         <Space>
           <BarChartOutlined />
-          假设检验
+          {t('analysis.hypothesisTesting')}
         </Space>
       ),
       children: (
@@ -80,7 +81,7 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       label: (
         <Space>
           <ExperimentOutlined />
-          置信区间
+          {t('analysis.confidenceIntervals')}
         </Space>
       ),
       children: (
@@ -92,23 +93,11 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
       label: (
         <Space>
           <ThunderboltOutlined />
-          功效分析
+          {t('analysis.powerAnalysis')}
         </Space>
       ),
       children: (
         <PowerAnalysis data={data} analysisResult={analysisResult} />
-      ),
-    },
-    {
-      key: 'rohe-analysis',
-      label: (
-        <Space>
-          <ExperimentOutlined />
-          ROHE分析
-        </Space>
-      ),
-      children: (
-        <ROHEResults roheAnalysis={analysisResult.roheAnalysis} />
       ),
     },
   ];
@@ -119,14 +108,14 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
         <Space>
           <BarChartOutlined />
           <Title level={3} style={{ margin: 0, color: '#f8f8f2' }}>
-          数据分析结果
+            {t('analysis.title')}
           </Title>
         </Space>
       }
       style={{ marginBottom: 48 }}
     >
       <Paragraph style={{ color: '#90908a', marginBottom: 24 }}>
-          深入分析您的数据特征和统计特性
+        {t('analysis.description')}
       </Paragraph>
 
       <Tabs

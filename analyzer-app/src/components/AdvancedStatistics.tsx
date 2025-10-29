@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Tag, Alert, Tabs } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   BulbOutlined,
   QuestionCircleOutlined,
@@ -17,21 +18,22 @@ interface AdvancedStatisticsProps {
 }
 
 const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult }) => {
+  const { t } = useTranslation();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
 
   const getTooltipContent = (type: string) => {
     switch (type) {
       case 'mode':
-        return '数据集中出现频率最高的值';
+        return t('advanced.hoverMode');
       case 'skewness':
-        return '描述分布不对称程度的指标。正值表示右偏，负值表示左偏';
+        return t('advanced.hoverSkewness');
       case 'kurtosis':
-        return '衡量分布尾部厚度的统计量。正值表示尾部较厚';
+        return t('advanced.hoverKurtosis');
       case 'distributionType':
-        return '基于偏度和峰度自动识别的分布类型';
+        return t('advanced.hoverDistribution');
       case 'normality':
-        return '正态性检验结果：Jarque-Bera和Shapiro-Wilk检验';
+        return t('advanced.hoverDistribution');
       default:
         return '';
     }
@@ -51,12 +53,17 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
   const getDistributionColor = (type: string) => {
     switch (type) {
       case '近似正态':
+      case 'approxNormal':
         return '#a6e22e';
       case '右偏':
+      case 'leftSided':
       case '左偏':
+      case 'rightSided':
         return '#fd971f';
       case '右偏厚尾':
+      case 'rightSidedThickTail':
       case '左偏厚尾':
+      case 'leftSidedThickTail':
         return '#f92672';
       default:
         return '#66d9ef';
@@ -71,7 +78,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
         <Space>
           <BulbOutlined style={{ color: '#e6db74' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            高级统计特性与分布分析
+            {t('advanced.title')}
           </Title>
         </Space>
       }
@@ -79,7 +86,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
     >
       <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
         {/* 基础统计特性 */}
-        <TabPane tab="基础统计" key="basic">
+        <TabPane tab={t('advanced.basicStats')} key="basic">
           <Row gutter={[16, 16]}>
             <Col xs={24} md={6}>
               <Tooltip title={getTooltipContent('mode')} placement="top">
@@ -99,7 +106,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Statistic
                     title={
                       <Text style={{ color: '#90908a', fontSize: '14px' }}>
-                        众数 (Mode)
+                        {t('advanced.mode')}
                       </Text>
                     }
                     value={analysisResult.mode?.toFixed(4) || 'N/A'}
@@ -110,7 +117,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    最频繁出现的值
+                    {t('advanced.mostFrequent')}
                   </Text>
                 </Card>
               </Tooltip>
@@ -134,7 +141,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Statistic
                     title={
                       <Text style={{ color: '#90908a', fontSize: '14px' }}>
-                        偏度 (Skewness)
+                        {t('advanced.skewness')}
                       </Text>
                     }
                     value={analysisResult.skewness?.toFixed(4) || '0.0000'}
@@ -145,7 +152,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    {Math.abs(analysisResult.skewness || 0) > 0.5 ? '分布不对称' : '分布对称'}
+                    {Math.abs(analysisResult.skewness || 0) > 0.5 ? t('advanced.asymmetric') : t('advanced.symmetric')}
                   </Text>
                 </Card>
               </Tooltip>
@@ -169,7 +176,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Statistic
                     title={
                       <Text style={{ color: '#90908a', fontSize: '14px' }}>
-                        峰度 (Kurtosis)
+                        {t('advanced.kurtosis')}
                       </Text>
                     }
                     value={analysisResult.kurtosis?.toFixed(4) || '0.0000'}
@@ -180,7 +187,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    {(analysisResult.kurtosis || 0) > 0 ? '尾部较厚' : '尾部较薄'}
+                    {(analysisResult.kurtosis || 0) > 0 ? t('advanced.thickTail') : t('advanced.thinTail')}
                   </Text>
                 </Card>
               </Tooltip>
@@ -204,18 +211,18 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Statistic
                     title={
                       <Text style={{ color: '#90908a', fontSize: '14px' }}>
-                        分布类型
+                        {t('advanced.distributionType')}
                       </Text>
                     }
-                    value={distributionAnalysis?.distributionType || '未知'}
+                    value={distributionAnalysis?.distributionType || t('advanced.unknown')}
                     valueStyle={{
-                      color: getDistributionColor(distributionAnalysis?.distributionType || '未知'),
+                      color: getDistributionColor(distributionAnalysis?.distributionType || t('advanced.unknown')),
                       fontSize: '16px',
                       transition: 'all 0.3s ease'
                     }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    自动识别类型
+                    {t('advanced.autoDetect')}
                   </Text>
                 </Card>
               </Tooltip>
@@ -224,14 +231,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
         </TabPane>
 
         {/* 偏度和峰度检验 */}
-        <TabPane tab="偏度峰度检验" key="skewness-kurtosis">
+        <TabPane tab={t('advanced.skewnessKurtosis')} key="skewness-kurtosis">
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
               <Card
                 title={
                   <Space>
                     <BarChartOutlined style={{ color: '#f92672' }} />
-                    <Text style={{ color: '#f8f8f2' }}>偏度检验 (Skewness Test)</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('advanced.skewnessTest')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#49483e' }}
@@ -240,14 +247,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>偏度值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.skewnessValue')}</Text>}
                         value={distributionAnalysis?.skewness?.value?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#f92672', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>标准误差</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.standardError')}</Text>}
                         value={distributionAnalysis?.skewness?.standardError?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#fd971f', fontSize: '16px' }}
                       />
@@ -256,14 +263,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>Z统计量</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.zStatistic')}</Text>}
                         value={distributionAnalysis?.skewness?.zStatistic?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>p值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('hypothesis.pValue')}</Text>}
                         value={distributionAnalysis?.skewness?.pValue?.toFixed(4) || '0.0000'}
                         valueStyle={{
                           color: (distributionAnalysis?.skewness?.pValue || 1) < 0.05 ? '#f92672' : '#a6e22e',
@@ -281,8 +288,8 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         }
                         <Text style={{ color: '#f8f8f2' }}>
                           {distributionAnalysis?.skewness?.isSignificant ?
-                            '偏度显著不为0 (p < 0.05)' :
-                            '偏度不显著不为0 (p ≥ 0.05)'
+                            t('advanced.significant') :
+                            t('advanced.notSignificant')
                           }
                         </Text>
                       </Space>
@@ -300,7 +307,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                 title={
                   <Space>
                     <BarChartOutlined style={{ color: '#fd971f' }} />
-                    <Text style={{ color: '#f8f8f2' }}>峰度检验 (Kurtosis Test)</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('advanced.kurtosisTest')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#49483e' }}
@@ -309,14 +316,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>峰度值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.kurtosisValue')}</Text>}
                         value={distributionAnalysis?.kurtosis?.value?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#fd971f', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>标准误差</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.standardError')}</Text>}
                         value={distributionAnalysis?.kurtosis?.standardError?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#f92672', fontSize: '16px' }}
                       />
@@ -325,14 +332,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>Z统计量</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.zStatistic')}</Text>}
                         value={distributionAnalysis?.kurtosis?.zStatistic?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>p值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('hypothesis.pValue')}</Text>}
                         value={distributionAnalysis?.kurtosis?.pValue?.toFixed(4) || '0.0000'}
                         valueStyle={{
                           color: (distributionAnalysis?.kurtosis?.pValue || 1) < 0.05 ? '#f92672' : '#a6e22e',
@@ -350,8 +357,8 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         }
                         <Text style={{ color: '#f8f8f2' }}>
                           {distributionAnalysis?.kurtosis?.isSignificant ?
-                            '峰度显著不为0 (p < 0.05)' :
-                            '峰度不显著不为0 (p ≥ 0.05)'
+                            t('advanced.kurtosisSignificant') :
+                            t('advanced.kurtosisNotSignificant')
                           }
                         </Text>
                       </Space>
@@ -367,14 +374,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
         </TabPane>
 
         {/* 正态性检验 */}
-        <TabPane tab="正态性检验" key="normality">
+        <TabPane tab={t('advanced.normality')} key="normality">
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
               <Card
                 title={
                   <Space>
                     <ExperimentOutlined style={{ color: '#a6e22e' }} />
-                    <Text style={{ color: '#f8f8f2' }}>Jarque-Bera检验</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('advanced.jarqueBera')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#49483e' }}
@@ -383,14 +390,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>JB统计量</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.jbStatistic')}</Text>}
                         value={distributionAnalysis?.normalityTests?.jarqueBera?.statistic?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>p值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('hypothesis.pValue')}</Text>}
                         value={distributionAnalysis?.normalityTests?.jarqueBera?.pValue?.toFixed(4) || '0.0000'}
                         valueStyle={{
                           color: (distributionAnalysis?.normalityTests?.jarqueBera?.pValue || 1) < 0.05 ? '#f92672' : '#a6e22e',
@@ -408,8 +415,8 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         }
                         <Text style={{ color: '#f8f8f2' }}>
                           {distributionAnalysis?.normalityTests?.jarqueBera?.isNormal ?
-                            '数据服从正态分布 (p ≥ 0.05)' :
-                            '数据不服从正态分布 (p < 0.05)'
+                            t('advanced.normalDist') :
+                            t('advanced.notNormalDist')
                           }
                         </Text>
                       </Space>
@@ -419,7 +426,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     style={{ marginTop: '8px' }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    基于偏度和峰度的正态性检验，适用于大样本
+                    {t('advanced.jbDesc')}
                   </Text>
                 </Space>
               </Card>
@@ -430,7 +437,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                 title={
                   <Space>
                     <ExperimentOutlined style={{ color: '#66d9ef' }} />
-                    <Text style={{ color: '#f8f8f2' }}>Shapiro-Wilk检验</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('advanced.shapiroWilk')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#49483e' }}
@@ -439,14 +446,14 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                   <Row gutter={16}>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>W统计量</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('advanced.wStatistic')}</Text>}
                         value={distributionAnalysis?.normalityTests?.shapiroWilk?.statistic?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
                       />
                     </Col>
                     <Col span={12}>
                       <Statistic
-                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>p值</Text>}
+                        title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('hypothesis.pValue')}</Text>}
                         value={distributionAnalysis?.normalityTests?.shapiroWilk?.pValue?.toFixed(4) || '0.0000'}
                         valueStyle={{
                           color: (distributionAnalysis?.normalityTests?.shapiroWilk?.pValue || 1) < 0.05 ? '#f92672' : '#a6e22e',
@@ -464,8 +471,8 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         }
                         <Text style={{ color: '#f8f8f2' }}>
                           {distributionAnalysis?.normalityTests?.shapiroWilk?.isNormal ?
-                            '数据服从正态分布 (p ≥ 0.05)' :
-                            '数据不服从正态分布 (p < 0.05)'
+                            t('advanced.normalDist') :
+                            t('advanced.notNormalDist')
                           }
                         </Text>
                       </Space>
@@ -475,7 +482,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     style={{ marginTop: '8px' }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
-                    基于排序数据的正态性检验，适用于小到中等样本
+                    {t('advanced.swDesc')}
                   </Text>
                 </Space>
               </Card>
@@ -484,19 +491,19 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
 
           {/* 置信区间 */}
           <Card
-            title="偏度和峰度的置信区间 (95%)"
+            title={t('advanced.confidenceIntervalTitle')}
             style={{ backgroundColor: '#49483e', marginTop: '16px' }}
           >
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Text style={{ color: '#90908a' }}>偏度置信区间: </Text>
+                <Text style={{ color: '#90908a' }}>{t('advanced.skewnessCI')} </Text>
                 <Tag color="magenta">
                   [{distributionAnalysis?.confidence?.skewnessCI?.lower?.toFixed(4) || '0.0000'},
                   {distributionAnalysis?.confidence?.skewnessCI?.upper?.toFixed(4) || '0.0000'}]
                 </Tag>
               </Col>
               <Col xs={24} md={12}>
-                <Text style={{ color: '#90908a' }}>峰度置信区间: </Text>
+                <Text style={{ color: '#90908a' }}>{t('advanced.kurtosisCI')} </Text>
                 <Tag color="orange">
                   [{distributionAnalysis?.confidence?.kurtosisCI?.lower?.toFixed(4) || '0.0000'},
                   {distributionAnalysis?.confidence?.kurtosisCI?.upper?.toFixed(4) || '0.0000'}]
@@ -520,10 +527,10 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
           <Space>
             <QuestionCircleOutlined style={{ color: '#fd971f' }} />
             <Text style={{ color: '#f8f8f2' }}>
-              {hoveredCard === 'mode' && '众数是数据集中出现频率最高的值，可以有多个或不存在。'}
-              {hoveredCard === 'skewness' && '偏度描述分布形状的倾斜程度，影响数据分析和建模。'}
-              {hoveredCard === 'kurtosis' && '峰度反映分布尾部的相对陡峭程度，影响风险评估。'}
-              {hoveredCard === 'distributionType' && '基于偏度和峰度自动识别的分布类型，帮助理解数据特征。'}
+              {hoveredCard === 'mode' && t('advanced.hoverMode')}
+              {hoveredCard === 'skewness' && t('advanced.hoverSkewness')}
+              {hoveredCard === 'kurtosis' && t('advanced.hoverKurtosis')}
+              {hoveredCard === 'distributionType' && t('advanced.hoverDistribution')}
             </Text>
           </Space>
         </div>

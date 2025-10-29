@@ -9,6 +9,7 @@ import {
   calculateTwoProportionCI,
   calculateVarianceCI
 } from '../utils';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -20,6 +21,7 @@ interface ConfidenceIntervalsProps {
 }
 
 const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysisResult }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('mean');
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
   const [equalVariance, setEqualVariance] = useState(true);
@@ -37,18 +39,18 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="均值置信区间" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('confidence.meanCI')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16}>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>样本均值</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.sampleMean')}</Text>}
                 value={basicCI?.mean?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>标准误差</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.standardError')}</Text>}
                 value={basicCI?.standardError?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#fd971f', fontSize: '16px' }}
               />
@@ -66,7 +68,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  均值 {basicCI?.confidenceLevel ? (basicCI.confidenceLevel * 100).toFixed(0) : '95'}% 置信区间:
+                  {t('confidence.meanCI95', { level: (confidenceLevel * 100).toFixed(0) })}:
                 </Text>
                 <Tag color="blue" style={{ fontSize: '14px' }}>
                   [{basicCI?.interval?.lower?.toFixed(4) || '0.0000'},
@@ -90,7 +92,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>自由度</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.degreesOfFreedom')}</Text>}
                 value={varianceCI.degreesOfFreedom || 0}
                 valueStyle={{ color: '#ae81ff', fontSize: '16px' }}
               />
@@ -108,7 +110,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  方差 {(confidenceLevel * 100).toFixed(0)}% 置信区间:
+                  {t('confidence.varianceCI95', { level: (confidenceLevel * 100).toFixed(0) })}:
                 </Text>
                 <Tag color="purple" style={{ fontSize: '14px' }}>
                   [{varianceCI.interval.lower?.toFixed(4) || '0.0000'},
@@ -130,17 +132,17 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="两个样本均值之差的置信区间" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('confidence.twoSampleMeanDiff')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16} style={{ marginBottom: '16px' }}>
             <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>方差是否相等:</Text>
+              <Text style={{ color: '#90908a' }}>{t('confidence.equalVariance')}</Text>
               <Select
                 value={equalVariance}
                 onChange={setEqualVariance}
                 style={{ width: '100%', marginTop: '8px' }}
               >
-                <Option value={true}>假设方差相等 (合并方差)</Option>
-                <Option value={false}>假设方差不相等 (Welch's方法)</Option>
+                <Option value={true}>{t('confidence.assumeEqual')}</Option>
+                <Option value={false}>{t('confidence.assumeUnequal')}</Option>
               </Select>
             </Col>
             <Col xs={24} md={12}>
@@ -160,28 +162,28 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>样本1均值</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.sample1Mean')}</Text>}
                 value={twoSampleCI.mean1?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#66d9ef', fontSize: '14px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>样本2均值</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.sample2Mean')}</Text>}
                 value={twoSampleCI.mean2?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#fd971f', fontSize: '14px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>均值之差</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.meanDiff')}</Text>}
                 value={twoSampleCI.meanDiff?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#f92672', fontSize: '14px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>自由度</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.degreesOfFreedom')}</Text>}
                 value={Math.round(twoSampleCI.degreesOfFreedom || 0)}
                 valueStyle={{ color: '#ae81ff', fontSize: '14px' }}
               />
@@ -194,14 +196,17 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  均值之差 {(confidenceLevel * 100).toFixed(0)}% 置信区间 ({twoSampleCI.method} 方法):
+                  {t('confidence.meanDiffCI', { 
+                    level: (confidenceLevel * 100).toFixed(0),
+                    method: twoSampleCI.method 
+                  })}:
                 </Text>
                 <Tag color="green" style={{ fontSize: '14px' }}>
                   [{twoSampleCI.interval.lower?.toFixed(4) || '0.0000'},
                   {twoSampleCI.interval.upper?.toFixed(4) || '0.0000'}]
                 </Tag>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
-                  样本量: n₁ = {twoSampleCI.sampleSize1}, n₂ = {twoSampleCI.sampleSize2}
+                  {t('confidence.sampleSize', { n1: twoSampleCI.sampleSize1, n2: twoSampleCI.sampleSize2 })}
                 </Text>
               </Space>
             }
@@ -222,8 +227,8 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     } catch (error) {
       return (
         <Alert
-          message="配对数据错误"
-          description="配对数据必须具有相同的样本量"
+          message={t('confidence.pairedError')}
+          description={t('confidence.pairedErrorDesc')}
           type="error"
           showIcon
         />
@@ -232,32 +237,32 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="配对样本均值之差的置信区间" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('confidence.pairedMeanDiff')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>差值均值</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.diffMean')}</Text>}
                 value={pairedCI.meanDiff?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>标准误差</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.standardError')}</Text>}
                 value={pairedCI.standardError?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#fd971f', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>自由度</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.degreesOfFreedom')}</Text>}
                 value={pairedCI.degreesOfFreedom || 0}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
                 value={`${(confidenceLevel * 100).toFixed(0)}%`}
                 valueStyle={{ color: '#f92672', fontSize: '16px' }}
               />
@@ -270,14 +275,14 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  配对差值均值 {(confidenceLevel * 100).toFixed(0)}% 置信区间:
+                  {t('confidence.pairedDiffCI', { level: (confidenceLevel * 100).toFixed(0) })}:
                 </Text>
                 <Tag color="cyan" style={{ fontSize: '14px' }}>
                   [{pairedCI.interval.lower?.toFixed(4) || '0.0000'},
                   {pairedCI.interval.upper?.toFixed(4) || '0.0000'}]
                 </Tag>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
-                  配对数量: n = {pairedCI.sampleSize}
+                  {t('confidence.pairedCount', { n: pairedCI.sampleSize })}
                 </Text>
               </Space>
             }
@@ -297,11 +302,11 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="两个比例之差的置信区间" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('confidence.twoProportionDiff')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>比例1</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.proportion1')}</Text>}
                 value={`${proportionCI.proportion1?.toFixed(4) || '0.0000'}`}
                 suffix={<Text style={{ color: '#75715e' }}>({proportionCI.success1}/{proportionCI.sampleSize1})</Text>}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
@@ -309,7 +314,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>比例2</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.proportion2')}</Text>}
                 value={`${proportionCI.proportion2?.toFixed(4) || '0.0000'}`}
                 suffix={<Text style={{ color: '#75715e' }}>({proportionCI.success2}/{proportionCI.sampleSize2})</Text>}
                 valueStyle={{ color: '#fd971f', fontSize: '16px' }}
@@ -317,14 +322,14 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>比例之差</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.proportionDiff')}</Text>}
                 value={proportionCI.proportionDiff?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#f92672', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={6}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
                 value={`${(confidenceLevel * 100).toFixed(0)}%`}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
@@ -337,7 +342,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  比例之差 {(confidenceLevel * 100).toFixed(0)}% 置信区间:
+                  {t('confidence.proportionDiffCI', { level: (confidenceLevel * 100).toFixed(0) })}:
                 </Text>
                 <Tag color="orange" style={{ fontSize: '14px' }}>
                   [{proportionCI.interval.lower?.toFixed(4) || '0.0000'},
@@ -359,26 +364,26 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
         <Space>
           <CalculatorOutlined style={{ color: '#a6e22e' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            置信区间 (Confidence Intervals)
+            {t('confidence.title')}
           </Title>
         </Space>
       }
       style={{ backgroundColor: '#2f2e27' }}
     >
       <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-        <TabPane tab="单样本" key="mean">
+        <TabPane tab={t('confidence.singleSample')} key="mean">
           {renderOneSampleCI()}
         </TabPane>
 
-        <TabPane tab="两样本均值" key="two-sample-mean">
+        <TabPane tab={t('confidence.twoSampleMean')} key="two-sample-mean">
           {renderTwoSampleCI()}
         </TabPane>
 
-        <TabPane tab="配对样本" key="paired">
+        <TabPane tab={t('confidence.pairedSample')} key="paired">
           {renderPairedCI()}
         </TabPane>
 
-        <TabPane tab="比例" key="proportion">
+        <TabPane tab={t('confidence.proportion')} key="proportion">
           {renderProportionCI()}
         </TabPane>
       </Tabs>

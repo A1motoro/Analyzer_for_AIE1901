@@ -7,6 +7,7 @@ import {
   DotChartOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -19,6 +20,7 @@ interface DataVisualizationProps {
 }
 
 const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisResult }) => {
+  const { t } = useTranslation();
   const histogramRef = useRef<HTMLCanvasElement>(null);
   const scatterRef = useRef<HTMLCanvasElement>(null);
   const [activeChart, setActiveChart] = useState<'histogram' | 'scatter'>('histogram');
@@ -83,7 +85,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
           plugins: {
             title: {
               display: true,
-              text: '数据分布直方图',
+              text: t('visualization.histogramTitle'),
               color: '#f8f8f2',
               font: { size: 16, weight: 'bold' }
             },
@@ -95,19 +97,19 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
               borderColor: '#49483e',
               borderWidth: 1,
               callbacks: {
-                label: (context) => `频次: ${context.parsed.y}`
+                label: (context) => `${t('visualization.tooltipHistogramLabel')}${context.parsed.y}`
               }
             }
           },
           scales: {
             y: {
               beginAtZero: true,
-              title: { display: true, text: '频次', color: '#f8f8f2' },
+              title: { display: true, text: t('visualization.yAxisHistogram'), color: '#f8f8f2' },
               ticks: { color: '#90908a' },
               grid: { color: '#49483e' }
             },
             x: {
-              title: { display: true, text: '数值区间', color: '#f8f8f2' },
+              title: { display: true, text: t('visualization.xAxisHistogram'), color: '#f8f8f2' },
               ticks: { color: '#90908a', maxRotation: 45 },
               grid: { color: '#49483e' }
             }
@@ -151,7 +153,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
           plugins: {
             title: {
               display: true,
-              text: '数据散点分布图',
+              text: t('visualization.scatterTitle'),
               color: '#f8f8f2',
               font: { size: 16, weight: 'bold' }
             },
@@ -163,19 +165,19 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
               borderColor: '#49483e',
               borderWidth: 1,
                 callbacks: {
-                  title: (tooltipItems) => `索引: ${tooltipItems[0].parsed.x}`,
-                  label: (context) => `数值: ${context.parsed.y?.toFixed(4) || 'N/A'}`
+                  title: (tooltipItems) => `${t('visualization.tooltipScatterTitle')}${tooltipItems[0].parsed.x}`,
+                  label: (context) => `${t('visualization.tooltipScatterLabel')}${context.parsed.y?.toFixed(4) || 'N/A'}`
                 }
             }
           },
           scales: {
             y: {
-              title: { display: true, text: '数值', color: '#f8f8f2' },
+              title: { display: true, text: t('visualization.yAxisScatter'), color: '#f8f8f2' },
               ticks: { color: '#90908a' },
               grid: { color: '#49483e' }
             },
             x: {
-              title: { display: true, text: '数据索引', color: '#f8f8f2' },
+              title: { display: true, text: t('visualization.xAxisScatter'), color: '#f8f8f2' },
               ticks: { color: '#90908a' },
               grid: { color: '#49483e' }
             }
@@ -199,14 +201,14 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
         <Space>
           <PieChartOutlined style={{ color: '#fd971f' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            数据可视化分析
+            {t('visualization.title')}
           </Title>
         </Space>
       }
       style={{ backgroundColor: '#2f2e27' }}
       extra={
         <Space>
-          <Tooltip title="刷新图表">
+          <Tooltip title={t('visualization.refreshTooltip')}>
             <Button
               type="text"
               icon={<ReloadOutlined />}
@@ -236,7 +238,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
           >
             <BarChartOutlined style={{ color: '#66d9ef', fontSize: '20px' }} />
             <div style={{ marginTop: '4px' }}>
-              <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>直方图</Text>
+              <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>{t('visualization.histogram')}</Text>
             </div>
           </Card>
         </Col>
@@ -257,7 +259,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
           >
             <DotChartOutlined style={{ color: '#ae81ff', fontSize: '20px' }} />
             <div style={{ marginTop: '4px' }}>
-              <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>散点图</Text>
+              <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>{t('visualization.scatter')}</Text>
             </div>
           </Card>
         </Col>
@@ -293,7 +295,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
       <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
         <Col xs={24} sm={8}>
           <Card size="small" style={{ backgroundColor: '#49483e', textAlign: 'center' }}>
-            <Text style={{ color: '#90908a', fontSize: '12px' }}>数据点数</Text>
+            <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('visualization.dataPoints')}</Text>
             <div style={{ color: '#66d9ef', fontSize: '18px', fontWeight: 'bold' }}>
               {data.length}
             </div>
@@ -301,7 +303,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
         </Col>
         <Col xs={24} sm={8}>
           <Card size="small" style={{ backgroundColor: '#49483e', textAlign: 'center' }}>
-            <Text style={{ color: '#90908a', fontSize: '12px' }}>均值</Text>
+            <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('visualization.mean')}</Text>
             <div style={{ color: '#a6e22e', fontSize: '18px', fontWeight: 'bold' }}>
               {analysisResult.mean?.toFixed(2)}
             </div>
@@ -309,7 +311,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, analysisRes
         </Col>
         <Col xs={24} sm={8}>
           <Card size="small" style={{ backgroundColor: '#49483e', textAlign: 'center' }}>
-            <Text style={{ color: '#90908a', fontSize: '12px' }}>标准差</Text>
+            <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('visualization.stdDev')}</Text>
             <div style={{ color: '#fd971f', fontSize: '18px', fontWeight: 'bold' }}>
               {analysisResult.stdDev?.toFixed(2)}
             </div>

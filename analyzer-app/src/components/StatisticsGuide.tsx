@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Row, Col, Space, Typography, Tooltip, Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   BulbOutlined,
   NumberOutlined,
@@ -14,72 +15,73 @@ const { Title, Text, Paragraph } = Typography;
 interface StatisticsGuideProps {}
 
 const StatisticsGuide: React.FC<StatisticsGuideProps> = () => {
+  const { t } = useTranslation();
   const [hoveredConcept, setHoveredConcept] = useState<string | null>(null);
   const [activePanels, setActivePanels] = useState<string[]>([]);
 
   const concepts = [
     {
       key: 'mean',
-      title: '均值 (Mean)',
-      description: '所有数据点的算术平均值',
+      title: t('statisticsGuide.mean.title'),
+      description: t('statisticsGuide.mean.description'),
       icon: <NumberOutlined />,
       color: '#66d9ef',
-      details: '均值是最基本的集中趋势度量，表示数据的平均水平。对于正态分布的数据，均值、中位数和众数相等。',
-      formula: 'μ = (x₁ + x₂ + ... + xn) / n'
+      details: t('statisticsGuide.mean.details'),
+      formula: t('statisticsGuide.mean.formula')
     },
     {
       key: 'median',
-      title: '中位数 (Median)',
-      description: '排序后位于中间位置的值',
+      title: t('statisticsGuide.median.title'),
+      description: t('statisticsGuide.median.description'),
       icon: <LineChartOutlined />,
       color: '#a6e22e',
-      details: '中位数是将数据排序后位于中间的值。对异常值不敏感，比均值更能反映数据的中心位置。',
-      formula: '排序后第 (n+1)/2 个值'
+      details: t('statisticsGuide.median.details'),
+      formula: t('statisticsGuide.median.formula')
     },
     {
       key: 'std',
-      title: '标准差 (Std Dev)',
-      description: '衡量数据分散程度的统计量',
+      title: t('statisticsGuide.stdDev.title'),
+      description: t('statisticsGuide.stdDev.description'),
       icon: <BarChartOutlined />,
       color: '#fd971f',
-      details: '标准差反映数据的变异程度。标准差越大，数据越分散；标准差越小，数据越集中。',
-      formula: 'σ = √[Σ(xi - μ)² / n]'
+      details: t('statisticsGuide.stdDev.details'),
+      formula: t('statisticsGuide.stdDev.formula')
     },
     {
       key: 'variance',
-      title: '方差 (Variance)',
-      description: '标准差的平方，衡量数据变异性',
+      title: t('statisticsGuide.variance.title'),
+      description: t('statisticsGuide.variance.description'),
       icon: <DotChartOutlined />,
       color: '#ae81ff',
-      details: '方差是标准差的平方，用于度量数据的离散程度。在统计推断中有重要应用。',
-      formula: 'σ² = Σ(xi - μ)² / n'
+      details: t('statisticsGuide.variance.details'),
+      formula: t('statisticsGuide.variance.formula')
     },
     {
       key: 'mode',
-      title: '众数 (Mode)',
-      description: '数据集中出现频率最高的值',
+      title: t('statisticsGuide.mode.title'),
+      description: t('statisticsGuide.mode.description'),
       icon: <NumberOutlined />,
       color: '#e6db74',
-      details: '众数是数据中最常出现的值。一个数据集可能有多个众数，也可能没有众数。',
-      formula: '出现频率最高的值'
+      details: t('statisticsGuide.mode.details'),
+      formula: t('statisticsGuide.mode.formula')
     },
     {
       key: 'skewness',
-      title: '偏度 (Skewness)',
-      description: '描述分布不对称程度的指标',
+      title: t('statisticsGuide.skewness.title'),
+      description: t('statisticsGuide.skewness.description'),
       icon: <BarChartOutlined />,
       color: '#f92672',
-      details: '偏度衡量分布的倾斜程度。正值表示右偏（长尾在右），负值表示左偏（长尾在左）。',
-      formula: '偏度 = E[(X-μ)³/σ³]'
+      details: t('statisticsGuide.skewness.details'),
+      formula: t('statisticsGuide.skewness.formula')
     },
     {
       key: 'kurtosis',
-      title: '峰度 (Kurtosis)',
-      description: '衡量分布尾部厚度的统计量',
+      title: t('statisticsGuide.kurtosis.title'),
+      description: t('statisticsGuide.kurtosis.description'),
       icon: <DotChartOutlined />,
       color: '#66d9ef',
-      details: '峰度描述分布尾部的相对陡峭程度。正值表示尾部较厚，负值表示尾部较薄。',
-      formula: '峰度 = E[(X-μ)⁴/σ⁴] - 3'
+      details: t('statisticsGuide.kurtosis.details'),
+      formula: t('statisticsGuide.kurtosis.formula')
     }
   ];
 
@@ -89,14 +91,14 @@ const StatisticsGuide: React.FC<StatisticsGuideProps> = () => {
         <Space>
           <BulbOutlined style={{ color: '#fd971f' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            统计概念指南
+            {t('statisticsGuide.title')}
           </Title>
         </Space>
       }
       style={{ backgroundColor: '#2f2e27' }}
     >
       <Paragraph style={{ color: '#90908a', marginBottom: '24px' }}>
-        深入理解数据分析中的核心统计概念
+        {t('statisticsGuide.description')}
       </Paragraph>
 
       <Row gutter={[16, 16]}>
@@ -163,7 +165,7 @@ const StatisticsGuide: React.FC<StatisticsGuideProps> = () => {
                           fontSize: '12px'
                         }}
                       >
-                        点击查看详情
+                        {t('statisticsGuide.clickDetails')}
                       </Tag>
                     </div>
                   </div>
@@ -205,17 +207,16 @@ const StatisticsGuide: React.FC<StatisticsGuideProps> = () => {
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Text strong style={{ color: '#f8f8f2' }}>
             <QuestionCircleOutlined style={{ marginRight: '8px' }} />
-            快速导航
+            {t('statisticsGuide.quickNav')}
           </Text>
           <Text style={{ color: '#90908a', fontSize: '14px' }}>
-            点击任意概念卡片查看详细解释，或悬停查看快速提示。
-            每个统计量都有其独特的数学含义和应用场景。
+            {t('statisticsGuide.quickNavDesc')}
           </Text>
           <Space wrap style={{ marginTop: '8px' }}>
-            <Tag color="blue">集中趋势</Tag>
-            <Tag color="green">离散程度</Tag>
-            <Tag color="orange">分布形状</Tag>
-            <Tag color="purple">概率统计</Tag>
+            <Tag color="blue">{t('statisticsGuide.centralTendency')}</Tag>
+            <Tag color="green">{t('statisticsGuide.dispersion')}</Tag>
+            <Tag color="orange">{t('statisticsGuide.distributionShape')}</Tag>
+            <Tag color="purple">{t('statisticsGuide.probability')}</Tag>
           </Space>
         </Space>
       </div>

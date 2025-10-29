@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider, Progress } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   ThunderboltOutlined
 } from '@ant-design/icons';
@@ -22,6 +23,7 @@ interface PowerAnalysisProps {
 }
 
 const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('power');
   const [testType, setTestType] = useState('one-sample-t');
   const [effectSize, setEffectSize] = useState(0.5);
@@ -77,34 +79,34 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
 
   const getAlternativeText = (alt: string) => {
     switch (alt) {
-      case 'less': return '左单侧 (H₁: 参数 < 零值)';
-      case 'greater': return '右单侧 (H₁: 参数 > 零值)';
-      default: return '双侧 (H₁: 参数 ≠ 零值)';
+      case 'less': return t('hypothesisAlt.leftSided');
+      case 'greater': return t('hypothesisAlt.rightSided');
+      default: return t('hypothesisAlt.twoSided');
     }
   };
 
   const renderPowerAnalysis = () => (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       {/* 参数设置 */}
-      <Card title="检验参数设置" style={{ backgroundColor: '#49483e' }}>
+      <Card title={t('power.testParams')} style={{ backgroundColor: '#49483e' }}>
         <Row gutter={[16, 16]}>
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>检验类型:</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.testType')}</Text>
             <Select
               value={testType}
               onChange={setTestType}
               style={{ width: '100%', marginTop: '8px' }}
             >
-              <Option value="one-sample-t">单样本t检验</Option>
-              <Option value="two-sample-t">两样本t检验</Option>
-              <Option value="proportion">比例检验</Option>
+              <Option value="one-sample-t">{t('power.oneSampleT')}</Option>
+              <Option value="two-sample-t">{t('power.twoSampleT')}</Option>
+              <Option value="proportion">{t('power.proportionTest')}</Option>
             </Select>
           </Col>
 
           {testType === 'proportion' ? (
             <>
               <Col xs={24} md={6}>
-                <Text style={{ color: '#c8c8c2' }}>零假设比例 (p₀):</Text>
+                <Text style={{ color: '#c8c8c2' }}>{t('power.nullProp')}</Text>
                 <InputNumber
                   value={p0}
                   onChange={(value) => setP0(value || 0.5)}
@@ -115,7 +117,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
                 />
               </Col>
               <Col xs={24} md={6}>
-                <Text style={{ color: '#c8c8c2' }}>备择假设比例 (p₁):</Text>
+                <Text style={{ color: '#c8c8c2' }}>{t('power.altProp')}</Text>
                 <InputNumber
                   value={p1}
                   onChange={(value) => setP1(value || 0.6)}
@@ -128,7 +130,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             </>
           ) : (
             <Col xs={24} md={6}>
-              <Text style={{ color: '#c8c8c2' }}>效应量 (Effect Size):</Text>
+              <Text style={{ color: '#c8c8c2' }}>{t('power.effectSize')}</Text>
               <InputNumber
                 value={effectSize}
                 onChange={(value) => setEffectSize(value || 0.5)}
@@ -140,7 +142,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           )}
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>显著性水平 (α):</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.significanceLevel')}</Text>
             <Select
               value={alpha}
               onChange={setAlpha}
@@ -153,7 +155,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           </Col>
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>样本量:</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.sampleSize')}</Text>
             <InputNumber
               value={sampleSize}
               onChange={(value) => setSampleSize(value || 30)}
@@ -163,15 +165,15 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           </Col>
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>备择假设:</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.alternative')}</Text>
             <Select
               value={alternative}
               onChange={setAlternative}
               style={{ width: '100%', marginTop: '8px' }}
             >
-              <Option value="two-sided">双侧检验</Option>
-              <Option value="less">左单侧检验</Option>
-              <Option value="greater">右单侧检验</Option>
+              <Option value="two-sided">{t('hypothesis.twoSided')}</Option>
+              <Option value="less">{t('hypothesis.leftSided')}</Option>
+              <Option value="greater">{t('hypothesis.rightSided')}</Option>
             </Select>
           </Col>
         </Row>
@@ -179,11 +181,11 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
 
       {/* 功效分析结果 */}
       {powerResult && (
-        <Card title="功效分析结果" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('power.powerResults')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16} style={{ marginBottom: '16px' }}>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>检验功效 (1-β)</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.testPower')}</Text>}
                 value={`${(powerResult.power * 100).toFixed(2)}%`}
                 valueStyle={{
                   color: powerResult.power > 0.8 ? '#a6e22e' : powerResult.power > 0.6 ? '#fd971f' : '#f92672',
@@ -199,14 +201,14 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>效应量</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.effectSizeValue')}</Text>}
                 value={powerResult.effectSize?.toFixed(3) || 'N/A'}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>非中心参数</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.nonCentralParam')}</Text>}
                 value={powerResult.nonCentralityParameter?.toFixed(3) || 'N/A'}
                 valueStyle={{ color: '#ae81ff', fontSize: '16px' }}
               />
@@ -219,16 +221,16 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  检验功效分析结果:
+                  {t('power.powerAnalysisResult')}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 当前参数下，检验的功效为 {(powerResult.power * 100).toFixed(2)}%
+                  • {t('power.currentPower', { power: (powerResult.power * 100).toFixed(2) })}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 这意味着当备择假设为真时，正确拒绝零假设的概率为 {(powerResult.power * 100).toFixed(2)}%
+                  • {t('power.rejectProb', { power: (powerResult.power * 100).toFixed(2) })}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 显著性水平 α = {alpha}，备择假设: {getAlternativeText(alternative)}
+                  • {t('power.powerDesc', { alpha, alt: getAlternativeText(alternative) })}
                 </Text>
               </Space>
             }
@@ -237,14 +239,14 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           />
 
           <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#2f2e27', borderRadius: '6px' }}>
-            <Text strong style={{ color: '#f8f8f2' }}>功效解释:</Text>
+            <Text strong style={{ color: '#f8f8f2' }}>{t('power.powerExplanation')}</Text>
             <br />
             <Text style={{ color: '#c8c8c2', fontSize: '12px' }}>
-              • 高功效 (&gt;80%): 检验能够很好地检测到效应
+              • {t('power.highPower')}
               <br />
-              • 中等功效 (60-80%): 检验有中等能力检测到效应
+              • {t('power.mediumPower')}
               <br />
-              • 低功效 (&lt;60%): 检验难以检测到效应，可能需要更大的样本量
+              • {t('power.lowPower')}
             </Text>
           </div>
         </Card>
@@ -255,25 +257,25 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
   const renderSampleSizeCalculation = () => (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       {/* 参数设置 */}
-      <Card title="样本大小计算参数" style={{ backgroundColor: '#49483e' }}>
+      <Card title={t('power.sampleSizeParams')} style={{ backgroundColor: '#49483e' }}>
         <Row gutter={[16, 16]}>
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>检验类型:</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.testType')}</Text>
             <Select
               value={testType}
               onChange={setTestType}
               style={{ width: '100%', marginTop: '8px' }}
             >
-              <Option value="one-sample-t">单样本t检验</Option>
-              <Option value="two-sample-t">两样本t检验</Option>
-              <Option value="proportion">比例检验</Option>
+              <Option value="one-sample-t">{t('power.oneSampleT')}</Option>
+              <Option value="two-sample-t">{t('power.twoSampleT')}</Option>
+              <Option value="proportion">{t('power.proportionTest')}</Option>
             </Select>
           </Col>
 
           {testType === 'proportion' ? (
             <>
               <Col xs={24} md={6}>
-                <Text style={{ color: '#c8c8c2' }}>零假设比例 (p₀):</Text>
+                <Text style={{ color: '#c8c8c2' }}>{t('power.nullProp')}</Text>
                 <InputNumber
                   value={p0}
                   onChange={(value) => setP0(value || 0.5)}
@@ -284,7 +286,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
                 />
               </Col>
               <Col xs={24} md={6}>
-                <Text style={{ color: '#c8c8c2' }}>备择假设比例 (p₁):</Text>
+                <Text style={{ color: '#c8c8c2' }}>{t('power.altProp')}</Text>
                 <InputNumber
                   value={p1}
                   onChange={(value) => setP1(value || 0.6)}
@@ -297,7 +299,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             </>
           ) : (
             <Col xs={24} md={6}>
-              <Text style={{ color: '#c8c8c2' }}>效应量 (Effect Size):</Text>
+              <Text style={{ color: '#c8c8c2' }}>{t('power.effectSize')}</Text>
               <InputNumber
                 value={effectSize}
                 onChange={(value) => setEffectSize(value || 0.5)}
@@ -309,7 +311,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           )}
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>显著性水平 (α):</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.significanceLevel')}</Text>
             <Select
               value={alpha}
               onChange={setAlpha}
@@ -322,7 +324,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           </Col>
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>目标功效 (1-β):</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.targetPower')}</Text>
             <Select
               value={power}
               onChange={setPower}
@@ -335,15 +337,15 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           </Col>
 
           <Col xs={24} md={6}>
-            <Text style={{ color: '#c8c8c2' }}>备择假设:</Text>
+            <Text style={{ color: '#c8c8c2' }}>{t('power.alternative')}</Text>
             <Select
               value={alternative}
               onChange={setAlternative}
               style={{ width: '100%', marginTop: '8px' }}
             >
-              <Option value="two-sided">双侧检验</Option>
-              <Option value="less">左单侧检验</Option>
-              <Option value="greater">右单侧检验</Option>
+              <Option value="two-sided">{t('hypothesis.twoSided')}</Option>
+              <Option value="less">{t('hypothesis.leftSided')}</Option>
+              <Option value="greater">{t('hypothesis.rightSided')}</Option>
             </Select>
           </Col>
         </Row>
@@ -351,25 +353,25 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
 
       {/* 样本大小计算结果 */}
       {sampleSizeResult && (
-        <Card title="样本大小计算结果" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('power.sampleSizeResult')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16} style={{ marginBottom: '16px' }}>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>所需样本量</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.requiredSampleSize')}</Text>}
                 value={'sampleSize' in sampleSizeResult ? sampleSizeResult.sampleSize : sampleSizeResult.sampleSizePerGroup}
                 valueStyle={{ color: '#a6e22e', fontSize: '24px' }}
               />
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>效应量</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.effectSizeValue')}</Text>}
                 value={sampleSizeResult.effectSize?.toFixed(3) || 'N/A'}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>目标功效</Text>}
+                title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.targetPower')}</Text>}
                 value={`${(sampleSizeResult.power * 100).toFixed(0)}%`}
                 valueStyle={{ color: '#fd971f', fontSize: '16px' }}
               />
@@ -380,14 +382,14 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             <Row gutter={16} style={{ marginBottom: '16px' }}>
               <Col xs={24} md={12}>
                 <Statistic
-                  title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>每组样本量</Text>}
+                  title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.sampleSizePerGroup')}</Text>}
                   value={'sampleSizePerGroup' in sampleSizeResult ? sampleSizeResult.sampleSizePerGroup : 'N/A'}
                   valueStyle={{ color: '#ae81ff', fontSize: '18px' }}
                 />
               </Col>
               <Col xs={24} md={12}>
                 <Statistic
-                  title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>总样本量</Text>}
+                  title={<Text style={{ color: '#c8c8c2', fontSize: '12px' }}>{t('power.totalSampleSize')}</Text>}
                   value={'totalSampleSize' in sampleSizeResult ? sampleSizeResult.totalSampleSize : 'N/A'}
                   valueStyle={{ color: '#f92672', fontSize: '18px' }}
                 />
@@ -401,16 +403,16 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  样本大小计算结果:
+                  {t('power.sampleSizeResultDesc')}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 要达到 {(sampleSizeResult.power * 100).toFixed(0)}% 的检验功效，显著性水平为 {alpha}
+                  • {t('power.reachPower', { power: (sampleSizeResult.power * 100).toFixed(0), alpha })}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 检测效应量为 {sampleSizeResult.effectSize?.toFixed(3) || 'N/A'} 的差异
+                  • {t('power.detectEffect', { effect: sampleSizeResult.effectSize?.toFixed(3) || 'N/A' })}
                 </Text>
                 <Text style={{ color: '#c8c8c2' }}>
-                  • 需要的最小样本量为 {'sampleSize' in sampleSizeResult ? sampleSizeResult.sampleSize : sampleSizeResult.sampleSizePerGroup} 个观测值
+                  • {t('power.minSampleSize', { size: 'sampleSize' in sampleSizeResult ? sampleSizeResult.sampleSize : sampleSizeResult.sampleSizePerGroup })}
                 </Text>
               </Space>
             }
@@ -419,16 +421,16 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           />
 
           <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#2f2e27', borderRadius: '6px' }}>
-            <Text strong style={{ color: '#f8f8f2' }}>样本大小解释:</Text>
+            <Text strong style={{ color: '#f8f8f2' }}>{t('power.sampleSizeExplanation')}</Text>
             <br />
             <Text style={{ color: '#c8c8c2', fontSize: '12px' }}>
-              • 样本量越大，检验的功效越高，能够检测到的效应越小
+              • {t('power.sampleSizeTip1')}
               <br />
-              • 显著性水平越低，需要的样本量越大
+              • {t('power.sampleSizeTip2')}
               <br />
-              • 目标功效越高，需要的样本量越大
+              • {t('power.sampleSizeTip3')}
               <br />
-              • 效应量越大，需要的样本量越小
+              • {t('power.sampleSizeTip4')}
             </Text>
           </div>
         </Card>
@@ -442,18 +444,18 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
         <Space>
           <ThunderboltOutlined style={{ color: '#a6e22e' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            功效分析与样本大小计算 (Power Analysis)
+            {t('power.title')}
           </Title>
         </Space>
       }
       style={{ backgroundColor: '#2f2e27' }}
     >
       <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-        <TabPane tab="功效分析" key="power">
+        <TabPane tab={t('power.powerAnalysis')} key="power">
           {renderPowerAnalysis()}
         </TabPane>
 
-        <TabPane tab="样本大小计算" key="sample-size">
+        <TabPane tab={t('power.sampleSizeCalc')} key="sample-size">
           {renderSampleSizeCalculation()}
         </TabPane>
       </Tabs>

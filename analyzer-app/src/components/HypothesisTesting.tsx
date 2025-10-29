@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   ExperimentOutlined,
   CheckCircleOutlined,
@@ -21,6 +22,7 @@ interface HypothesisTestingProps {
 }
 
 const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('one-sample');
   const [testType, setTestType] = useState('mean');
   const [nullValue, setNullValue] = useState(0);
@@ -55,9 +57,9 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
 
   const getAlternativeText = (alt: string) => {
     switch (alt) {
-      case 'less': return '左单侧 (H₁: 参数 < 零值)';
-      case 'greater': return '右单侧 (H₁: 参数 > 零值)';
-      default: return '双侧 (H₁: 参数 ≠ 零值)';
+      case 'less': return t('hypothesisAlt.leftSided');
+      case 'greater': return t('hypothesisAlt.rightSided');
+      default: return t('hypothesisAlt.twoSided');
     }
   };
 
@@ -67,32 +69,32 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
         <Space>
           <ExperimentOutlined style={{ color: '#a6e22e' }} />
           <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-            假设检验 (Hypothesis Testing)
+            {t('hypothesis.title')}
           </Title>
         </Space>
       }
       style={{ backgroundColor: '#2f2e27' }}
     >
       <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-        <TabPane tab="单样本检验" key="one-sample">
+        <TabPane tab={t('hypothesis.oneSampleTest')} key="one-sample">
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             {/* 测试参数设置 */}
-            <Card title="测试参数设置" style={{ backgroundColor: '#49483e' }}>
+            <Card title={t('hypothesis.testParameters')} style={{ backgroundColor: '#49483e' }}>
               <Row gutter={[16, 16]}>
                 <Col xs={24} md={6}>
-                  <Text style={{ color: '#90908a' }}>检验类型:</Text>
+                  <Text style={{ color: '#90908a' }}>{t('hypothesis.testType')}:</Text>
                   <Select
                     value={testType}
                     onChange={setTestType}
                     style={{ width: '100%', marginTop: '8px' }}
                   >
-                    <Option value="mean">均值检验 (t检验)</Option>
-                    <Option value="variance">方差检验 (F检验)</Option>
-                    <Option value="proportion">比例检验 (z检验)</Option>
+                    <Option value="mean">{t('hypothesis.meanTest')}</Option>
+                    <Option value="variance">{t('hypothesis.varianceTest')}</Option>
+                    <Option value="proportion">{t('hypothesis.proportionTest')}</Option>
                   </Select>
                 </Col>
                 <Col xs={24} md={6}>
-                  <Text style={{ color: '#90908a' }}>零假设值:</Text>
+                  <Text style={{ color: '#90908a' }}>{t('hypothesis.nullValue')}:</Text>
                   <InputNumber
                     value={nullValue}
                     onChange={(value) => setNullValue(value || 0)}
@@ -101,27 +103,27 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
                   />
                 </Col>
                 <Col xs={24} md={6}>
-                  <Text style={{ color: '#90908a' }}>显著性水平:</Text>
+                  <Text style={{ color: '#90908a' }}>{t('hypothesis.significanceLevel')}:</Text>
                   <Select
                     value={significanceLevel}
                     onChange={setSignificanceLevel}
                     style={{ width: '100%', marginTop: '8px' }}
                   >
-                    <Option value={0.01}>0.01 (99% 置信)</Option>
-                    <Option value={0.05}>0.05 (95% 置信)</Option>
-                    <Option value={0.10}>0.10 (90% 置信)</Option>
+                    <Option value={0.01}>0.01 (99% {t('statistics.confidenceLevel')})</Option>
+                    <Option value={0.05}>0.05 (95% {t('statistics.confidenceLevel')})</Option>
+                    <Option value={0.10}>0.10 (90% {t('statistics.confidenceLevel')})</Option>
                   </Select>
                 </Col>
                 <Col xs={24} md={6}>
-                  <Text style={{ color: '#90908a' }}>备择假设:</Text>
+                  <Text style={{ color: '#90908a' }}>{t('hypothesis.alternativeHypothesis')}:</Text>
                   <Select
                     value={alternative}
                     onChange={setAlternative}
                     style={{ width: '100%', marginTop: '8px' }}
                   >
-                    <Option value="two-sided">双侧检验</Option>
-                    <Option value="less">左单侧检验</Option>
-                    <Option value="greater">右单侧检验</Option>
+                    <Option value="two-sided">{t('hypothesis.twoSided')}</Option>
+                    <Option value="less">{t('hypothesis.leftSided')}</Option>
+                    <Option value="greater">{t('hypothesis.rightSided')}</Option>
                   </Select>
                 </Col>
               </Row>
@@ -129,14 +131,14 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
 
             {/* 检验结果 */}
             {testResult && (
-              <Card title="检验结果" style={{ backgroundColor: '#49483e' }}>
+              <Card title={t('hypothesis.testResults')} style={{ backgroundColor: '#49483e' }}>
                 <Space direction="vertical" size={16} style={{ width: '100%' }}>
                   <Row gutter={16}>
                     <Col xs={24} md={8}>
                       <Statistic
                         title={
                           <Text style={{ color: '#90908a', fontSize: '12px' }}>
-                            检验统计量
+                            {t('hypothesis.statistic')}
                           </Text>
                         }
                         value={testResult.statistic?.toFixed(4) || 'N/A'}
@@ -147,7 +149,7 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
                       <Statistic
                         title={
                           <Text style={{ color: '#90908a', fontSize: '12px' }}>
-                            p值
+                            {t('hypothesis.pValue')}
                           </Text>
                         }
                         value={testResult.pValue?.toFixed(4) || 'N/A'}
@@ -161,7 +163,7 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
                       <Statistic
                         title={
                           <Text style={{ color: '#90908a', fontSize: '12px' }}>
-                            自由度
+                            {t('hypothesis.degreesOfFreedom')}
                           </Text>
                         }
                         value={
@@ -185,8 +187,8 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
                         }
                         <Text style={{ color: '#f8f8f2', fontWeight: 'bold' }}>
                           {testResult.rejectNull ?
-                            `拒绝零假设 (p < ${significanceLevel})` :
-                            `无法拒绝零假设 (p ≥ ${significanceLevel})`
+                            `${t('hypothesis.rejectNull')} (p < ${significanceLevel})` :
+                            `${t('hypothesis.failToRejectNull')} (p ≥ ${significanceLevel})`
                           }
                         </Text>
                       </Space>
@@ -198,18 +200,18 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
 
                   <Card size="small" style={{ backgroundColor: '#2f2e27' }}>
                     <Space direction="vertical" size="small">
-                      <Text strong style={{ color: '#f8f8f2' }}>检验信息:</Text>
+                      <Text strong style={{ color: '#f8f8f2' }}>{t('hypothesis.testInfo')}:</Text>
                       <Text style={{ color: '#90908a' }}>
-                        • 零假设 H₀: {testType === 'mean' ? `μ = ${nullValue}` : testType === 'variance' ? 'σ₁² = σ₂²' : `p = ${nullValue}`}
+                        • {t('hypothesis.nullHypothesis')}: {testType === 'mean' ? `μ = ${nullValue}` : testType === 'variance' ? 'σ₁² = σ₂²' : `p = ${nullValue}`}
                       </Text>
                       <Text style={{ color: '#90908a' }}>
-                        • 备择假设 H₁: {getAlternativeText(alternative)}
+                        • {t('hypothesis.altHypothesis')}: {getAlternativeText(alternative)}
                       </Text>
                       <Text style={{ color: '#90908a' }}>
-                        • 显著性水平: α = {significanceLevel}
+                        • {t('hypothesis.alpha')} = {significanceLevel}
                       </Text>
                       <Text style={{ color: '#90908a' }}>
-                        • 样本量: n = {data.length}
+                        • {t('hypothesis.sampleSize')}: n = {data.length}
                       </Text>
                     </Space>
                   </Card>
@@ -219,25 +221,25 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
           </Space>
         </TabPane>
 
-        <TabPane tab="两样本检验" key="two-sample">
+        <TabPane tab={t('hypothesis.twoSampleTest')} key="two-sample">
           <Card style={{ backgroundColor: '#49483e' }}>
             <Text style={{ color: '#90908a' }}>
-              两样本检验功能正在开发中，包括：
-              <br />• 两个均值之差的t检验
-              <br />• 配对样本t检验
-              <br />• 两个方差的F检验
-              <br />• 两个比例的z检验
+              {t('hypothesis.twoSampleTests')}
+              <br />• {t('hypothesis.twoSampleTTest')}
+              <br />• {t('hypothesis.pairedTTest')}
+              <br />• {t('hypothesis.twoVarianceFTest')}
+              <br />• {t('hypothesis.twoProportionZTest')}
             </Text>
           </Card>
         </TabPane>
 
-        <TabPane tab="功效分析" key="power">
+        <TabPane tab={t('hypothesis.powerAnalysis')} key="power">
           <Card style={{ backgroundColor: '#49483e' }}>
             <Text style={{ color: '#90908a' }}>
-              功效分析功能正在开发中，包括：
-              <br />• 检验功效计算
-              <br />• 样本大小确定
-              <br />• 功效曲线绘制
+              {t('hypothesis.powerAnalysisText')}
+              <br />• {t('hypothesis.powerCalculation')}
+              <br />• {t('hypothesis.sampleSizeDetermination')}
+              <br />• {t('hypothesis.powerCurves')}
             </Text>
           </Card>
         </TabPane>

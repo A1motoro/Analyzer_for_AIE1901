@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Statistic, Space, Tooltip, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   NumberOutlined,
   LineChartOutlined,
@@ -102,6 +103,7 @@ interface CoreStatisticsProps {
 }
 
 export const CoreStatistics: React.FC<CoreStatisticsProps> = ({ analysisResult }) => {
+  const { t } = useTranslation();
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       {/* 核心统计指标 */}
@@ -109,34 +111,34 @@ export const CoreStatistics: React.FC<CoreStatisticsProps> = ({ analysisResult }
         <StatisticCard
           title="MEAN"
           value={analysisResult.mean?.toFixed(4) || '0.0000'}
-          suffix="平均值"
+          suffix={t('statisticsCard.meanSuffix')}
           icon={<NumberOutlined />}
           color="#66d9ef"
-          tooltip="算术平均值，表示数据的中心位置"
+          tooltip={t('statisticsCard.meanTooltip')}
         />
         <StatisticCard
           title="MEDIAN"
           value={analysisResult.median?.toFixed(4) || '0.0000'}
-          suffix="中位数"
+          suffix={t('statisticsCard.medianSuffix')}
           icon={<LineChartOutlined />}
           color="#a6e22e"
-          tooltip="排序后位于中间位置的值，对异常值不敏感"
+          tooltip={t('statisticsCard.medianTooltip')}
         />
         <StatisticCard
           title="STD DEV"
           value={analysisResult.stdDev?.toFixed(4) || '0.0000'}
-          suffix="标准差"
+          suffix={t('statisticsCard.stdDevSuffix')}
           icon={<BarChartOutlined />}
           color="#fd971f"
-          tooltip="衡量数据分散程度的统计量"
+          tooltip={t('statisticsCard.stdDevTooltip')}
         />
         <StatisticCard
           title="VARIANCE"
           value={analysisResult.variance?.toFixed(4) || '0.0000'}
-          suffix="方差"
+          suffix={t('statisticsCard.varianceSuffix')}
           icon={<DotChartOutlined />}
           color="#ae81ff"
-          tooltip="标准差的平方，衡量数据变异性"
+          tooltip={t('statisticsCard.varianceTooltip')}
         />
       </div>
     </Space>

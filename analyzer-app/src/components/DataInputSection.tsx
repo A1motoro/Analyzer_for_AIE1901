@@ -11,6 +11,7 @@ import {
   Alert,
   Tag
 } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   UploadOutlined,
   ExperimentOutlined,
@@ -41,6 +42,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
   data,
   isUserUploadedData
 }) => {
+  const { t } = useTranslation();
   const { Title, Text, Paragraph } = Typography;
 
   return (
@@ -49,14 +51,14 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
         <Space>
           <FileTextOutlined />
           <Title level={3} style={{ margin: 0, color: '#f8f8f2' }}>
-            数据输入
+            {t('data.input')}
           </Title>
         </Space>
       }
       style={{ marginBottom: 48 }}
     >
       <Paragraph style={{ color: '#90908a', marginBottom: 24 }}>
-        选择您的数据输入方式，开始数据分析之旅
+        {t('data.inputDescription')}
       </Paragraph>
 
       {/* 输入方法切换 */}
@@ -69,19 +71,19 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           <Radio.Button value="upload">
             <Space>
               <UploadOutlined />
-              文件上传
+              {t('data.upload')}
             </Space>
           </Radio.Button>
           <Radio.Button value="distribution">
             <Space>
               <ExperimentOutlined />
-              分布生成
+              {t('data.distribution')}
             </Space>
           </Radio.Button>
           <Radio.Button value="ai">
             <Space>
               <RobotOutlined />
-              AI生成
+              {t('data.aiGenerate')}
             </Space>
           </Radio.Button>
         </Radio.Group>
@@ -111,10 +113,10 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 <div style={{ padding: '40px 0', textAlign: 'center' }}>
                   <UploadOutlined style={{ fontSize: '48px', color: '#fd971f', marginBottom: '16px' }} />
                   <Title level={4} style={{ color: '#f8f8f2', margin: '0 0 8px 0' }}>
-                    上传数据文件
+                    {t('data.uploadFile')}
                   </Title>
                   <Text style={{ color: '#90908a' }}>
-                    将 CSV 文件拖拽到此处，或点击上传
+                    {t('data.uploadHint')}
                   </Text>
                 </div>
               </Upload.Dragger>
@@ -126,17 +128,17 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 message={
                   <Space>
                     <Text strong style={{ color: '#a6e22e' }}>
-                      数据导入成功！
+                      {t('data.uploadSuccess')}
                     </Text>
                     <Text style={{ color: '#90908a' }}>
-                      已成功加载 {data.length} 个数据点
+                      {t('data.dataPointsLoaded', { count: data.length })}
                     </Text>
                   </Space>
                 }
                 description={
                   <Space direction="vertical">
                     <Text style={{ color: '#a6e22e' }}>
-                      数据已就绪，可进行分析
+                      {t('data.dataReady')}
                     </Text>
                     <Button
                       type="link"
@@ -145,7 +147,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                       onClick={handleClearData}
                       icon={<i className="fa fa-trash" />}
                     >
-                      删除数据
+                      {t('data.delete')}
                     </Button>
                   </Space>
                 }
@@ -163,10 +165,10 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ textAlign: 'center' }}>
             <Title level={4} style={{ color: '#f8f8f2', margin: '0 0 8px 0' }}>
-              选择概率分布类型
+              {t('data.selectDistribution')}
             </Title>
             <Text style={{ color: '#90908a' }}>
-              选择您要生成的统计分布，系统将自动生成1000个随机数据点
+              {t('data.distributionHint')}
             </Text>
           </div>
 
@@ -178,7 +180,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 onClick={() => handleDistributionGenerate('normal')}
               >
                 <Title level={5} style={{ color: '#66d9ef', margin: '0 0 4px 0' }}>
-                  正态分布
+                  {t('data.normal')}
                 </Title>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
                   N(μ, σ²)
@@ -192,7 +194,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 onClick={() => handleDistributionGenerate('uniform')}
               >
                 <Title level={5} style={{ color: '#a6e22e', margin: '0 0 4px 0' }}>
-                  均匀分布
+                  {t('data.uniform')}
                 </Title>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
                   U(a, b)
@@ -206,7 +208,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 onClick={() => handleDistributionGenerate('exponential')}
               >
                 <Title level={5} style={{ color: '#fd971f', margin: '0 0 4px 0' }}>
-                  指数分布
+                  {t('data.exponential')}
                 </Title>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
                   Exp(λ)
@@ -220,7 +222,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 onClick={() => handleDistributionGenerate('poisson')}
               >
                 <Title level={5} style={{ color: '#ae81ff', margin: '0 0 4px 0' }}>
-                  泊松分布
+                  {t('data.poisson')}
                 </Title>
                 <Text style={{ color: '#90908a', fontSize: '12px' }}>
                   Poisson(λ)
@@ -232,18 +234,18 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
           <Alert
             message={
               <Space>
-                <Text strong style={{ color: '#e6db74' }}>使用提示</Text>
+                <Text strong style={{ color: '#e6db74' }}>{t('data.useHint')}</Text>
               </Space>
             }
-            description="点击任意分布类型按钮，系统将使用默认参数生成1000个随机数据点。您可以在分析结果中查看数据的统计特性。"
+            description={t('data.useHintDesc')}
             type="info"
             showIcon
           />
 
           {data.length > 0 && (
             <Alert
-              message="数据生成成功"
-              description={`${data.length} 个随机数据点已生成`}
+              message={t('data.generateSuccess')}
+              description={t('data.pointsGenerated', { count: data.length })}
               type="success"
               showIcon
             />
@@ -269,10 +271,10 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
               <RobotOutlined style={{ fontSize: '32px' }} />
             </div>
             <Title level={2} style={{ color: '#f8f8f2', margin: '0 0 12px 0' }}>
-              AI智能数据生成
+              {t('data.aiGenerateTitle')}
             </Title>
             <Paragraph style={{ color: '#90908a', marginBottom: '32px', maxWidth: '500px', margin: '0 auto 32px' }}>
-              基于先进的机器学习算法，智能生成符合统计分布特征的数据集
+              {t('data.aiGenerateDesc')}
             </Paragraph>
 
             <Button
@@ -287,7 +289,7 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
               }}
               icon={<RobotOutlined />}
             >
-              启动AI生成
+              {t('data.clickGenerate')}
             </Button>
           </div>
 
@@ -297,15 +299,15 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 title={
                   <Space>
                     <ExperimentOutlined style={{ color: '#66d9ef' }} />
-                    <Text style={{ color: '#f8f8f2' }}>技术特性</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('data.features')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#2f2e27' }}
               >
                 <Space direction="vertical" size="small">
-                  <Text style={{ color: '#a6e22e' }}>✓ 基于深度学习算法</Text>
-                  <Text style={{ color: '#a6e22e' }}>✓ 自适应参数调整</Text>
-                  <Text style={{ color: '#a6e22e' }}>✓ 高质量数据输出</Text>
+                  <Text style={{ color: '#a6e22e' }}>✓ {t('data.deepLearning')}</Text>
+                  <Text style={{ color: '#a6e22e' }}>✓ {t('data.adaptiveParams')}</Text>
+                  <Text style={{ color: '#a6e22e' }}>✓ {t('data.highQuality')}</Text>
                 </Space>
               </Card>
             </Col>
@@ -314,15 +316,15 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
                 title={
                   <Space>
                     <BarChartOutlined style={{ color: '#fd971f' }} />
-                    <Text style={{ color: '#f8f8f2' }}>当前状态</Text>
+                    <Text style={{ color: '#f8f8f2' }}>{t('data.status')}</Text>
                   </Space>
                 }
                 style={{ backgroundColor: '#2f2e27' }}
               >
                 <Space direction="vertical">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: '#90908a' }}>AI引擎状态</Text>
-                    <Tag color="success" style={{ margin: 0 }}>就绪</Tag>
+                    <Text style={{ color: '#90908a' }}>{t('data.aiEngine')}</Text>
+                    <Tag color="success" style={{ margin: 0 }}>{t('data.ready')}</Tag>
                   </div>
                 </Space>
               </Card>
@@ -333,16 +335,16 @@ const DataInputSection: React.FC<DataInputSectionProps> = ({
             <Alert
               message={
                 <Space>
-                  <Text strong style={{ color: '#a6e22e' }}>AI数据生成成功</Text>
+                  <Text strong style={{ color: '#a6e22e' }}>{t('data.aiGenerateSuccess')}</Text>
                 </Space>
               }
               description={
                 <Space direction="vertical">
-                  <Text>已生成 {data.length} 个高质量数据点，符合统计分布特征</Text>
+                  <Text>{t('data.generatedHighQuality', { count: data.length })}</Text>
                   <Space size="large">
-                    <Text style={{ color: '#75715e' }}>✓ 分布拟合度: 98.5%</Text>
-                    <Text style={{ color: '#75715e' }}>✓ 数据质量: 优秀</Text>
-                    <Text style={{ color: '#75715e' }}>✓ 处理时间: 0.2s</Text>
+                    <Text style={{ color: '#75715e' }}>✓ {t('data.fitScore')}</Text>
+                    <Text style={{ color: '#75715e' }}>✓ {t('data.dataQuality')}</Text>
+                    <Text style={{ color: '#75715e' }}>✓ {t('data.processTime')}</Text>
                   </Space>
                 </Space>
               }

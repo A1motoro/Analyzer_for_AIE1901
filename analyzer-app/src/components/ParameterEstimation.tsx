@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Statistic, Row, Col, Space, Typography, Table, Tooltip, Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   ExperimentOutlined,
   CalculatorOutlined,
@@ -14,13 +15,14 @@ interface ParameterEstimationProps {
 }
 
 const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResult }) => {
+  const { t } = useTranslation();
   const [hoveredMethod, setHoveredMethod] = useState<string | null>(null);
   const [expandedMethod, setExpandedMethod] = useState<string | null>(null);
 
 
   const comparisonColumns = [
     {
-      title: '参数',
+      title: t('parameter.parameter'),
       dataIndex: 'parameter',
       key: 'parameter',
       render: (text: string, record: any) => (
@@ -31,19 +33,19 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
       )
     },
     {
-      title: '最大似然估计',
+      title: t('parameter.mleTitle'),
       dataIndex: 'mle',
       key: 'mle',
       render: (text: string) => <Text style={{ color: '#66d9ef', fontFamily: 'monospace' }}>{text}</Text>
     },
     {
-      title: '矩法估计',
+      title: t('parameter.momTitle'),
       dataIndex: 'mom',
       key: 'mom',
       render: (text: string) => <Text style={{ color: '#ae81ff', fontFamily: 'monospace' }}>{text}</Text>
     },
     {
-      title: '绝对差异',
+      title: t('parameter.absoluteDiff'),
       dataIndex: 'difference',
       key: 'difference',
       render: (text: string, record: any) => (
@@ -62,21 +64,21 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
   const mleData = [
     {
       key: 'mean',
-      parameter: '均值',
+      parameter: t('parameter.mean'),
       value: analysisResult.mleParams?.mean?.toFixed(6) || '0.000000',
       symbol: 'μ̂',
       color: '#66d9ef'
     },
     {
       key: 'variance',
-      parameter: '方差',
+      parameter: t('parameter.variance'),
       value: analysisResult.mleParams?.variance?.toFixed(6) || '0.000000',
       symbol: 'σ²̂',
       color: '#a6e22e'
     },
     {
       key: 'stdDev',
-      parameter: '标准差',
+      parameter: t('parameter.stdDev'),
       value: analysisResult.mleParams?.stdDev?.toFixed(6) || '0.000000',
       symbol: 'σ̂',
       color: '#fd971f'
@@ -86,21 +88,21 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
   const momData = [
     {
       key: 'mean',
-      parameter: '均值',
+      parameter: t('parameter.mean'),
       value: analysisResult.momParams?.mean?.toFixed(6) || '0.000000',
       symbol: 'μ̃',
       color: '#ae81ff'
     },
     {
       key: 'variance',
-      parameter: '方差',
+      parameter: t('parameter.variance'),
       value: analysisResult.momParams?.variance?.toFixed(6) || '0.000000',
       symbol: 'σ²̃',
       color: '#f92672'
     },
     {
       key: 'stdDev',
-      parameter: '标准差',
+      parameter: t('parameter.stdDev'),
       value: analysisResult.momParams?.stdDev?.toFixed(6) || '0.000000',
       symbol: 'σ̃',
       color: '#e6db74'
@@ -110,7 +112,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
   const comparisonData = [
     {
       key: 'mean',
-      parameter: '均值 (μ)',
+      parameter: `${t('parameter.mean')} (μ)`,
       mle: analysisResult.mleParams?.mean?.toFixed(8) || '0.00000000',
       mom: analysisResult.momParams?.mean?.toFixed(8) || '0.00000000',
       difference: Math.abs((analysisResult.mleParams?.mean || 0) - (analysisResult.momParams?.mean || 0)).toFixed(10),
@@ -119,7 +121,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
     },
     {
       key: 'variance',
-      parameter: '方差 (σ²)',
+      parameter: `${t('parameter.variance')} (σ²)`,
       mle: analysisResult.mleParams?.variance?.toFixed(8) || '0.00000000',
       mom: analysisResult.momParams?.variance?.toFixed(8) || '0.00000000',
       difference: Math.abs((analysisResult.mleParams?.variance || 0) - (analysisResult.momParams?.variance || 0)).toFixed(10),
@@ -136,7 +138,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
           <Space>
             <ExperimentOutlined style={{ color: '#66d9ef' }} />
             <Title level={4} style={{ margin: 0, color: '#66d9ef' }}>
-              最大似然估计 (MLE)
+              {t('parameter.mle')}
             </Title>
           </Space>
         }
@@ -150,7 +152,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
         onMouseLeave={() => setHoveredMethod(null)}
         onClick={() => setExpandedMethod(expandedMethod === 'mle' ? null : 'mle')}
         extra={
-          <Tooltip title={expandedMethod === 'mle' ? '收起详情' : '展开详情'}>
+          <Tooltip title={expandedMethod === 'mle' ? t('parameter.collapse') : t('parameter.expand')}>
             <InfoCircleOutlined
               style={{
                 color: '#66d9ef',
@@ -163,7 +165,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
         }
       >
         <Paragraph style={{ color: '#90908a', marginBottom: '24px' }}>
-          Maximum Likelihood Estimation - 基于概率的最大化
+          {t('parameter.mleDesc')}
         </Paragraph>
 
         <Row gutter={[16, 16]}>
@@ -190,10 +192,9 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
             animation: 'slideDown 0.3s ease'
           }}>
             <Space direction="vertical">
-              <Text strong style={{ color: '#f8f8f2' }}>原理说明：</Text>
+              <Text strong style={{ color: '#f8f8f2' }}>{t('parameter.principle')}</Text>
               <Text style={{ color: '#90908a' }}>
-                最大似然估计通过寻找最可能产生观测数据的参数值来估计参数。
-                它基于概率论，寻找使得似然函数 L(θ|x) = ∏ f(xᵢ|θ) 最大化的参数 θ。
+                {t('parameter.mlePrinciple')}
               </Text>
               <div style={{
                 padding: '8px',
@@ -216,7 +217,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
           <Space>
             <CalculatorOutlined style={{ color: '#ae81ff' }} />
             <Title level={4} style={{ margin: 0, color: '#ae81ff' }}>
-              矩法估计 (MoM)
+              {t('parameter.mom')}
             </Title>
           </Space>
         }
@@ -230,7 +231,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
         onMouseLeave={() => setHoveredMethod(null)}
         onClick={() => setExpandedMethod(expandedMethod === 'mom' ? null : 'mom')}
         extra={
-          <Tooltip title={expandedMethod === 'mom' ? '收起详情' : '展开详情'}>
+          <Tooltip title={expandedMethod === 'mom' ? t('parameter.collapse') : t('parameter.expand')}>
             <InfoCircleOutlined
               style={{
                 color: '#ae81ff',
@@ -243,7 +244,7 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
         }
       >
         <Paragraph style={{ color: '#90908a', marginBottom: '24px' }}>
-          Method of Moments - 基于样本矩的估计方法
+          {t('parameter.momDesc')}
         </Paragraph>
 
         <Row gutter={[16, 16]}>
@@ -270,10 +271,9 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
             animation: 'slideDown 0.3s ease'
           }}>
             <Space direction="vertical">
-              <Text strong style={{ color: '#f8f8f2' }}>原理说明：</Text>
+              <Text strong style={{ color: '#f8f8f2' }}>{t('parameter.principle')}</Text>
               <Text style={{ color: '#90908a' }}>
-                矩法估计通过匹配样本矩和理论矩来估计参数。
-                它设置样本矩等于理论矩，然后求解参数方程。
+                {t('parameter.momPrinciple')}
               </Text>
               <div style={{
                 padding: '8px',
@@ -296,14 +296,14 @@ const ParameterEstimation: React.FC<ParameterEstimationProps> = ({ analysisResul
           <Space>
             <BarChartOutlined style={{ color: '#e6db74' }} />
             <Title level={4} style={{ margin: 0, color: '#f8f8f2' }}>
-              参数估计方法比较
+              {t('parameter.comparison')}
             </Title>
           </Space>
         }
         style={{ backgroundColor: '#2f2e27' }}
       >
         <Paragraph style={{ color: '#90908a', marginBottom: '24px' }}>
-          对比MLE与MoM两种经典参数估计方法的差异
+          {t('parameter.comparisonDesc')}
         </Paragraph>
 
         <Table
