@@ -226,7 +226,157 @@
     "gettingStarted": "Getting Started",
     "dataInput": "Data Input Methods",
     "analysis": "Analysis Features",
-    "visualization": "Visualization"
+    "visualization": "Visualization",
+    "nav": {
+      "title": "Tutorial Navigation",
+      "quickStart": "Quick Start",
+      "dataInput": "Data Input",
+      "analysis": "Analysis Features",
+      "aiAssistant": "AI Assistant",
+      "settings": "System Settings",
+      "tips": "Tips & Tricks"
+    },
+    "quickStart": {
+      "title": "Quick Start Guide",
+      "description": "Follow these steps to quickly get started with the Data Analyst Web App. From data input to result analysis, you can complete your first data analysis in just a few minutes.",
+      "step1": {
+        "title": "Step 1: Choose Data Input Method",
+        "desc": "The app supports three data input methods. Choose the one that best suits your needs.",
+        "content1": "File Upload: Upload a CSV format data file",
+        "content2": "Distribution Generation: Select a statistical distribution type (normal, uniform, exponential, Poisson, etc.) and set parameters",
+        "content3": "AI Generation: Use AI to intelligently generate sample data"
+      },
+      "step2": {
+        "title": "Step 2: View Data Overview",
+        "desc": "After data is loaded, the system will automatically analyze and display data overview information on the right side.",
+        "content1": "View basic information such as number of data points and data range",
+        "content2": "Confirm that data has been loaded correctly",
+        "content3": "If needed, you can clear data and re-enter"
+      },
+      "step3": {
+        "title": "Step 3: Explore Analysis Results",
+        "desc": "The system will automatically calculate analysis results. You can view different types of analysis in multiple tabs.",
+        "content1": "Basic Statistical Analysis: View basic statistics such as mean, median, standard deviation",
+        "content2": "Parameter Estimation: Compare results from MLE and MoM estimation methods",
+        "content3": "Visualization: Understand data distribution intuitively through histograms and scatter plots"
+      },
+      "step4": {
+        "title": "Step 4: Use AI Assistant (Optional)",
+        "desc": "After configuring the API, you can use the AI assistant to get deeper data analysis suggestions.",
+        "content1": "Click the settings drawer on the right to configure Aliyun API key",
+        "content2": "Ask questions in the AI assistant chat box to get intelligent analysis suggestions"
+      }
+    },
+    "dataInput": {
+      "title": "Data Input Details",
+      "description": "Learn the specific operation steps and usage scenarios for three data input methods.",
+      "method": "Method",
+      "steps": "Operation Steps",
+      "upload": {
+        "step1": "Click the \"File Upload\" tab in the data input area",
+        "step2": "Drag and drop a CSV file to the upload area, or click to select a file",
+        "step3": "The system automatically parses and loads data, showing a success message",
+        "tips": "CSV files should be in pure numeric format, with one value per line, or comma-separated numeric columns."
+      },
+      "distribution": {
+        "step1": "Click the \"Distribution Generation\" tab in the data input area",
+        "step2": "Select distribution type (normal, uniform, exponential, Poisson, etc.)",
+        "step3": "Set distribution parameters (mean, standard deviation, etc.) as needed, or use default values",
+        "step4": "Set sample size and click the \"Generate\" button",
+        "tips": "Different distribution types are suitable for different data scenarios. Normal distribution is suitable for most natural phenomena, uniform distribution for random sampling, and exponential distribution for time interval data."
+      },
+      "ai": {
+        "step1": "Click the \"AI Generation\" tab in the data input area",
+        "step2": "Click the \"Start AI Generation\" button (currently simulated data)",
+        "tips": "AI generation can help you quickly generate sample data that conforms to specific statistical characteristics for testing and learning."
+      }
+    },
+    "analysis": {
+      "title": "Analysis Features Details",
+      "description": "Learn about the various statistical analysis features provided in the app, each with its specific application scenarios.",
+      "basic": {
+        "feature1": "Basic Statistics: Mean, median, mode, standard deviation, variance, etc.",
+        "feature2": "Advanced Statistics: Distribution characteristics such as skewness and kurtosis",
+        "feature3": "Data Visualization: Automatically generate histograms and scatter plots",
+        "feature4": "Statistics Guide: View detailed explanations of each statistic"
+      },
+      "parameter": {
+        "feature1": "Maximum Likelihood Estimation (MLE): Parameter estimation method based on probability theory",
+        "feature2": "Method of Moments (MoM): Parameter estimation method based on sample moments",
+        "feature3": "Comparative Analysis: Display results from both methods simultaneously for easy comparison"
+      },
+      "hypothesis": {
+        "feature1": "One-Sample Test: Test whether sample mean equals a specific value",
+        "feature2": "Hypothesis Testing: Support for t-test, F-test, z-test, etc.",
+        "feature3": "Test Results: Display p-value, test statistic, confidence interval, etc."
+      },
+      "confidence": {
+        "feature1": "Normal Distribution Confidence Interval: Confidence interval based on sample mean and standard deviation",
+        "feature2": "Wilson Confidence Interval: Suitable for proportional data confidence intervals",
+        "feature3": "Bootstrap Confidence Interval: Non-parametric confidence interval suitable for small samples"
+      },
+      "power": {
+        "feature1": "Test Power Calculation: Evaluate the statistical power of hypothesis tests",
+        "feature2": "Sample Size Determination: Calculate required sample size based on expected power",
+        "feature3": "Power Curves: Visualize test power under different parameters"
+      }
+    },
+    "aiAssistant": {
+      "title": "AI Assistant Usage Guide",
+      "description": "Configure and use the AI assistant to get intelligent data analysis suggestions and explanations.",
+      "config": {
+        "title": "Configuration Steps",
+        "step1": "Open the settings drawer on the right",
+        "step1Desc": "Click the \"System Settings\" button on the right side of the page to open the settings drawer",
+        "step2": "Enter API Key",
+        "step2Desc": "Enter your Aliyun API Key in the \"API Configuration\" section, select a model (recommended: qwen-plus), and click Save",
+        "step3": "Start Using",
+        "step3Desc": "After successful configuration, the AI assistant will activate automatically. You can ask questions in the AI assistant chat box on the right"
+      },
+      "usage": {
+        "title": "Usage Tips",
+        "item1": "Ask specific questions: For example, \"Does my data follow a normal distribution?\"",
+        "item2": "Request analysis suggestions: For example, \"Based on these statistical results, what analysis method should I use?\"",
+        "item3": "Request concept explanations: For example, \"How to interpret skewness and kurtosis values?\"",
+        "item4": "Ask about parameter meanings: For example, \"What does the difference between MLE and MoM results indicate?\""
+      }
+    },
+    "settings": {
+      "title": "System Settings Guide",
+      "description": "Learn how to customize the app's theme, language, and API configuration.",
+      "theme": {
+        "title": "Theme Settings",
+        "content": "The app supports both dark and light themes. Dark theme (VSCode Dark) is suitable for long-term use and eye-friendly; Light theme (VSCode Light) is suitable for bright environments. Theme settings are automatically saved and will be applied when you open the app next time."
+      },
+      "language": {
+        "title": "Language Settings",
+        "content": "The app supports both Chinese and English. After switching languages, the interface text will update immediately. Language settings are saved in browser local storage."
+      },
+      "api": {
+        "title": "API Configuration",
+        "content": "Configure Aliyun API key to enable AI assistant features. API Key is only saved in your local browser and will not be uploaded to any server. You need to first enable the large model service on Aliyun official website and obtain an API Key."
+      }
+    },
+    "tips": {
+      "title": "Tips & Best Practices",
+      "description": "Here are some practical tips to help you use the Data Analyst Web App more efficiently.",
+      "tip1": {
+        "title": "Data Preparation Suggestions",
+        "content": "Before uploading CSV files, ensure the data format is correct. It is recommended to have one value per line, or comma-separated numeric columns. For large datasets (over 100,000 records), processing may take some time."
+      },
+      "tip2": {
+        "title": "Interpreting Analysis Results",
+        "content": "View results from multiple analysis tabs to comprehensively understand data characteristics. Combining visualization and statistics can provide a more comprehensive understanding of data distribution. If outliers are found, consider data cleaning first."
+      },
+      "tip3": {
+        "title": "AI Assistant Usage Tips",
+        "content": "When asking questions, be as specific and clear as possible, providing context. For example, asking \"Based on my data (mean 50, standard deviation 15), what test method should I use?\" will get more useful answers than \"How to analyze?\""
+      },
+      "tip4": {
+        "title": "Performance Optimization",
+        "content": "It is recommended to use the latest versions of Chrome, Firefox, or Edge browsers. If you encounter performance issues, try clearing browser cache or reducing data volume. For very large datasets, consider batch processing."
+      }
+    }
   },
   "errors": {
     "noData": "No data available for analysis",
