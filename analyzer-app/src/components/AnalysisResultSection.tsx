@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Tabs, Space, Typography } from 'antd';
+import { Space, Typography } from 'antd';
 import {
   CalculatorOutlined,
   ExperimentOutlined,
@@ -17,6 +17,8 @@ import StatisticsGuide from './StatisticsGuide';
 import HypothesisTesting from './HypothesisTesting';
 import ConfidenceIntervals from './ConfidenceIntervals';
 import PowerAnalysis from './PowerAnalysis';
+import { AnalysisTabButton } from './analysis/AnalysisTabButton';
+import { AnalysisResultCard } from './analysis/AnalysisResultCard';
 
 interface AnalysisResultSectionProps {
   activeTab: string;
@@ -32,99 +34,98 @@ const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
   data
 }) => {
   const { t } = useTranslation();
-  const { Title, Paragraph } = Typography;
+  const { Paragraph } = Typography;
 
-  const tabItems = [
+  const tabs = [
     {
       key: 'basic',
-      label: (
-        <Space>
-          <CalculatorOutlined />
-          {t('analysis.basicStats')}
-        </Space>
-      ),
-      children: (
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <CoreStatistics analysisResult={analysisResult} />
-          <AdvancedStatistics analysisResult={analysisResult} />
-          <DataVisualization data={data} analysisResult={analysisResult} />
-          <StatisticsGuide />
-        </Space>
-      ),
+      icon: <CalculatorOutlined />,
+      label: t('analysis.basicStats'),
+      color: '#66d9ef',
     },
     {
       key: 'mle-mom',
-      label: (
-        <Space>
-          <ExperimentOutlined />
-          {t('analysis.parameterEstimation')}
-        </Space>
-      ),
-      children: (
-        <ParameterEstimation analysisResult={analysisResult} />
-      ),
+      icon: <ExperimentOutlined />,
+      label: t('analysis.parameterEstimation'),
+      color: '#a6e22e',
     },
     {
       key: 'hypothesis-testing',
-      label: (
-        <Space>
-          <BarChartOutlined />
-          {t('analysis.hypothesisTesting')}
-        </Space>
-      ),
-      children: (
-        <HypothesisTesting analysisResult={analysisResult} data={data} />
-      ),
+      icon: <BarChartOutlined />,
+      label: t('analysis.hypothesisTesting'),
+      color: '#fd971f',
     },
     {
       key: 'confidence-intervals',
-      label: (
-        <Space>
-          <ExperimentOutlined />
-          {t('analysis.confidenceIntervals')}
-        </Space>
-      ),
-      children: (
-        <ConfidenceIntervals data={data} analysisResult={analysisResult} />
-      ),
+      icon: <ExperimentOutlined />,
+      label: t('analysis.confidenceIntervals'),
+      color: '#ae81ff',
     },
     {
       key: 'power-analysis',
-      label: (
-        <Space>
-          <ThunderboltOutlined />
-          {t('analysis.powerAnalysis')}
-        </Space>
-      ),
-      children: (
-        <PowerAnalysis data={data} analysisResult={analysisResult} />
-      ),
+      icon: <ThunderboltOutlined />,
+      label: t('analysis.powerAnalysis'),
+      color: '#f92672',
     },
   ];
 
-  return (
-    <Card
-      title={
-        <Space>
-          <BarChartOutlined />
-          <Title level={3} style={{ margin: 0, color: '#f8f8f2' }}>
-            {t('analysis.title')}
-          </Title>
-        </Space>
-      }
-      style={{ marginBottom: 48 }}
-    >
-      <Paragraph style={{ color: '#90908a', marginBottom: 24 }}>
-        {t('analysis.description')}
-      </Paragraph>
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'basic':
+        return (
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <CoreStatistics analysisResult={analysisResult} />
+            <AdvancedStatistics analysisResult={analysisResult} />
+            <DataVisualization data={data} analysisResult={analysisResult} />
+            <StatisticsGuide />
+          </Space>
+        );
+      case 'mle-mom':
+        return <ParameterEstimation analysisResult={analysisResult} />;
+      case 'hypothesis-testing':
+        return <HypothesisTesting analysisResult={analysisResult} data={data} />;
+      case 'confidence-intervals':
+        return <ConfidenceIntervals data={data} analysisResult={analysisResult} />;
+      case 'power-analysis':
+        return <PowerAnalysis data={data} analysisResult={analysisResult} />;
+      default:
+        return null;
+    }
+  };
 
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={tabItems}
-        style={{ backgroundColor: '#2f2e27', border: 'none' }}
-      />
-    </Card>
+  return (
+    <div className="analysis-result-section">
+      <AnalysisResultCard
+        title={t('analysis.title')}
+        icon={<BarChartOutlined />}
+        iconColor="#4fc3f7"
+      >
+        <Paragraph style={{ color: 'var(--monokai-gray)', marginBottom: 24 }}>
+          {t('analysis.description')}
+        </Paragraph>
+
+        {/* 自定义标签切换栏 */}
+        <div className="analysis-tabs-container">
+          <div className="analysis-tabs-wrapper">
+            {tabs.map((tab) => (
+              <AnalysisTabButton
+                key={tab.key}
+                icon={tab.icon}
+                label={tab.label}
+                isActive={activeTab === tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                color={tab.color}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 内容区域 */}
+        <div className="analysis-content-wrapper">
+          {renderContent()}
+        </div>
+      </AnalysisResultCard>
+    </div>
   );
 };
 

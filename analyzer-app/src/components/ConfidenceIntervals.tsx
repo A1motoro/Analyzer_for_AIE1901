@@ -78,6 +78,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             }
             type="info"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
 
@@ -120,6 +121,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             }
             type="info"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
       </Space>
@@ -212,6 +214,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             }
             type="success"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
       </Space>
@@ -231,6 +234,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
           description={t('confidence.pairedErrorDesc')}
           type="error"
           showIcon
+          style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
         />
       );
     }
@@ -288,6 +292,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             }
             type="info"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
       </Space>
@@ -352,6 +357,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             }
             type="warning"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
       </Space>

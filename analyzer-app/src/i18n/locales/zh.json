@@ -43,12 +43,16 @@
     "distributionHint": "选择您要生成的统计分布，系统将自动生成1000个随机数据点",
     "normal": "正态分布",
     "uniform": "均匀分布",
+    "uniformMin": "最小值",
+    "uniformMax": "最大值",
     "exponential": "指数分布",
+    "exponentialLambda": "λ (率)",
     "poisson": "泊松分布",
+    "poissonRate": "率 (λ)",
     "gamma": "Gamma分布",
     "beta": "Beta分布",
-    "useHint": "使用提示",
-    "useHintDesc": "点击任意分布类型按钮，系统将使用默认参数生成1000个随机数据点。您可以在分析结果中查看数据的统计特性。",
+    "useHint": "使用提示：点击分布类型自定义参数",
+    "useHintDesc": "选择分布后，输入自定义参数（如均值、标准差），然后点击“生成”按钮创建数据系列。未输入使用默认值。",
     "generateSuccess": "数据生成成功",
     "pointsGenerated": "{{count}} 个随机数据点已生成",
     "aiGenerateTitle": "AI智能数据生成",
@@ -72,7 +76,35 @@
     "preview": "数据预览",
     "statistics": "数据统计",
     "analysis": "数据分析",
-    "visualization": "数据可视化"
+    "visualization": "数据可视化",
+    "generate": "生成",
+    "sampleSize": "数据规模",
+    "sampleSizeLabel": "数据规模 (样本数量)",
+    "sampleSizeDesc": "生成的数据点数量",
+    "dataPoints": "个数据点",
+    "distributionParams": "分布参数",
+    "distributionParamsDesc": {
+      "normal": "正态分布 N(μ, σ²) 的参数设置",
+      "uniform": "均匀分布 U(a, b) 的参数设置",
+      "exponential": "指数分布 Exp(λ) 的参数设置",
+      "poisson": "泊松分布 Poisson(λ) 的参数设置"
+    },
+    "paramLabels": {
+      "mean": "均值 (μ)",
+      "meanDesc": "分布的期望值",
+      "stdDev": "标准差 (σ)",
+      "stdDevDesc": "数据的离散程度",
+      "variance": "方差 (σ²)",
+      "varianceDesc": "标准差的平方",
+      "min": "最小值 (a)",
+      "max": "最大值 (b)",
+      "lambda": "率参数 (λ)",
+      "lambdaDesc": "必须大于 0"
+    },
+    "previewCard": {
+      "title": "分布预览",
+      "stdDev": "标准差: σ = "
+    }
   },
   "hypothesis": {
     "title": "假设检验 (Hypothesis Testing)",
@@ -121,10 +153,11 @@
     "correlation": "相关性分析",
     "regression": "回归分析",
     "mean": "均值",
+    "stdDev": "标准差",
+    "generate": "生成",
     "median": "中位数",
     "mode": "众数",
     "variance": "方差",
-    "stdDev": "标准差",
     "min": "最小值",
     "max": "最大值",
     "range": "极差",
@@ -575,5 +608,6 @@
     "tooltipHistogramLabel": "频次: ",
     "tooltipScatterTitle": "索引: ",
     "tooltipScatterLabel": "数值: "
-  }
+  },
+  "lightWarning": "不建议使用亮配色，可能在某些组件下显示不佳"
 }

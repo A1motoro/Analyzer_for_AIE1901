@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// Add Ant Design import
+import { Input } from 'antd';
+
 const AliyunAPIConfig: React.FC = () => {
   const { t } = useTranslation();
   const [apiKey, setApiKey] = useState('');
@@ -37,13 +40,12 @@ const AliyunAPIConfig: React.FC = () => {
           <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-1">
             {t('api.apiKey')}
           </label>
-          <input
+          <Input
             type="text"
             id="apiKey"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder={t('api.apiKeyPlaceholder')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all-300"
           />
         </div>
 

@@ -236,6 +236,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             }
             type={powerResult.power > 0.8 ? 'success' : powerResult.power > 0.6 ? 'warning' : 'error'}
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
 
           <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#2f2e27', borderRadius: '6px' }}>
@@ -418,6 +419,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             }
             type="info"
             showIcon
+            style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
 
           <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#2f2e27', borderRadius: '6px' }}>

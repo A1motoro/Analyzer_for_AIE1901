@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { callAliyunAPI } from '../api';
 
+// Add Ant Design imports
+import { Input, Button } from 'antd';
+
 interface AIModelChatProps {
   analysisResult: any;
   data: number[];
@@ -224,30 +227,21 @@ const AIModelChat: React.FC<AIModelChatProps> = ({ analysisResult, data }) => {
       {/* 输入区域 - 仅当API状态为ready时显示 */}
       {apiStatus === 'ready' && (
         <div className="flex gap-2">
-          <input
-            type="text"
+          <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={t('ai.placeholder')}
             disabled={isLoading}
-            className="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all-300"
           />
-          <button
+          <Button
             onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            className={`px-4 py-2 rounded-lg transition-all-300 ${
-              isLoading
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                : 'bg-primary hover:bg-primary/90 text-white'
-            }`}
+            loading={isLoading}
+            type="primary"
           >
-            {isLoading ? (
-              <i className="fa fa-circle-o-notch fa-spin"></i>
-            ) : (
-              <i className="fa fa-paper-plane"></i>
-            )}
-          </button>
+            {isLoading ? null : <i className="fa fa-paper-plane"></i>}
+          </Button>
         </div>
       )}
     </div>

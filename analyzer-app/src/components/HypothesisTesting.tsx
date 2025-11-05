@@ -195,7 +195,7 @@ const HypothesisTesting: React.FC<HypothesisTestingProps> = ({ data }) => {
                     }
                     type={testResult.rejectNull ? 'warning' : 'success'}
                     showIcon={false}
-                    style={{ marginTop: '16px' }}
+                    style={{ marginTop: '16px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
                   />
 
                   <Card size="small" style={{ backgroundColor: '#2f2e27' }}>

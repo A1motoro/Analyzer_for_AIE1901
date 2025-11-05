@@ -296,7 +296,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }
                     type={distributionAnalysis?.skewness?.isSignificant ? 'warning' : 'success'}
                     showIcon={false}
-                    style={{ marginTop: '8px' }}
+                    style={{ marginTop: '8px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
                   />
                 </Space>
               </Card>
@@ -365,7 +365,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }
                     type={distributionAnalysis?.kurtosis?.isSignificant ? 'warning' : 'success'}
                     showIcon={false}
-                    style={{ marginTop: '8px' }}
+                    style={{ marginTop: '8px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
                   />
                 </Space>
               </Card>
@@ -423,7 +423,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }
                     type={distributionAnalysis?.normalityTests?.jarqueBera?.isNormal ? 'success' : 'warning'}
                     showIcon={false}
-                    style={{ marginTop: '8px' }}
+                    style={{ marginTop: '8px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
                     {t('advanced.jbDesc')}
@@ -479,7 +479,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                     }
                     type={distributionAnalysis?.normalityTests?.shapiroWilk?.isNormal ? 'success' : 'warning'}
                     showIcon={false}
-                    style={{ marginTop: '8px' }}
+                    style={{ marginTop: '8px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
                   />
                   <Text style={{ color: '#75715e', fontSize: '12px' }}>
                     {t('advanced.swDesc')}

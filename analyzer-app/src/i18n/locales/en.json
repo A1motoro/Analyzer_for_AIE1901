@@ -72,7 +72,35 @@
     "preview": "Data Preview",
     "statistics": "Data Statistics",
     "analysis": "Data Analysis",
-    "visualization": "Data Visualization"
+    "visualization": "Data Visualization",
+    "generate": "Generate",
+    "sampleSize": "Sample Size",
+    "sampleSizeLabel": "Sample Size (Number of Samples)",
+    "sampleSizeDesc": "Number of data points to generate",
+    "dataPoints": "data points",
+    "distributionParams": "Distribution Parameters",
+    "distributionParamsDesc": {
+      "normal": "Parameter settings for Normal Distribution N(μ, σ²)",
+      "uniform": "Parameter settings for Uniform Distribution U(a, b)",
+      "exponential": "Parameter settings for Exponential Distribution Exp(λ)",
+      "poisson": "Parameter settings for Poisson Distribution Poisson(λ)"
+    },
+    "paramLabels": {
+      "mean": "Mean (μ)",
+      "meanDesc": "Expected value of the distribution",
+      "stdDev": "Standard Deviation (σ)",
+      "stdDevDesc": "Degree of data dispersion",
+      "variance": "Variance (σ²)",
+      "varianceDesc": "Square of standard deviation",
+      "min": "Minimum (a)",
+      "max": "Maximum (b)",
+      "lambda": "Rate Parameter (λ)",
+      "lambdaDesc": "Must be greater than 0"
+    },
+    "previewCard": {
+      "title": "Distribution Preview",
+      "stdDev": "Standard Deviation: σ = "
+    }
   },
   "hypothesis": {
     "title": "Hypothesis Testing",

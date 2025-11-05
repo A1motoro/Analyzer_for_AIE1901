@@ -561,6 +561,540 @@ input:focus, textarea:focus {
   }
 }
 
+/* ==================== 分析结果区域样式 ==================== */
 
+.analysis-result-section {
+  margin-bottom: 48px;
+}
 
+.analysis-result-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.analysis-result-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ==================== 标签切换容器样式 ==================== */
+
+.analysis-tabs-container {
+  margin-bottom: 32px;
+  padding: 8px;
+  background: var(--monokai-bg);
+  border-radius: 12px;
+  border: 1px solid var(--monokai-bg-lighter);
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.analysis-tabs-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: fit-content;
+}
+
+/* ==================== 标签按钮样式 ==================== */
+
+.analysis-tab-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--monokai-bg-light);
+  color: var(--monokai-fg-dim);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.analysis-tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--tab-hover-bg, rgba(102, 217, 239, 0.15)), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.analysis-tab-button:hover::before {
+  opacity: 1;
+}
+
+.analysis-tab-button:hover {
+  color: var(--tab-color);
+  background: var(--monokai-bg-lighter);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.analysis-tab-button[data-active="true"] {
+  background: linear-gradient(135deg, var(--tab-active-bg, rgba(102, 217, 239, 0.2)), var(--tab-active-bg, rgba(102, 217, 239, 0.15)));
+  color: var(--tab-color);
+  box-shadow: 0 4px 20px var(--tab-active-shadow, rgba(102, 217, 239, 0.3)), 0 0 0 2px var(--tab-active-border, rgba(102, 217, 239, 0.4));
+  font-weight: 700;
+}
+
+.analysis-tab-button[data-active="true"] .tab-icon {
+  color: var(--tab-color);
+  transform: scale(1.15);
+}
+
+.analysis-tab-button[data-active="true"] .tab-label {
+  color: var(--tab-color);
+  text-shadow: 0 0 8px var(--tab-text-shadow, rgba(102, 217, 239, 0.3));
+}
+
+.analysis-tab-button .tab-icon {
+  font-size: 18px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.analysis-tab-button .tab-label {
+  font-size: 15px;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+}
+
+/* 活动标签指示器 */
+.analysis-tab-button .tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  background: var(--tab-color);
+  border-radius: 3px 3px 0 0;
+  animation: indicatorGlow 2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--tab-color);
+}
+
+@keyframes indicatorGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--tab-color), 0 0 12px var(--tab-indicator-shadow, rgba(102, 217, 239, 0.5));
+    opacity: 0.8;
+  }
+  50% {
+    box-shadow: 0 0 16px var(--tab-color), 0 0 24px var(--tab-indicator-shadow, rgba(102, 217, 239, 0.5));
+    opacity: 1;
+  }
+}
+
+/* ==================== 内容区域样式 ==================== */
+
+.analysis-content-wrapper {
+  margin-top: 24px;
+  padding: 8px 0;
+  animation: fadeInContent 0.4s ease-out;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== 响应式设计 ==================== */
+
+@media (max-width: 768px) {
+  .analysis-tabs-wrapper {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--monokai-bg-lighter) var(--monokai-bg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .analysis-tabs-wrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .analysis-tabs-wrapper::-webkit-scrollbar-track {
+    background: var(--monokai-bg);
+    border-radius: 3px;
+  }
+
+  .analysis-tabs-wrapper::-webkit-scrollbar-thumb {
+    background: var(--monokai-bg-lighter);
+    border-radius: 3px;
+  }
+
+  .analysis-tabs-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--monokai-gray);
+  }
+
+  .analysis-tab-button {
+    min-width: 100px;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+  .analysis-tab-button .tab-icon {
+    font-size: 16px;
+  }
+
+  .analysis-tab-button .tab-label {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analysis-tab-button {
+    min-width: 80px;
+    padding: 10px 14px;
+  }
+
+  .analysis-tab-button .tab-label {
+    display: none;
+  }
+
+  .analysis-tab-button .tab-icon {
+    margin: 0;
+  }
+}
+
+/* ==================== 平滑滚动 ==================== */
+
+.analysis-tabs-container {
+  scroll-behavior: smooth;
+}
+
+/* ==================== 焦点状态 ==================== */
+
+.analysis-tab-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--tab-focus-shadow, rgba(102, 217, 239, 0.3));
+}
+
+.analysis-tab-button:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.analysis-tab-button:focus-visible {
+  outline: 2px solid var(--tab-color);
+  outline-offset: 2px;
+}
+
+/* ==================== 分布参数输入样式 ==================== */
+
+.distribution-param-card {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.param-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.param-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.param-statistic {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--monokai-bg);
+  border-radius: 6px;
+  border: 1px solid var(--monokai-bg-lighter);
+}
+
+.param-preview {
+  margin-top: 16px;
+}
+
+.param-actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--monokai-bg-lighter);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 分布卡片选中状态 */
+.distribution-card-selected {
+  border: 2px solid var(--monokai-blue);
+  box-shadow: 0 4px 16px rgba(102, 217, 239, 0.3);
+  transform: translateY(-2px);
+}
+
+/* InputNumber 样式优化 */
+.ant-input-number {
+  background-color: var(--monokai-bg) !important;
+  border-color: var(--monokai-bg-lighter) !important;
+  color: var(--monokai-fg) !important;
+}
+
+.ant-input-number:hover {
+  border-color: var(--monokai-blue) !important;
+}
+
+.ant-input-number-focused {
+  border-color: var(--monokai-blue) !important;
+  box-shadow: 0 0 0 2px rgba(102, 217, 239, 0.2) !important;
+}
+
+.ant-input-number-input {
+  color: var(--monokai-fg) !important;
+}
+
+.ant-input-number-handler-wrap {
+  background-color: var(--monokai-bg-light) !important;
+  border-color: var(--monokai-bg-lighter) !important;
+}
+
+.ant-input-number-handler {
+  color: var(--monokai-fg) !important;
+}
+
+.ant-input-number-handler:hover {
+  color: var(--monokai-blue) !important;
+}
+
+/* ==================== 数据输入标签样式 ==================== */
+
+.data-input-tabs-container {
+  margin-bottom: 24px;
+  padding: 8px;
+  background: var(--monokai-bg);
+  border-radius: 12px;
+  border: 1px solid var(--monokai-bg-lighter);
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.data-input-tabs-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: fit-content;
+}
+
+.data-input-tab-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--monokai-bg-light);
+  color: var(--monokai-fg-dim);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.data-input-tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--tab-hover-bg, rgba(102, 217, 239, 0.15)), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.data-input-tab-button:hover::before {
+  opacity: 1;
+}
+
+.data-input-tab-button:hover {
+  color: var(--tab-color);
+  background: var(--monokai-bg-lighter);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.data-input-tab-button[data-active="true"] {
+  background: linear-gradient(135deg, var(--tab-active-bg, rgba(102, 217, 239, 0.2)), var(--tab-active-bg, rgba(102, 217, 239, 0.15)));
+  color: var(--tab-color);
+  box-shadow: 0 4px 20px var(--tab-active-shadow, rgba(102, 217, 239, 0.3)), 0 0 0 2px var(--tab-active-border, rgba(102, 217, 239, 0.4));
+  font-weight: 700;
+}
+
+.data-input-tab-button[data-active="true"] .tab-icon {
+  color: var(--tab-color);
+  transform: scale(1.15);
+}
+
+.data-input-tab-button[data-active="true"] .tab-label {
+  color: var(--tab-color);
+  text-shadow: 0 0 8px var(--tab-text-shadow, rgba(102, 217, 239, 0.3));
+}
+
+.data-input-tab-button .tab-icon {
+  font-size: 18px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-input-tab-button .tab-label {
+  font-size: 15px;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+}
+
+.data-input-tab-button .tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  background: var(--tab-color);
+  border-radius: 3px 3px 0 0;
+  animation: indicatorGlow 2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--tab-color);
+}
+
+/* ==================== 数据规模选择器样式 ==================== */
+
+.sample-size-selector {
+  margin-top: 16px;
+}
+
+.sample-size-selector .ant-slider {
+  margin: 12px 0;
+}
+
+.sample-size-selector .ant-slider-rail {
+  background-color: var(--monokai-bg-lighter) !important;
+}
+
+.sample-size-selector .ant-slider-track {
+  background-color: var(--monokai-blue) !important;
+}
+
+.sample-size-selector .ant-slider-handle {
+  border-color: var(--monokai-blue) !important;
+  background-color: var(--monokai-bg-light) !important;
+}
+
+.sample-size-selector .ant-slider-handle:hover {
+  border-color: var(--monokai-blue) !important;
+  box-shadow: 0 0 0 5px rgba(102, 217, 239, 0.2) !important;
+}
+
+.sample-size-selector .ant-slider-handle:focus {
+  border-color: var(--monokai-blue) !important;
+  box-shadow: 0 0 0 5px rgba(102, 217, 239, 0.2) !important;
+}
+
+.sample-size-selector .ant-slider-dot {
+  border-color: var(--monokai-bg-lighter) !important;
+}
+
+.sample-size-selector .ant-slider-mark-text {
+  color: var(--monokai-gray) !important;
+}
+
+.sample-size-selector .ant-slider-mark-text-active {
+  color: var(--monokai-fg) !important;
+}
+
+/* ==================== 成功提示脉冲动画 ==================== */
+
+.success-pulse-alert {
+  animation: successPulse 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.success-pulse-alert::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(166, 226, 46, 0.3),
+    transparent
+  );
+  animation: successShimmer 3s ease-in-out infinite;
+}
+
+@keyframes successPulse {
+  0%, 100% {
+    background-color: rgba(166, 226, 46, 0.1);
+    box-shadow: 0 0 0 0 rgba(166, 226, 46, 0.4);
+  }
+  50% {
+    background-color: rgba(166, 226, 46, 0.15);
+    box-shadow: 0 0 0 8px rgba(166, 226, 46, 0);
+  }
+}
+
+@keyframes successShimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .data-input-tabs-wrapper {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--monokai-bg-lighter) var(--monokai-bg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-input-tab-button {
+    min-width: 100px;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+}
