@@ -929,6 +929,189 @@ export const performOneSampleTTest = function(sampleData: number[], mu0: number,
   };
 };
 
+// 两样本t检验
+export const performTwoSampleTTest = function(
+  sampleData1: number[], 
+  sampleData2: number[], 
+  alpha: number, 
+  alt: string,
+  equalVariance = true
+) {
+  const n1 = sampleData1.length;
+  const n2 = sampleData2.length;
+
+  const mean1 = sampleData1.reduce((sum, val) => sum + val, 0) / n1;
+  const mean2 = sampleData2.reduce((sum, val) => sum + val, 0) / n2;
+
+  const var1 = sampleData1.reduce((sum, val) => sum + Math.pow(val - mean1, 2), 0) / (n1 - 1);
+  const var2 = sampleData2.reduce((sum, val) => sum + Math.pow(val - mean2, 2), 0) / (n2 - 1);
+
+  const meanDiff = mean1 - mean2;
+  let tStatistic, df, se;
+
+  if (equalVariance) {
+    // 合并方差t检验
+    const pooledVar = ((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2);
+    se = Math.sqrt(pooledVar * (1/n1 + 1/n2));
+    df = n1 + n2 - 2;
+  } else {
+    // Welch's t检验（方差不相等）
+    se = Math.sqrt(var1/n1 + var2/n2);
+    const dfNum = Math.pow(var1/n1 + var2/n2, 2);
+    const dfDen = Math.pow(var1/n1, 2)/(n1-1) + Math.pow(var2/n2, 2)/(n2-1);
+    df = dfNum / dfDen;
+  }
+
+  tStatistic = meanDiff / se;
+
+  // 近似计算p值
+  let pValue;
+  const absT = Math.abs(tStatistic);
+  const baseP = absT <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * absT - 0.416 * absT * absT);
+  
+  switch (alt) {
+    case 'less':
+      pValue = tStatistic <= 0 ? baseP : 1 - baseP;
+      break;
+    case 'greater':
+      pValue = tStatistic >= 0 ? baseP : 1 - baseP;
+      break;
+    default: // two-sided
+      pValue = 2 * baseP;
+  }
+
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: tStatistic,
+    df,
+    pValue,
+    rejectNull,
+    mean1,
+    mean2,
+    meanDiff,
+    variance1: var1,
+    variance2: var2,
+    stdDev1: Math.sqrt(var1),
+    stdDev2: Math.sqrt(var2),
+    sampleSize1: n1,
+    sampleSize2: n2,
+    equalVariance,
+    significanceLevel: alpha,
+    alternative: alt
+  };
+};
+
+// 配对样本t检验
+export const performPairedTTest = function(
+  sampleData1: number[], 
+  sampleData2: number[], 
+  alpha: number, 
+  alt: string
+) {
+  if (sampleData1.length !== sampleData2.length) {
+    throw new Error('配对样本必须具有相同的样本量');
+  }
+
+  const n = sampleData1.length;
+  const differences = sampleData1.map((val, i) => val - sampleData2[i]);
+  
+  const meanDiff = differences.reduce((sum, val) => sum + val, 0) / n;
+  const diffVar = differences.reduce((sum, val) => sum + Math.pow(val - meanDiff, 2), 0) / (n - 1);
+  const diffStd = Math.sqrt(diffVar);
+  const se = diffStd / Math.sqrt(n);
+
+  const tStatistic = meanDiff / se;
+  const df = n - 1;
+
+  // 近似计算p值
+  let pValue;
+  const absT = Math.abs(tStatistic);
+  const baseP = absT <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * absT - 0.416 * absT * absT);
+  
+  switch (alt) {
+    case 'less':
+      pValue = tStatistic <= 0 ? baseP : 1 - baseP;
+      break;
+    case 'greater':
+      pValue = tStatistic >= 0 ? baseP : 1 - baseP;
+      break;
+    default: // two-sided
+      pValue = 2 * baseP;
+  }
+
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: tStatistic,
+    df,
+    pValue,
+    rejectNull,
+    meanDiff,
+    mean1: sampleData1.reduce((sum, val) => sum + val, 0) / n,
+    mean2: sampleData2.reduce((sum, val) => sum + val, 0) / n,
+    diffStd,
+    standardError: se,
+    sampleSize: n,
+    significanceLevel: alpha,
+    alternative: alt
+  };
+};
+
+// 两样本比例检验
+export const performTwoProportionTest = function(
+  successes1: number,
+  trials1: number,
+  successes2: number,
+  trials2: number,
+  alpha: number,
+  alt: string
+) {
+  const p1 = successes1 / trials1;
+  const p2 = successes2 / trials2;
+  const pPooled = (successes1 + successes2) / (trials1 + trials2);
+
+  const se = Math.sqrt(pPooled * (1 - pPooled) * (1/trials1 + 1/trials2));
+  const proportionDiff = p1 - p2;
+
+  const zStatistic = proportionDiff / se;
+
+  // 计算p值
+  let pValue;
+  const absZ = Math.abs(zStatistic);
+  const baseP = absZ <= 0 ? 0.5 : 0.5 * Math.exp(-0.717 * absZ - 0.416 * absZ * absZ);
+  
+  switch (alt) {
+    case 'less':
+      pValue = zStatistic <= 0 ? baseP : 1 - baseP;
+      break;
+    case 'greater':
+      pValue = zStatistic >= 0 ? baseP : 1 - baseP;
+      break;
+    default: // two-sided
+      pValue = 2 * baseP;
+  }
+
+  const rejectNull = pValue < alpha;
+
+  return {
+    statistic: zStatistic,
+    pValue,
+    rejectNull,
+    proportion1: p1,
+    proportion2: p2,
+    proportionDiff,
+    successes1,
+    successes2,
+    trials1,
+    trials2,
+    sampleSize1: trials1,
+    sampleSize2: trials2,
+    significanceLevel: alpha,
+    alternative: alt
+  };
+};
+
 // 方差F检验
 export const performVarianceFTest = function(sampleData1: number[], sampleData2: number[], alpha: number) {
   const n1 = sampleData1.length;

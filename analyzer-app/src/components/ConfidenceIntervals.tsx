@@ -7,7 +7,8 @@ import {
   calculateTwoSampleMeanCI,
   calculatePairedMeanCI,
   calculateTwoProportionCI,
-  calculateVarianceCI
+  calculateVarianceCI,
+  calculateConfidenceInterval
 } from '../utils';
 import { useTranslation } from 'react-i18next';
 
@@ -34,12 +35,29 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
   };
 
   const renderOneSampleCI = () => {
-    const basicCI = analysisResult.confidenceInterval;
+    // 使用自定义置信水平重新计算均值置信区间
+    const basicCI = calculateConfidenceInterval(data, confidenceLevel);
     const varianceCI = calculateVarianceCI(data, confidenceLevel);
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.meanCI')} style={{ backgroundColor: '#49483e' }}>
+          <Row gutter={16} style={{ marginBottom: '16px' }}>
+            <Col xs={24} md={12}>
+              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
+              <Select
+                value={confidenceLevel}
+                onChange={setConfidenceLevel}
+                style={{ width: '100%', marginTop: '8px' }}
+              >
+                <Option value={0.80}>80%</Option>
+                <Option value={0.90}>90%</Option>
+                <Option value={0.95}>95%</Option>
+                <Option value={0.99}>99%</Option>
+                <Option value={0.999}>99.9%</Option>
+              </Select>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col xs={24} md={8}>
               <Statistic
@@ -57,7 +75,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
                 value={`${(confidenceLevel * 100).toFixed(0)}%`}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
               />
@@ -82,11 +100,11 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
           />
         </Card>
 
-        <Card title="方差置信区间" style={{ backgroundColor: '#49483e' }}>
+        <Card title={t('confidence.varianceCI')} style={{ backgroundColor: '#49483e' }}>
           <Row gutter={16}>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>样本方差</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.sampleVariance')}</Text>}
                 value={varianceCI.variance?.toFixed(4) || '0.0000'}
                 valueStyle={{ color: '#f92672', fontSize: '16px' }}
               />
@@ -100,7 +118,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             </Col>
             <Col xs={24} md={8}>
               <Statistic
-                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Text>}
+                title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
                 value={`${(confidenceLevel * 100).toFixed(0)}%`}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
               />
@@ -148,15 +166,17 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
               </Select>
             </Col>
             <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>置信水平:</Text>
+              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
               <Select
                 value={confidenceLevel}
                 onChange={setConfidenceLevel}
                 style={{ width: '100%', marginTop: '8px' }}
               >
+                <Option value={0.80}>80%</Option>
                 <Option value={0.90}>90%</Option>
                 <Option value={0.95}>95%</Option>
                 <Option value={0.99}>99%</Option>
+                <Option value={0.999}>99.9%</Option>
               </Select>
             </Col>
           </Row>
@@ -242,6 +262,22 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.pairedMeanDiff')} style={{ backgroundColor: '#49483e' }}>
+          <Row gutter={16} style={{ marginBottom: '16px' }}>
+            <Col xs={24} md={12}>
+              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
+              <Select
+                value={confidenceLevel}
+                onChange={setConfidenceLevel}
+                style={{ width: '100%', marginTop: '8px' }}
+              >
+                <Option value={0.80}>80%</Option>
+                <Option value={0.90}>90%</Option>
+                <Option value={0.95}>95%</Option>
+                <Option value={0.99}>99%</Option>
+                <Option value={0.999}>99.9%</Option>
+              </Select>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
@@ -308,6 +344,22 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.twoProportionDiff')} style={{ backgroundColor: '#49483e' }}>
+          <Row gutter={16} style={{ marginBottom: '16px' }}>
+            <Col xs={24} md={12}>
+              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
+              <Select
+                value={confidenceLevel}
+                onChange={setConfidenceLevel}
+                style={{ width: '100%', marginTop: '8px' }}
+              >
+                <Option value={0.80}>80%</Option>
+                <Option value={0.90}>90%</Option>
+                <Option value={0.95}>95%</Option>
+                <Option value={0.99}>99%</Option>
+                <Option value={0.999}>99.9%</Option>
+              </Select>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
