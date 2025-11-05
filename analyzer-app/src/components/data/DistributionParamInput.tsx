@@ -116,7 +116,10 @@ export const DistributionParamInput: React.FC<DistributionParamInputProps> = ({
               max={10000}
               step={100}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              parser={(value) => {
+                const parsed = value!.replace(/\$\s?|(,*)/g, '');
+                return parsed ? parseFloat(parsed) : 1000;
+              }}
             />
           </Col>
         </Row>
@@ -174,7 +177,10 @@ export const DistributionParamInput: React.FC<DistributionParamInputProps> = ({
                 max={1000}
                 step={0.1}
                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                parser={(value) => {
+                  const parsed = value!.replace(/\$\s?|(,*)/g, '');
+                  return parsed ? parseFloat(parsed) : 0;
+                }}
               />
               <div className="param-statistic">
                 <Text style={{ color: 'var(--monokai-gray)', fontSize: '12px' }}>
@@ -201,7 +207,10 @@ export const DistributionParamInput: React.FC<DistributionParamInputProps> = ({
                 max={100}
                 step={0.1}
                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                parser={(value) => {
+                  const parsed = value!.replace(/\$\s?|(,*)/g, '');
+                  return parsed ? parseFloat(parsed) : 0.1;
+                }}
               />
               <div className="param-statistic">
                 <Text style={{ color: 'var(--monokai-gray)', fontSize: '12px' }}>
@@ -228,7 +237,10 @@ export const DistributionParamInput: React.FC<DistributionParamInputProps> = ({
                 max={10000}
                 step={1}
                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                parser={(value) => {
+                  const parsed = value!.replace(/\$\s?|(,*)/g, '');
+                  return parsed ? parseFloat(parsed) : 0.01;
+                }}
               />
               <div className="param-statistic">
                 <Text style={{ color: 'var(--monokai-gray)', fontSize: '12px' }}>
