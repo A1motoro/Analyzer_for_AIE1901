@@ -570,7 +570,23 @@
     "pairedError": "配对数据错误",
     "pairedErrorDesc": "配对数据必须具有相同的样本量",
     "standardError": "标准误差",
-    "degreesOfFreedom": "自由度"
+    "degreesOfFreedom": "自由度",
+    "boundaryAnalysis": "边界值概率分析",
+    "boundaryValue": "边界值",
+    "boundaryPlaceholder": "输入要分析的边界值",
+    "useSampleMean": "使用样本均值",
+    "probabilityResults": "概率分析结果",
+    "probGreaterThan": "P(μ > 边界值)",
+    "probLessThan": "P(μ < 边界值)",
+    "zScore": "Z分数",
+    "method": "检验方法",
+    "boundaryPosition": "边界值位置",
+    "belowCI": "低于置信区间",
+    "aboveCI": "高于置信区间",
+    "withinCI": "在置信区间内",
+    "customLevel": "自定义",
+    "customLevelValue": "自定义置信水平",
+    "customLevelPlaceholder": "输入0.01-99.99之间的值"
   },
   "parameter": {
     "mle": "最大似然估计 (MLE)",
@@ -633,7 +649,17 @@
     "sampleSizeTip1": "样本量越大，检验的功效越高，能够检测到的效应越小",
     "sampleSizeTip2": "显著性水平越低，需要的样本量越大",
     "sampleSizeTip3": "目标功效越高，需要的样本量越大",
-    "sampleSizeTip4": "效应量越大，需要的样本量越小"
+    "sampleSizeTip4": "效应量越大，需要的样本量越小",
+    "powerFunction": "功效函数 (Power Function)",
+    "powerFunctionDesc": "Power Function K(μ) 表示在参数值为 μ 时拒绝 H₀ 的概率。根据 STA2002 Lecture 9，功效函数展示了功效随效应量或样本量的变化。",
+    "powerVsEffectSize": "功效 vs 效应量",
+    "powerVsSampleSize": "功效 vs 样本量",
+    "powerFunctionNotes": "说明：",
+    "effectSizeNote": "固定样本量和显著性水平，展示功效随效应量的变化。效应量越大，功效越高。",
+    "sampleSizeNote": "固定效应量和显著性水平，展示功效随样本量的变化。样本量越大，功效越高。",
+    "powerFunctionNote2": "当功效接近 1 时，检验能够很好地检测到备择假设。",
+    "powerFunctionNote3": "在零假设值处，功效等于显著性水平 α。",
+    "power": "功效"
   },
   "rohe": {
     "title": "ROHE分析结果",
