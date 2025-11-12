@@ -185,6 +185,69 @@ export const tQuantileApprox = function(df: number, p: number) {
   return t;
 };
 
+// 辅助函数：计算t分布累积分布函数（CDF）的近似值
+export const tCDFApprox = function(t: number, df: number) {
+  // 对于大自由度，使用正态分布近似
+  if (df > 1000) {
+    return normalCDF(t);
+  }
+  
+  // 使用数值积分近似计算t分布CDF
+  // 这里使用一个简化的近似方法
+  const z = t;
+  const z2 = z * z;
+  
+  // 基于t分布的渐近展开
+  if (Math.abs(z) < 0.1) {
+    // 对于接近0的值，使用线性近似
+    return 0.5 + z / Math.sqrt(2 * Math.PI * df);
+  }
+  
+  // 使用正态分布CDF作为基础，然后进行修正
+  let cdf = normalCDF(z);
+  
+  // 小样本修正（对于df较小的情况）
+  if (df < 30) {
+    const correction = (z * (z2 + 1)) / (4 * df);
+    cdf += correction * (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-z2 / 2);
+  }
+  
+  return Math.max(0, Math.min(1, cdf));
+};
+
+// 计算均值大于某个边界值的概率
+export const calculateMeanProbability = function(
+  sampleMean: number,
+  standardError: number,
+  boundaryValue: number,
+  method: 'z' | 't' = 'z',
+  degreesOfFreedom: number = 0
+) {
+  // 标准化边界值
+  const zScore = (boundaryValue - sampleMean) / standardError;
+  
+  // 根据方法选择CDF
+  let probability;
+  if (method === 'z') {
+    // P(μ > boundary) = 1 - Φ(z)
+    probability = 1 - normalCDF(zScore);
+  } else {
+    // P(μ > boundary) = 1 - F_t(z, df)
+    probability = 1 - tCDFApprox(zScore, degreesOfFreedom);
+  }
+  
+  return {
+    boundaryValue,
+    sampleMean,
+    standardError,
+    zScore: zScore.toFixed(4),
+    probabilityGreater: probability,
+    probabilityLess: 1 - probability,
+    method,
+    degreesOfFreedom: method === 't' ? degreesOfFreedom : null
+  };
+};
+
 // 计算总体均值置信区间，自动选择z或t方法
 export const calculateConfidenceInterval = function(data: number[], confidenceLevel = 0.95, knownVariance: number | null = null) {
   const n = data.length;
@@ -462,7 +525,7 @@ export const analyzeDistribution = function(data: number[]) {
 };
 
 // 辅助函数：正态分布累积分布函数
-function normalCDF(x: number): number {
+export function normalCDF(x: number): number {
   const t = 1 / (1 + 0.2316419 * Math.abs(x));
   const d = 0.3989423 * Math.exp(-x * x / 2);
   const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
@@ -886,6 +949,106 @@ export const calculateSampleSizeProportionTest = function(
     zAlpha,
     zBeta
   };
+};
+
+// 生成 Power Function 数据点（用于绘制图表）
+// 根据 Lecture 9，Power Function K(μ) 表示在参数值为 μ 时拒绝 H0 的概率
+export const generatePowerFunctionData = function(
+  testType: 'one-sample-t' | 'two-sample-t' | 'proportion',
+  xAxisType: 'effect-size' | 'sample-size',
+  fixedParams: {
+    alpha: number;
+    alternative: 'less' | 'greater' | 'two-sided';
+    sampleSize?: number; // 当 xAxisType 为 'effect-size' 时需要
+    effectSize?: number; // 当 xAxisType 为 'sample-size' 时需要
+    p0?: number; // 比例检验的零假设值
+    p1?: number; // 比例检验的备择假设值（当 xAxisType 为 'sample-size' 时需要）
+  },
+  xRange: { min: number; max: number; steps: number }
+): Array<{ x: number; y: number }> {
+  const data: Array<{ x: number; y: number }> = [];
+  const step = (xRange.max - xRange.min) / xRange.steps;
+
+  for (let i = 0; i <= xRange.steps; i++) {
+    const x = xRange.min + i * step;
+    let power = 0;
+
+    try {
+      if (xAxisType === 'effect-size') {
+        // Power vs Effect Size（固定样本量）
+        if (testType === 'one-sample-t') {
+          const result = calculatePowerOneSampleT(
+            fixedParams.sampleSize!,
+            x,
+            fixedParams.alpha,
+            fixedParams.alternative
+          );
+          power = result.power;
+        } else if (testType === 'two-sample-t') {
+          const result = calculatePowerTwoSampleT(
+            fixedParams.sampleSize!,
+            fixedParams.sampleSize!,
+            x,
+            fixedParams.alpha,
+            true,
+            fixedParams.alternative
+          );
+          power = result.power;
+        } else if (testType === 'proportion') {
+          // 对于比例检验，effect size = |p1 - p0| / sqrt(p0(1-p0))
+          // 这里 x 是 effect size，需要转换为 p1
+          const p1 = fixedParams.p0! + x * Math.sqrt(fixedParams.p0! * (1 - fixedParams.p0!));
+          const result = calculatePowerProportionTest(
+            fixedParams.sampleSize!,
+            fixedParams.p0!,
+            p1,
+            fixedParams.alpha,
+            fixedParams.alternative
+          );
+          power = result.power;
+        }
+      } else {
+        // Power vs Sample Size（固定效应量）
+        if (testType === 'one-sample-t') {
+          const result = calculatePowerOneSampleT(
+            Math.round(x),
+            fixedParams.effectSize!,
+            fixedParams.alpha,
+            fixedParams.alternative
+          );
+          power = result.power;
+        } else if (testType === 'two-sample-t') {
+          const result = calculatePowerTwoSampleT(
+            Math.round(x),
+            Math.round(x),
+            fixedParams.effectSize!,
+            fixedParams.alpha,
+            true,
+            fixedParams.alternative
+          );
+          power = result.power;
+        } else if (testType === 'proportion') {
+          const result = calculatePowerProportionTest(
+            Math.round(x),
+            fixedParams.p0!,
+            fixedParams.p1!,
+            fixedParams.alpha,
+            fixedParams.alternative
+          );
+          power = result.power;
+        }
+      }
+    } catch (error) {
+      // 如果计算失败，跳过该点
+      continue;
+    }
+
+    // 确保 power 在 [0, 1] 范围内
+    power = Math.max(0, Math.min(1, power));
+    data.push({ x, y: power });
+  }
+
+  return data;
 };
 
 // 假设检验函数
