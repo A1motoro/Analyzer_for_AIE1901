@@ -197,6 +197,9 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
               },
               label: (context) => {
                 const powerValue = context.parsed.y;
+                if (powerValue === null || powerValue === undefined) {
+                  return `${yLabel}: N/A`;
+                }
                 return `${yLabel}: ${(powerValue * 100).toFixed(2)}%`;
               }
             }
