@@ -129,7 +129,7 @@ const TutorialSection: React.FC = () => {
   const currentTopic = tutorialContents[activeTopic];
 
   return (
-    <section className="bg-white rounded-xl shadow-card p-6 mb-12 transition-all-300 hover:shadow-card-hover animate-slide-up">
+    <section className="tutorial-section bg-white rounded-xl shadow-card p-6 mb-12 transition-all-300 hover:shadow-card-hover animate-slide-up">
       <h2 className="text-xl font-bold mb-6">{t('tutorialSection.title')}</h2>
 
       {/* 教程主题导航 */}

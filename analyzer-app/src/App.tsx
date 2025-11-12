@@ -298,7 +298,16 @@ const App: React.FC = () => {
               {t('app.nav.analysis')}
             </button>
             <button
-              onClick={() => setCurrentView('tutorial')}
+              onClick={() => {
+                setCurrentView('tutorial');
+                // 自动滚动到教程区域
+                setTimeout(() => {
+                  const tutorialSection = document.querySelector('.tutorial-section');
+                  if (tutorialSection) {
+                    tutorialSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
               className="hero-secondary-btn"
             >
               <i className="fa fa-book mr-2"></i>
@@ -704,6 +713,13 @@ const App: React.FC = () => {
                 onClick={() => {
                   setCurrentView('tutorial');
                   setDrawerOpen(false);
+                  // 自动滚动到教程区域
+                  setTimeout(() => {
+                    const tutorialSection = document.querySelector('.tutorial-section');
+                    if (tutorialSection) {
+                      tutorialSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
                 }}
                 style={{
                   textAlign: 'left',
