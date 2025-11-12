@@ -1,4 +1,3 @@
-import React from 'react';
 import { Space, Typography } from 'antd';
 import {
   CalculatorOutlined,
@@ -27,12 +26,12 @@ interface AnalysisResultSectionProps {
   data: number[];
 }
 
-const AnalysisResultSection: React.FC<AnalysisResultSectionProps> = ({
+const AnalysisResultSection = ({
   activeTab,
   setActiveTab,
   analysisResult,
   data
-}) => {
+}: AnalysisResultSectionProps) => {
   const { t } = useTranslation();
   const { Paragraph } = Typography;
 

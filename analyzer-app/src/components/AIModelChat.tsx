@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { callAliyunAPI } from '../api';
 
@@ -15,7 +15,7 @@ interface Message {
   content: string;
 }
 
-const AIModelChat: React.FC<AIModelChatProps> = ({ analysisResult, data }) => {
+const AIModelChat = ({ analysisResult, data }: AIModelChatProps) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
