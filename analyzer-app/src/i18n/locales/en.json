@@ -669,7 +669,17 @@
     "sampleSizeNote": "With fixed effect size and significance level, shows how power changes with sample size. Larger sample size leads to higher power.",
     "powerFunctionNote2": "When power approaches 1, the test can detect the alternative hypothesis well.",
     "powerFunctionNote3": "At the null hypothesis value, power equals the significance level α.",
-    "power": "Power"
+    "power": "Power",
+    "currentValue": "Current Value",
+    "powerFunction": "Power Function Chart",
+    "powerFunctionDesc": "The power function chart shows how test power changes with different parameter values, helping understand the impact of parameters on test power.",
+    "powerVsEffectSize": "Power vs Effect Size",
+    "powerVsSampleSize": "Power vs Sample Size",
+    "powerFunctionNotes": "Chart Notes:",
+    "effectSizeNote": "X-axis is effect size, Y-axis is test power. The curve shows test power at different effect sizes with fixed sample size.",
+    "sampleSizeNote": "X-axis is sample size, Y-axis is test power. The curve shows test power at different sample sizes with fixed effect size.",
+    "powerFunctionNote2": "Green marker indicates power value at current parameter settings",
+    "powerFunctionNote3": "Dashed lines indicate common power reference lines (80% and 90%)"
   },
   "rohe": {
     "title": "ROHE Analysis Results",

@@ -997,15 +997,49 @@ export const generatePowerFunctionData = function(
         } else if (testType === 'proportion') {
           // 对于比例检验，effect size = |p1 - p0| / sqrt(p0(1-p0))
           // 这里 x 是 effect size，需要转换为 p1
-          const p1 = fixedParams.p0! + x * Math.sqrt(fixedParams.p0! * (1 - fixedParams.p0!));
-          const result = calculatePowerProportionTest(
-            fixedParams.sampleSize!,
-            fixedParams.p0!,
-            p1,
-            fixedParams.alpha,
-            fixedParams.alternative
-          );
-          power = result.power;
+          // 根据alternative方向确定p1的位置
+          let p1: number;
+          const p0 = fixedParams.p0!;
+          const stdError = Math.sqrt(p0 * (1 - p0));
+          
+          switch (fixedParams.alternative) {
+            case 'less':
+              // p1 < p0
+              p1 = Math.max(0, Math.min(1, p0 - x * stdError));
+              break;
+            case 'greater':
+              // p1 > p0
+              p1 = Math.max(0, Math.min(1, p0 + x * stdError));
+              break;
+            default: // two-sided
+              // 对于two-sided，通常显示p1 > p0的情况（更常见）
+              p1 = Math.max(0, Math.min(1, p0 + x * stdError));
+          }
+          
+          // 确保p1在有效范围内
+          if (p1 <= 0 || p1 >= 1) {
+            // 如果p1超出范围，根据alternative方向确定power
+            // 对于less: p1接近0时，power应该接近1（能检测到差异）
+            // 对于greater: p1接近1时，power应该接近1（能检测到差异）
+            // 对于two-sided: 需要考虑两个方向，通常p1接近边界时power接近1
+            if (fixedParams.alternative === 'less') {
+              power = p1 <= 0 ? 1 : 0;
+            } else if (fixedParams.alternative === 'greater') {
+              power = p1 >= 1 ? 1 : 0;
+            } else {
+              // two-sided: 如果p1接近0或1，都能检测到差异
+              power = (p1 <= 0 || p1 >= 1) ? 1 : 0;
+            }
+          } else {
+            const result = calculatePowerProportionTest(
+              fixedParams.sampleSize!,
+              p0,
+              p1,
+              fixedParams.alpha,
+              fixedParams.alternative
+            );
+            power = result.power;
+          }
         }
       } else {
         // Power vs Sample Size（固定效应量）

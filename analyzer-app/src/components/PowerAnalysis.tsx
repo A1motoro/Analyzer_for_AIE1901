@@ -107,13 +107,35 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
     let xRange: { min: number; max: number; steps: number };
     let xLabel: string;
     let yLabel = t('power.power');
+    let currentXValue: number; // 当前参数值，用于标记
 
     if (powerChartType === 'effect-size') {
       fixedParams.sampleSize = sampleSize;
       if (testType === 'proportion') {
         fixedParams.p0 = p0;
+        // 对于比例检验，计算当前的effect size
+        const currentEffectSize = Math.abs(p1 - p0) / Math.sqrt(p0 * (1 - p0));
+        currentXValue = currentEffectSize;
+        // 自适应范围：确保从0开始，显示完整的power function曲线
+        // 对于比例检验，effect size的理论最大值受限于p0和1-p0
+        // 最大effect size = max(|1-p0|, |0-p0|) / sqrt(p0(1-p0)) = max(1-p0, p0) / sqrt(p0(1-p0))
+        const maxPossibleEffectSize = Math.max(p0, 1 - p0) / Math.sqrt(p0 * (1 - p0));
+        const maxEffectSize = Math.min(3.0, Math.max(maxPossibleEffectSize, currentEffectSize * 1.5));
+        xRange = { 
+          min: 0, 
+          max: maxEffectSize, 
+          steps: 150 
+        };
+      } else {
+        currentXValue = effectSize;
+        // 自适应范围：从0开始，确保显示完整的power function曲线
+        // 对于t检验，effect size通常范围是0到2-3
+        xRange = { 
+          min: 0, 
+          max: Math.max(3.0, effectSize * 2), 
+          steps: 150 
+        };
       }
-      xRange = { min: 0.1, max: 2.0, steps: 50 };
       xLabel = t('power.effectSize');
     } else {
       fixedParams.effectSize = effectSize;
@@ -121,7 +143,16 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
         fixedParams.p0 = p0;
         fixedParams.p1 = p1;
       }
-      xRange = { min: 10, max: 200, steps: 50 };
+      currentXValue = sampleSize;
+      // 自适应范围：从较小值开始，确保显示完整的power function曲线
+      // 样本量范围应该足够大以显示power的变化趋势
+      const minSampleSize = Math.max(5, Math.floor(sampleSize * 0.1));
+      const maxSampleSize = Math.max(sampleSize * 2, 200);
+      xRange = { 
+        min: minSampleSize, 
+        max: Math.min(500, maxSampleSize), 
+        steps: 150 
+      };
       xLabel = t('power.sampleSize');
     }
 
@@ -133,25 +164,78 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
       xRange
     );
 
-    // 创建图表
+    // 计算当前参数值对应的power值（用于标记）
+    let currentPowerValue: number | null = null;
+    if (chartData.length > 0) {
+      // 找到最接近当前值的点
+      const closestPoint = chartData.reduce((prev, curr) => 
+        Math.abs(curr.x - currentXValue) < Math.abs(prev.x - currentXValue) ? curr : prev
+      );
+      currentPowerValue = closestPoint.y;
+    }
+
+    // 准备数据集
+    // 找到最接近当前x值的点（用于标记）
+    let closestIndex = -1;
+    if (currentPowerValue !== null && currentXValue !== undefined) {
+      const closestPoint = chartData.reduce((prev, curr) => 
+        Math.abs(curr.x - currentXValue) < Math.abs(prev.x - currentXValue) ? curr : prev
+      );
+      closestIndex = chartData.findIndex(d => Math.abs(d.x - closestPoint.x) < 0.0001);
+    }
+
+    const datasets: any[] = [{
+      label: yLabel,
+      data: chartData.map(d => ({ x: d.x, y: d.y })),
+      borderColor: '#f92672',
+      backgroundColor: 'rgba(249, 38, 114, 0.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      pointHoverBackgroundColor: '#f92672',
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 2
+    }];
+
+    // 添加当前参数值的标记
+    if (closestIndex >= 0 && currentXValue !== undefined) {
+      // 添加当前值标记点（绿色大点）
+      datasets.push({
+        label: t('power.currentValue') + ` (${powerChartType === 'effect-size' ? currentXValue.toFixed(2) : Math.round(currentXValue)})`,
+        data: chartData.map((d, i) => i === closestIndex ? { x: d.x, y: d.y } : null),
+        borderColor: '#a6e22e',
+        backgroundColor: '#a6e22e',
+        borderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointHoverBackgroundColor: '#a6e22e',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
+        showLine: false
+      });
+    }
+
+    // 添加重要的power参考线（0.8和0.9）
+    const referencePowers = [0.8, 0.9];
+    referencePowers.forEach((refPower, idx) => {
+      datasets.push({
+        label: `Power = ${(refPower * 100).toFixed(0)}%`,
+        data: chartData.map(d => ({ x: d.x, y: refPower })),
+        borderColor: idx === 0 ? '#fd971f' : '#66d9ef',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false
+      });
+    });
+
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: chartData.map(d => d.x.toFixed(2)),
-        datasets: [{
-          label: yLabel,
-          data: chartData.map(d => d.y),
-          borderColor: '#f92672',
-          backgroundColor: 'rgba(249, 38, 114, 0.1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          pointHoverBackgroundColor: '#f92672',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2
-        }]
+        datasets: datasets
       },
       options: {
         responsive: true,
@@ -181,8 +265,14 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           legend: {
             display: true,
             labels: {
-              color: '#f8f8f2'
-            }
+              color: '#f8f8f2',
+              filter: function(legendItem: any) {
+                // 过滤掉空标签
+                return legendItem.text !== '';
+              }
+            },
+            position: 'top',
+            align: 'start'
           },
           tooltip: {
             backgroundColor: '#2f2e27',
@@ -209,6 +299,7 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
           y: {
             beginAtZero: true,
             max: 1,
+            min: 0,
             title: {
               display: true,
               text: yLabel,
@@ -216,15 +307,21 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             },
             ticks: {
               color: '#90908a',
+              stepSize: 0.1,
               callback: function(value) {
                 return ((value as number) * 100).toFixed(0) + '%';
               }
             },
             grid: {
-              color: '#49483e'
+              color: '#49483e',
+              lineWidth: 1
             }
           },
           x: {
+            type: 'linear',
+            position: 'bottom',
+            min: xRange.min,
+            max: xRange.max,
             title: {
               display: true,
               text: xLabel,
@@ -235,12 +332,21 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
             },
             ticks: {
               color: '#90908a',
-              maxTicksLimit: 10,
+              maxTicksLimit: 12,
               maxRotation: 45,
-              minRotation: 0
+              minRotation: 0,
+              callback: function(value) {
+                const numValue = value as number;
+                if (powerChartType === 'effect-size') {
+                  return numValue.toFixed(2);
+                } else {
+                  return Math.round(numValue).toString();
+                }
+              }
             },
             grid: {
-              color: '#49483e'
+              color: '#49483e',
+              lineWidth: 1
             }
           }
         },

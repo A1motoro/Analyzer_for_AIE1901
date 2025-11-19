@@ -674,7 +674,17 @@
     "sampleSizeNote": "固定效应量和显著性水平，展示功效随样本量的变化。样本量越大，功效越高。",
     "powerFunctionNote2": "当功效接近 1 时，检验能够很好地检测到备择假设。",
     "powerFunctionNote3": "在零假设值处，功效等于显著性水平 α。",
-    "power": "功效"
+    "power": "功效",
+    "currentValue": "当前值",
+    "powerFunction": "功效函数图",
+    "powerFunctionDesc": "功效函数图展示了在不同参数值下检验功效的变化趋势，帮助理解参数对检验功效的影响。",
+    "powerVsEffectSize": "功效 vs 效应量",
+    "powerVsSampleSize": "功效 vs 样本量",
+    "powerFunctionNotes": "图表说明:",
+    "effectSizeNote": "横轴为效应量，纵轴为检验功效。曲线展示了在固定样本量下，不同效应量对应的检验功效。",
+    "sampleSizeNote": "横轴为样本量，纵轴为检验功效。曲线展示了在固定效应量下，不同样本量对应的检验功效。",
+    "powerFunctionNote2": "绿色标记点表示当前参数设置下的功效值",
+    "powerFunctionNote3": "虚线表示常用的功效参考线（80%和90%）"
   },
   "rohe": {
     "title": "ROHE分析结果",
