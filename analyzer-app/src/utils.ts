@@ -7,8 +7,8 @@ export const calculateBasicStats = function(data: number[]) {
     ? (sortedData[n/2 - 1] + sortedData[n/2]) / 2
     : sortedData[Math.floor(n/2)];
 
-  // 计算方差和标准差
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  // 计算方差和标准差（使用无偏估计，除以n-1）
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
   const stdDev = Math.sqrt(variance);
 
   // 计算众数
@@ -26,10 +26,10 @@ export const calculateBasicStats = function(data: number[]) {
   });
 
   // 计算偏度和峰度
-  const skewnessNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 3), 0) / n;
+  const skewnessNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 3), 0) / (n - 1);
   const skewness = skewnessNumerator / Math.pow(stdDev, 3);
 
-  const kurtosisNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 4), 0) / n;
+  const kurtosisNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 4), 0) / (n - 1);
   const kurtosis = kurtosisNumerator / Math.pow(stdDev, 4) - 3;
 
   return {
@@ -109,10 +109,10 @@ export const parseCSVContent = function(content: string) {
 };
 
 export const calculateMLE = function(data: number[]) {
-  // 假设正态分布的MLE参数估计
+  // 假设正态分布的MLE参数估计，但使用无偏样本方差
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
 
   return {
     mean,
@@ -125,7 +125,7 @@ export const calculateMoM = function(data: number[]) {
   // 假设正态分布的MoM参数估计
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
 
   return {
     mean,
@@ -1091,6 +1091,274 @@ export const performOneSampleTTest = function(sampleData: number[], mu0: number,
     alternative: alt
   };
 };
+
+// 计算均值大于或小于边界数值的概率（从原始数据）
+export function calculateMeanProbabilityFromData(data: number[], boundary: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided', knownVariance: number | null = null) {
+  const n = data.length;
+  const mean = data.reduce((sum, val) => sum + val, 0) / n;
+  let stdDev, standardError, zScore, tScore, probability, degreesOfFreedom;
+  let method = '';
+
+  if (knownVariance !== null) {
+    // 方差已知，使用z检验
+    stdDev = Math.sqrt(knownVariance);
+    method = 'z';
+  } else {
+    // 方差未知，计算样本标准差
+    const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
+    stdDev = Math.sqrt(variance);
+    // 根据样本量选择检验方法
+    method = n >= 30 ? 'z' : 't';
+  }
+
+  standardError = stdDev / Math.sqrt(n);
+  zScore = (boundary - mean) / standardError;
+
+  // 计算概率
+  if (method === 'z') {
+    // 使用z分布（正态分布）
+    const cdfValue = normalCDF(zScore);
+    
+    switch (direction) {
+      case 'less':
+        probability = cdfValue;
+        break;
+      case 'greater':
+        probability = 1 - cdfValue;
+        break;
+      case 'two-sided':
+        const tailProbability = 1 - normalCDF(Math.abs(zScore));
+        probability = 2 * tailProbability;
+        break;
+    }
+  } else {
+    // 使用t分布近似
+    const degreesOfFreedom = n - 1;
+    const tScore = (boundary - mean) / standardError;
+    const cdfValue = tCDFApprox(tScore, degreesOfFreedom);
+    
+    switch (direction) {
+      case 'less':
+        probability = cdfValue;
+        break;
+      case 'greater':
+        probability = 1 - cdfValue;
+        break;
+      case 'two-sided':
+        const tailProbability = 1 - tCDFApprox(Math.abs(tScore), degreesOfFreedom);
+        probability = 2 * tailProbability;
+        break;
+    }
+  }
+
+  return {
+    probability: Math.max(0, Math.min(1, probability)), // 确保概率值在[0,1]范围内
+    mean,
+    score: method === 'z' ? zScore : tScore,
+    zScore: method === 'z' ? zScore : undefined,
+    tScore: method === 't' ? tScore : undefined,
+    degreesOfFreedom: method === 't' ? degreesOfFreedom : undefined,
+    method,
+    sampleSize: n,
+    standardError
+  };
+};
+
+// 计算方差大于或小于边界数值的概率
+export function calculateVarianceProbability(data: number[], boundary: number, direction: 'less' | 'greater' = 'greater') {
+  const n = data.length;
+  if (n <= 1) {
+    return {
+      probability: 0.5,
+      variance: 0,
+      chiSquare: 0,
+      degreesOfFreedom: 0
+    };
+  }
+  
+  const mean = data.reduce((sum, val) => sum + val, 0) / n;
+  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
+  const degreesOfFreedom = n - 1;
+  
+  // 计算卡方统计量
+  const chiSquare = (degreesOfFreedom * sampleVariance) / boundary;
+  
+  const cdfApprox = chiSquareCDF(chiSquare, degreesOfFreedom);
+  
+  let probability;
+  if (direction === 'less') {
+    probability = cdfApprox;
+  } else { // greater
+    probability = 1 - cdfApprox;
+  }
+  
+  // 确保概率值在合理范围内
+  probability = Math.max(0, Math.min(1, probability));
+  
+  return {
+    probability,
+    variance: sampleVariance,
+    chiSquare,
+    degreesOfFreedom
+  };
+};
+
+// 通过概率值求均值边界值
+export function calculateMeanBoundary(data: number[], probability: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided', knownVariance: number | null = null) {
+  // 计算样本统计量
+  const n = data.length;
+  const mean = data.reduce((sum, val) => sum + val, 0) / n;
+  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
+  const variance = knownVariance !== null ? knownVariance : sampleVariance;
+  const stdDev = Math.sqrt(variance);
+  
+  // 确定临界值
+  let criticalValue: number;
+  const standardError = stdDev / Math.sqrt(n);
+  
+  // 根据样本量和是否已知方差选择分布
+  const useTTest = knownVariance === null;
+  const df = useTTest ? n - 1 : Infinity;
+  
+  // 计算临界值
+  if (direction === 'two-sided') {
+    const alpha = 1 - probability;
+    const tailProbability = alpha / 2;
+    
+    if (useTTest) {
+      // 使用t分布的双侧临界值
+      criticalValue = tQuantileApprox(df, 1 - tailProbability);
+    } else {
+      // 使用正态分布的双侧临界值
+      criticalValue = normalQuantile(1 - tailProbability);
+    }
+    
+    // 计算双侧边界
+    const lowerBound = mean - criticalValue * standardError;
+    const upperBound = mean + criticalValue * standardError;
+    
+    return {
+      lowerBound,
+      upperBound,
+      mean,
+      standardError,
+      criticalValue,
+      df,
+      method: useTTest ? 't-test' : 'z-test',
+      direction
+    };
+  } else if (direction === 'greater') {
+    // 右侧检验
+    const alpha = 1 - probability;
+    
+    if (useTTest) {
+      criticalValue = tQuantileApprox(df, 1 - alpha);
+    } else {
+      criticalValue = normalQuantile(1 - alpha);
+    }
+    
+    const boundary = mean + criticalValue * standardError;
+    
+    return {
+      boundary,
+      mean,
+      standardError,
+      criticalValue,
+      df,
+      method: useTTest ? 't-test' : 'z-test',
+      direction
+    };
+  } else { // direction === 'less'
+    // 左侧检验
+    const alpha = 1 - probability;
+    
+    if (useTTest) {
+      criticalValue = tQuantileApprox(df, alpha);
+    } else {
+      criticalValue = normalQuantile(alpha);
+    }
+    
+    const boundary = mean + criticalValue * standardError;
+    
+    return {
+      boundary,
+      mean,
+      standardError,
+      criticalValue,
+      df,
+      method: useTTest ? 't-test' : 'z-test',
+      direction
+    };
+  }
+};
+
+// 通过概率值求方差边界值
+export function calculateVarianceBoundary(data: number[], probability: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided') {
+  // 计算样本统计量
+  const n = data.length;
+  const mean = data.reduce((sum, val) => sum + val, 0) / n;
+  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
+  
+  // 自由度
+  const df = n - 1;
+  
+  let boundary1: number, boundary2: number;
+  
+  if (direction === 'two-sided') {
+    const alpha = 1 - probability;
+    const lowerTailProbability = alpha / 2;
+    const upperTailProbability = 1 - alpha / 2;
+    
+    // 计算卡方分位数
+    const lowerCriticalValue = chiSquareQuantile(lowerTailProbability, df);
+    const upperCriticalValue = chiSquareQuantile(upperTailProbability, df);
+    
+    // 计算方差边界
+    boundary1 = (df * sampleVariance) / upperCriticalValue; // 下界
+    boundary2 = (df * sampleVariance) / lowerCriticalValue; // 上界
+    
+    return {
+      lowerBound: boundary1,
+      upperBound: boundary2,
+      sampleVariance,
+      df,
+      lowerCriticalValue,
+      upperCriticalValue,
+      direction
+    };
+  } else if (direction === 'greater') {
+    // 右侧检验
+    const alpha = 1 - probability;
+    const criticalValue = chiSquareQuantile(alpha, df);
+    
+    // 计算方差边界
+    boundary1 = (df * sampleVariance) / criticalValue;
+    
+    return {
+      boundary: boundary1,
+      sampleVariance,
+      df,
+      criticalValue,
+      direction
+    };
+  } else { // direction === 'less'
+    // 左侧检验
+    const alpha = 1 - probability;
+    const criticalValue = chiSquareQuantile(1 - alpha, df);
+    
+    // 计算方差边界
+    boundary1 = (df * sampleVariance) / criticalValue;
+    
+    return {
+      boundary: boundary1,
+      sampleVariance,
+      df,
+      criticalValue,
+      direction
+    };
+  }
+};
+
 
 // 两样本t检验
 export const performTwoSampleTTest = function(
