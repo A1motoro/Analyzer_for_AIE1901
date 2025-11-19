@@ -436,27 +436,7 @@ const App: React.FC = () => {
       <footer className="bg-monokai-dark border-t border-monokai py-12">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            {/* API配置提示区域 */}
-            <div className="mb-6">
-              <p className="text-lg mb-2" style={{ color: 'var(--monokai-orange)' }}>
-                请先配置阿里云API
-              </p>
-              <p className="text-base mb-4" style={{ color: 'var(--monokai-yellow)' }}>
-                点击右上角"设置"按钮输入API密钥
-              </p>
-              <button 
-                className="px-6 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105"
-                style={{ 
-                  background: 'linear-gradient(135deg, var(--monokai-purple), var(--monokai-blue))',
-                  color: 'white',
-                  border: 'none',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
-                }}
-                onClick={() => setDrawerOpen(true)}
-              >
-                前往API设置
-              </button>
-            </div>
+
             
             {/* 副标题区域 */}
             <div className="mb-6">
