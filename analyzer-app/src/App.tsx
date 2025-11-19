@@ -432,39 +432,82 @@ const App: React.FC = () => {
       </main>
 
 
-      {/* 页脚 */}
+      {/* 美化版页脚 - 整合底部信息 */}
       <footer className="bg-monokai-dark border-t border-monokai py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="mb-6 md:mb-0 text-center md:text-left">
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold" style={{ color: 'var(--monokai-fg)' }}>{t('app.title')} {t('appInfo.webApp')}</h3>
-                  <p className="text-sm text-monokai-gray">{t('app.description')}</p>
-                </div>
-                <p className="text-sm text-monokai-dim">{t('app.footer')}</p>
-              </div>
-            <div className="flex space-x-4">
-              <a href="https://github.com/A1motoro/Analyzer_for_AIE1901" target="_blank" rel="noopener noreferrer"
-                className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-github text-xl"></i>
-              </a>
-              <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-twitter text-xl"></i>
-              </a>
-              <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-linkedin text-xl"></i>
-              </a>
+          <div className="text-center">
+            {/* API配置提示区域 */}
+            <div className="mb-6">
+              <p className="text-lg mb-2" style={{ color: 'var(--monokai-orange)' }}>
+                请先配置阿里云API
+              </p>
+              <p className="text-base mb-4" style={{ color: 'var(--monokai-yellow)' }}>
+                点击右上角"设置"按钮输入API密钥
+              </p>
+              <button 
+                className="px-6 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--monokai-purple), var(--monokai-blue))',
+                  color: 'white',
+                  border: 'none',
+                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                }}
+                onClick={() => setDrawerOpen(true)}
+              >
+                前往API设置
+              </button>
+            </div>
+            
+            {/* 副标题区域 */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--monokai-fg)' }}>
+                数据分析师 Web应用
+              </h3>
+              <p className="text-lg mb-4" style={{ color: 'var(--monokai-cyan)' }}>
+                AI驱动的数据分析平台
+              </p>
+            </div>
+            
+            {/* 版权信息 */}
+            <div className="mb-4">
+              <p className="text-sm" style={{ color: 'var(--monokai-gray)' }}>
+                © 2024 数据分析师Web应用. 保留所有权利.
+              </p>
+            </div>
+            
+            {/* 特色标签 */}
+            <div className="feature-tags">
+              <span className="feature-tag">
+                <span className="feature-tag-icon">🚀</span>
+                现代化设计
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">🤖</span>
+                AI驱动
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">📊</span>
+                数据可视化
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">⚡</span>
+                高性能
+              </span>
             </div>
           </div>
-
-          {/* 装饰性分割线 */}
-          <div className="mt-8 pt-8 border-t border-monokai">
-            <div className="flex justify-center space-x-8 text-sm text-monokai-dim">
-              <span>{t('appInfo.modernDesign')}</span>
-              <span>{t('appInfo.aiDriven')}</span>
-              <span>{t('appInfo.dataVisualization')}</span>
-              <span>{t('appInfo.highPerformance')}</span>
-            </div>
+          
+          {/* 社交媒体链接 */}
+          <div className="flex justify-center space-x-4 mt-8">
+            <a href="https://github.com/A1motoro/Analyzer_for_AIE1901" target="_blank" rel="noopener noreferrer"
+              className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-github text-xl"></i>
+            </a>
+            <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-twitter text-xl"></i>
+            </a>
+            <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-linkedin text-xl"></i>
+            </a>
           </div>
         </div>
       </footer>

@@ -126,7 +126,6 @@ const AIModelChat: React.FC<AIModelChatProps> = ({ analysisResult, data }) => {
       return (
         <div className="text-center text-blue-600 py-6">
           <i className="fa fa-info-circle text-2xl mb-2"></i>
-          <p>{t('ai.configuring')}</p>
           <p className="text-sm mt-1">{t('ai.configuringDesc')}</p>
           <button
             onClick={() => window.location.hash = '#settings'}
@@ -140,7 +139,6 @@ const AIModelChat: React.FC<AIModelChatProps> = ({ analysisResult, data }) => {
       return (
         <div className="text-center text-red-600 py-6">
           <i className="fa fa-exclamation-circle text-2xl mb-2"></i>
-          <p>{t('ai.error')}</p>
           <p className="text-sm mt-1">{t('ai.errorDesc')}</p>
           <button
             onClick={() => window.location.hash = '#settings'}
