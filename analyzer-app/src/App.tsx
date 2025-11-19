@@ -45,7 +45,6 @@ const App: React.FC = () => {
   // API配置状态
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('qwen-plus');
-  const [apiSaveSuccess, setApiSaveSuccess] = useState(false);
 
   // 初始化主题
   useEffect(() => {
@@ -131,14 +130,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // 保存API配置
-  const handleApiSave = () => {
-    const config = { apiKey, model };
-    localStorage.setItem('aliyunApiConfig', JSON.stringify(config));
-    setApiSaveSuccess(true);
-    message.success(t('api.saveSuccess'));
-    setTimeout(() => setApiSaveSuccess(false), 3000);
-  };
+  // 保存API密钥的函数将在后续实现
 
   // 处理数据分析
   const analyzeData = () => {
@@ -328,7 +320,16 @@ const App: React.FC = () => {
               {t('app.nav.analysis')}
             </button>
             <button
-              onClick={() => setCurrentView('tutorial')}
+              onClick={() => {
+                setCurrentView('tutorial');
+                // 自动滚动到教程区域
+                setTimeout(() => {
+                  const tutorialSection = document.querySelector('.tutorial-section');
+                  if (tutorialSection) {
+                    tutorialSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
               className="hero-secondary-btn"
             >
               <i className="fa fa-book mr-2"></i>
@@ -436,39 +437,62 @@ const App: React.FC = () => {
       </main>
 
 
-      {/* 页脚 */}
+      {/* 美化版页脚 - 整合底部信息 */}
       <footer className="bg-monokai-dark border-t border-monokai py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="mb-6 md:mb-0 text-center md:text-left">
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold" style={{ color: 'var(--monokai-fg)' }}>{t('app.title')} {t('appInfo.webApp')}</h3>
-                  <p className="text-sm text-monokai-gray">{t('app.description')}</p>
-                </div>
-                <p className="text-sm text-monokai-dim">{t('app.footer')}</p>
-              </div>
-            <div className="flex space-x-4">
-              <a href="https://github.com/A1motoro/Analyzer_for_AIE1901" target="_blank" rel="noopener noreferrer"
-                className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-github text-xl"></i>
-              </a>
-              <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-twitter text-xl"></i>
-              </a>
-              <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
-                <i className="fa fa-linkedin text-xl"></i>
-              </a>
+          <div className="text-center">
+
+            
+            {/* 副标题区域 */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--monokai-fg)' }}>
+                数据分析师 Web应用
+              </h3>
+              <p className="text-lg mb-4" style={{ color: 'var(--monokai-cyan)' }}>
+                AI驱动的数据分析平台
+              </p>
+            </div>
+            
+            {/* 版权信息 */}
+            <div className="mb-4">
+              <p className="text-sm" style={{ color: 'var(--monokai-gray)' }}>
+                © 2024 数据分析师Web应用. 保留所有权利.
+              </p>
+            </div>
+            
+            {/* 特色标签 */}
+            <div className="feature-tags">
+              <span className="feature-tag">
+                <span className="feature-tag-icon">🚀</span>
+                现代化设计
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">🤖</span>
+                AI驱动
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">📊</span>
+                数据可视化
+              </span>
+              <span className="feature-tag">
+                <span className="feature-tag-icon">⚡</span>
+                高性能
+              </span>
             </div>
           </div>
-
-          {/* 装饰性分割线 */}
-          <div className="mt-8 pt-8 border-t border-monokai">
-            <div className="flex justify-center space-x-8 text-sm text-monokai-dim">
-              <span>{t('appInfo.modernDesign')}</span>
-              <span>{t('appInfo.aiDriven')}</span>
-              <span>{t('appInfo.dataVisualization')}</span>
-              <span>{t('appInfo.highPerformance')}</span>
-            </div>
+          
+          {/* 社交媒体链接 */}
+          <div className="flex justify-center space-x-4 mt-8">
+            <a href="https://github.com/A1motoro/Analyzer_for_AIE1901" target="_blank" rel="noopener noreferrer"
+              className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-github text-xl"></i>
+            </a>
+            <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-twitter text-xl"></i>
+            </a>
+            <a href="#" className="p-3 rounded-lg bg-monokai-light hover:bg-monokai text-monokai-gray hover:text-monokai-fg transition">
+              <i className="fa fa-linkedin text-xl"></i>
+            </a>
           </div>
         </div>
       </footer>
@@ -862,8 +886,18 @@ const App: React.FC = () => {
               <Button
                 type="primary"
                 block
-                icon={<i className="fa fa-save mr-2"></i>}
-                onClick={handleApiSave}
+                icon={<i className="fa fa-info-circle mr-2"></i>}
+                onClick={() => {
+                  setCurrentView('tutorial');
+                  setDrawerOpen(false);
+                  // 自动滚动到教程区域
+                  setTimeout(() => {
+                    const tutorialSection = document.querySelector('.tutorial-section');
+                    if (tutorialSection) {
+                      tutorialSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
                 style={{
                   height: '40px',
                   backgroundColor: 'var(--monokai-purple)',
@@ -874,26 +908,7 @@ const App: React.FC = () => {
                 {t('api.save')}
               </Button>
 
-              {/* 保存成功提示 */}
-              {apiSaveSuccess && (
-                <div style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  background: theme === 'dark' ? 'rgba(78, 201, 176, 0.1)' : '#f6ffed',
-                  border: `1px solid ${theme === 'dark' ? 'var(--monokai-green)' : '#b7eb8f'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
-                  <i className="fa fa-check-circle" style={{ color: 'var(--monokai-green)' }}></i>
-                  <span style={{ 
-                    fontSize: '13px',
-                    color: 'var(--monokai-green)' 
-                  }}>
-                    {t('api.saveSuccess')}
-                  </span>
-                </div>
-              )}
+              {/* API保存成功提示将在后续实现 */}
             </Space>
           </div>
 
