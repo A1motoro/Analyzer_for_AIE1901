@@ -1183,10 +1183,7 @@ export function calculateVarianceProbability(data: number[], boundary: number, d
   // 计算卡方统计量
   const chiSquare = (degreesOfFreedom * sampleVariance) / boundary;
   
-  // 使用正态分布近似卡方分布的累积分布函数
-  // 卡方分布的近似计算（对于大自由度更准确）
-  const zApprox = Math.sqrt(2 * chiSquare) - Math.sqrt(2 * degreesOfFreedom - 1);
-  const cdfApprox = normalCDF(zApprox);
+  const cdfApprox = chiSquareCDF(chiSquare, degreesOfFreedom);
   
   let probability;
   if (direction === 'less') {
