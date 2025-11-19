@@ -111,12 +111,14 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
 
   // 获取下界值（兼容两种属性名）
   const getLowerBound = (): string => {
-    return getBoundaryValue('lowerBound') || getBoundaryValue('lowerBoundary');
+    const value = result?.lowerBound ?? result?.lowerBoundary;
+    return typeof value === 'number' ? value.toFixed(4) : (0).toFixed(4);
   };
 
   // 获取上界值（兼容两种属性名）
   const getUpperBound = (): string => {
-    return getBoundaryValue('upperBound') || getBoundaryValue('upperBoundary');
+    const value = result?.upperBound ?? result?.upperBoundary;
+    return typeof value === 'number' ? value.toFixed(4) : (0).toFixed(4);
   };
 
   // 获取单边界值
