@@ -33,7 +33,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
   const [currentLevel, setCurrentLevel] = useState(0.95); // 当前置信水平
   const [useCustomLevel, setUseCustomLevel] = useState(false); // 是否使用自定义置信水平
   const [boundaryValue, setBoundaryValue] = useState<number>(analysisResult.mean || 0); // 边界值
-  const [probabilityResult, setProbabilityResult] = useState<any>(null); // 概率计算结果
+  const [probabilityResult] = useState<any>(null); // 概率计算结果
   const [equalVariance, setEqualVariance] = useState(true);
     // 概率计算相关状态
     const [meanBoundary, setMeanBoundary] = useState<number>(analysisResult.mean || 0);
