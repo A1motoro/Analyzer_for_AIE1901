@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Alert, Tag, InputNumber, Button, Select } from 'antd';
 
 const { Text } = Typography;
-const { Option } = Select;
 
 // 定义边界计算结果的类型
 interface BoundaryResult {
@@ -103,6 +102,13 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
 
   const { method: testMethod, color: tagColor } = getTestMethodInfo();
 
+  // 定义方向选项
+  const directionOptions = [
+    { value: 'less', label: '小于' },
+    { value: 'greater', label: '大于' },
+    { value: 'two-sided', label: '双侧' }
+  ];
+
   // 安全地获取边界值，处理可能不存在的属性
   const getBoundaryValue = (property: keyof BoundaryResult, defaultValue: number = 0): string => {
     const value = result?.[property];
@@ -152,11 +158,8 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
             value={direction}
             onChange={(value) => setDirection(value)}
             style={{ width: '100%' }}
-          >
-            <Option value="less">小于</Option>
-            <Option value="greater">大于</Option>
-            <Option value="two-sided">双侧</Option>
-          </Select>
+            options={directionOptions}
+          />
         </Col>
         <Col xs={24} md={8}>
           <Button
