@@ -31,13 +31,47 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
   resultConfig
 }) => {
   const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      const boundaryResult = calculateFunction(data, probability, direction);
-      setResult(boundaryResult);
+      try {
+        setError(null);
+        const boundaryResult = calculateFunction(data, probability, direction);
+        setResult(boundaryResult);
+      } catch (err) {
+        console.error('Error calculating boundary:', err);
+        setError(err instanceof Error ? err.message : '计算过程中发生未知错误');
+        setResult(null);
+      }
     }
   }, [data, probability, direction, calculateFunction]);
+
+  // 获取检验方法和对应的颜色
+  const getTestMethodInfo = () => {
+    if (!result) return { method: '', color: 'purple' };
+    
+    // 处理均值边界计算的方法
+    if (result.method === 'z-test' || result.method === 't-test') {
+      return {
+        method: result.method === 'z-test' ? 'Z-test' : 'T-test',
+        color: result.method === 'z-test' ? 'blue' : 'purple'
+      };
+    }
+    
+    // 处理方差边界计算（使用卡方检验）
+    if (resultConfig.resultType === 'variance') {
+      return {
+        method: 'Chi-square',
+        color: 'purple'
+      };
+    }
+    
+    // 默认情况
+    return { method: '', color: 'purple' };
+  };
+
+  const { method: testMethod, color: tagColor } = getTestMethodInfo();
 
   return (
     <Card title={title} style={{ backgroundColor: '#49483e' }}>
@@ -75,8 +109,15 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
           <Button
             onClick={() => {
               if (data && data.length > 0) {
-                const boundaryResult = calculateFunction(data, probability, direction);
-                setResult(boundaryResult);
+                try {
+                  setError(null);
+                  const boundaryResult = calculateFunction(data, probability, direction);
+                  setResult(boundaryResult);
+                } catch (err) {
+                  console.error('Error calculating boundary:', err);
+                  setError(err instanceof Error ? err.message : '计算过程中发生未知错误');
+                  setResult(null);
+                }
               }
             }}
             style={{ marginTop: '29px', width: '100%' }}
@@ -85,6 +126,16 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
           </Button>
         </Col>
       </Row>
+
+      {error && (
+        <Alert
+          message="计算错误"
+          description={error}
+          type="error"
+          showIcon
+          style={{ marginBottom: '16px', backgroundColor: '#2f2e27', color: '#f8f8f2' }}
+        />
+      )}
 
       {result && (
         <Alert
@@ -96,20 +147,20 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
                     <Col xs={24} md={12}>
                       <Statistic
                         title={<Text style={{ color: '#90908a', fontSize: '12px' }}>下界值</Text>}
-                        value={result.lowerBoundary?.toFixed(4) || '0.0000'}
+                        value={result.lowerBound?.toFixed(4) || result.lowerBoundary?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: resultConfig.lowerColor === 'blue' ? '#1890ff' : '#52c41a', fontSize: '16px' }}
                       />
                     </Col>
                     <Col xs={24} md={12}>
                       <Statistic
                         title={<Text style={{ color: '#90908a', fontSize: '12px' }}>上界值</Text>}
-                        value={result.upperBoundary?.toFixed(4) || '0.0000'}
+                        value={result.upperBound?.toFixed(4) || result.upperBoundary?.toFixed(4) || '0.0000'}
                         valueStyle={{ color: resultConfig.upperColor === 'blue' ? '#1890ff' : '#52c41a', fontSize: '16px' }}
                       />
                     </Col>
                   </Row>
                   <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                    {resultConfig.resultType === 'mean' ? '均值' : '方差'}在 [{result.lowerBoundary?.toFixed(4)}, {result.upperBoundary?.toFixed(4)}] 范围内的概率为 {(probability * 100).toFixed(1)}%
+                    {resultConfig.resultType === 'mean' ? '均值' : '方差'}在 [{result.lowerBound?.toFixed(4) || result.lowerBoundary?.toFixed(4)}, {result.upperBound?.toFixed(4) || result.upperBoundary?.toFixed(4)}] 范围内的概率为 {(probability * 100).toFixed(1)}%
                   </Text>
                 </>
               ) : (
@@ -127,9 +178,9 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
                   </Text>
                 </>
               )}
-              {result.method && (
-                <Tag color={result.method === 'z' ? 'blue' : 'purple'}>
-                  {result.method === 'z' ? 'Z-test' : result.method === 't' ? 'T-test' : 'Chi-square'}
+              {testMethod && (
+                <Tag color={tagColor}>
+                  {testMethod}
                 </Tag>
               )}
             </Space>

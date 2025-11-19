@@ -15,7 +15,7 @@ import {
   calculateVarianceBoundary
 } from '../utils';
 import { useTranslation } from 'react-i18next';
-import ProbabilityBoundaryCard from './ProbabilityBoundaryCard';
+import ProbabilityBoundaryCard from './ProbabilityBoundaryCard.tsx';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -33,7 +33,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
   const [currentLevel, setCurrentLevel] = useState(0.95); // 当前置信水平
   const [useCustomLevel, setUseCustomLevel] = useState(false); // 是否使用自定义置信水平
   const [boundaryValue, setBoundaryValue] = useState<number>(analysisResult.mean || 0); // 边界值
-  const [probabilityResult] = useState<any>(null); // 概率计算结果
+
   const [equalVariance, setEqualVariance] = useState(true);
     // 概率计算相关状态
     const [meanBoundary, setMeanBoundary] = useState<number>(analysisResult.mean || 0);
@@ -187,74 +187,6 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
                 </Button>
               </Col>
             </Row>
-            
-            {probabilityResult && (
-              <Card
-                style={{
-                  backgroundColor: '#2f2e27',
-                  border: '1px solid #49483e',
-                  marginTop: '16px'
-                }}
-                bodyStyle={{ padding: '16px' }}
-              >
-                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                  <div>
-                    <Text strong style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>
-                      {t('confidence.probabilityResults')}:
-                    </Text>
-                    <Row gutter={16}>
-                      <Col xs={24} md={12}>
-                        <Statistic
-                          title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.probGreaterThan')}</Text>}
-                          value={(probabilityResult.probabilityGreater * 100).toFixed(2)}
-                          suffix="%"
-                          valueStyle={{ color: '#a6e22e', fontSize: '18px' }}
-                        />
-                        <Text style={{ color: '#75715e', fontSize: '12px', display: 'block', marginTop: '4px' }}>
-                          P(μ &gt; {boundaryValue?.toFixed(4)})
-                        </Text>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Statistic
-                          title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.probLessThan')}</Text>}
-                          value={(probabilityResult.probabilityLess * 100).toFixed(2)}
-                          suffix="%"
-                          valueStyle={{ color: '#f92672', fontSize: '18px' }}
-                        />
-                        <Text style={{ color: '#75715e', fontSize: '12px', display: 'block', marginTop: '4px' }}>
-                          P(μ &lt; {boundaryValue?.toFixed(4)})
-                        </Text>
-                      </Col>
-                    </Row>
-                  </div>
-                  <Divider style={{ borderColor: '#49483e', margin: '8px 0' }} />
-                  <Row gutter={16}>
-                    <Col xs={24} md={8}>
-                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.zScore')}:</Text>
-                      <Text style={{ color: '#66d9ef', fontSize: '14px', display: 'block', marginTop: '4px' }}>
-                        {probabilityResult.zScore}
-                      </Text>
-                    </Col>
-                    <Col xs={24} md={8}>
-                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.method')}:</Text>
-                      <Tag color={probabilityResult.method === 'z' ? 'blue' : 'purple'} style={{ marginTop: '4px' }}>
-                        {probabilityResult.method === 'z' ? 'Z-test' : 'T-test'}
-                      </Tag>
-                    </Col>
-                    <Col xs={24} md={8}>
-                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.boundaryPosition')}:</Text>
-                      <Text style={{ color: '#fd971f', fontSize: '14px', display: 'block', marginTop: '4px' }}>
-                        {boundaryValue! < basicCI.interval.lower
-                          ? t('confidence.belowCI')
-                          : boundaryValue! > basicCI.interval.upper
-                          ? t('confidence.aboveCI')
-                          : t('confidence.withinCI')}
-                      </Text>
-                    </Col>
-                  </Row>
-                </Space>
-              </Card>
-            )}
           </div>
         </Card>
 

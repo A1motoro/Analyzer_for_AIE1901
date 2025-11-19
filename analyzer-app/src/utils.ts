@@ -1324,7 +1324,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       df,
       lowerCriticalValue,
       upperCriticalValue,
-      direction
+      direction,
+      method: 'chi-square'
     };
   } else if (direction === 'greater') {
     // 右侧检验
@@ -1339,7 +1340,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       sampleVariance,
       df,
       criticalValue,
-      direction
+      direction,
+      method: 'chi-square'
     };
   } else { // direction === 'less'
     // 左侧检验
@@ -1354,7 +1356,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       sampleVariance,
       df,
       criticalValue,
-      direction
+      direction,
+      method: 'chi-square'
     };
   }
 };
