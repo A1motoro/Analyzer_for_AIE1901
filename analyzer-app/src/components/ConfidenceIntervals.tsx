@@ -60,22 +60,9 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.meanCI')} style={{ backgroundColor: '#49483e' }}>
-          <Row gutter={16} style={{ marginBottom: '16px' }}>
-            <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
-              <Select
-                value={confidenceLevel}
-                onChange={setConfidenceLevel}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                <Option value={0.80}>80%</Option>
-                <Option value={0.90}>90%</Option>
-                <Option value={0.95}>95%</Option>
-                <Option value={0.99}>99%</Option>
-                <Option value={0.999}>99.9%</Option>
-              </Select>
-            </Col>
-          </Row>
+          <div style={{ marginBottom: '16px' }}>
+            {renderConfidenceLevelSelector()}
+          </div>
           <Row gutter={16}>
             <Col xs={24} md={8}>
               <Statistic
@@ -94,7 +81,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             <Col xs={24} md={8}>
               <Statistic
                 title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
-                value={`${(confidenceLevel * 100).toFixed(0)}%`}
+                value={`${(currentLevel * 100).toFixed(useCustomLevel ? 2 : 0)}%`}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
               />
             </Col>
@@ -104,7 +91,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  {t('confidence.meanCI95', { level: (confidenceLevel * 100).toFixed(0) })}:
+                  {t('confidence.meanCI95', { level: (currentLevel * 100).toFixed(useCustomLevel ? 2 : 0) })}:
                 </Text>
                 <Tag color="blue" style={{ fontSize: '14px' }}>
                   [{basicCI?.interval?.lower?.toFixed(4) || '0.0000'},
@@ -116,6 +103,104 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             showIcon
             style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
+          
+          {/* 边界值概率分析 */}
+          <Divider />
+          <div style={{ marginTop: '16px' }}>
+            <Title level={5} style={{ color: '#f8f8f2', marginBottom: '12px' }}>
+              {t('confidence.boundaryAnalysis')}
+            </Title>
+            <Row gutter={16} style={{ marginBottom: '16px' }}>
+              <Col xs={24} md={16}>
+                <Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>
+                  {t('confidence.boundaryValue')}:
+                </Text>
+                <InputNumber
+                  value={boundaryValue}
+                  onChange={(value) => setBoundaryValue(value)}
+                  placeholder={t('confidence.boundaryPlaceholder')}
+                  style={{ width: '100%' }}
+                  precision={4}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Button
+                  onClick={() => setBoundaryValue(basicCI?.mean || null)}
+                  style={{ marginTop: '29px', width: '100%' }}
+                >
+                  {t('confidence.useSampleMean')}
+                </Button>
+              </Col>
+            </Row>
+            
+            {probabilityResult && (
+              <Card
+                style={{
+                  backgroundColor: '#2f2e27',
+                  border: '1px solid #49483e',
+                  marginTop: '16px'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                  <div>
+                    <Text strong style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>
+                      {t('confidence.probabilityResults')}:
+                    </Text>
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <Statistic
+                          title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.probGreaterThan')}</Text>}
+                          value={(probabilityResult.probabilityGreater * 100).toFixed(2)}
+                          suffix="%"
+                          valueStyle={{ color: '#a6e22e', fontSize: '18px' }}
+                        />
+                        <Text style={{ color: '#75715e', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+                          P(μ &gt; {boundaryValue?.toFixed(4)})
+                        </Text>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Statistic
+                          title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.probLessThan')}</Text>}
+                          value={(probabilityResult.probabilityLess * 100).toFixed(2)}
+                          suffix="%"
+                          valueStyle={{ color: '#f92672', fontSize: '18px' }}
+                        />
+                        <Text style={{ color: '#75715e', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+                          P(μ &lt; {boundaryValue?.toFixed(4)})
+                        </Text>
+                      </Col>
+                    </Row>
+                  </div>
+                  <Divider style={{ borderColor: '#49483e', margin: '8px 0' }} />
+                  <Row gutter={16}>
+                    <Col xs={24} md={8}>
+                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.zScore')}:</Text>
+                      <Text style={{ color: '#66d9ef', fontSize: '14px', display: 'block', marginTop: '4px' }}>
+                        {probabilityResult.zScore}
+                      </Text>
+                    </Col>
+                    <Col xs={24} md={8}>
+                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.method')}:</Text>
+                      <Tag color={probabilityResult.method === 'z' ? 'blue' : 'purple'} style={{ marginTop: '4px' }}>
+                        {probabilityResult.method === 'z' ? 'Z-test' : 'T-test'}
+                      </Tag>
+                    </Col>
+                    <Col xs={24} md={8}>
+                      <Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.boundaryPosition')}:</Text>
+                      <Text style={{ color: '#fd971f', fontSize: '14px', display: 'block', marginTop: '4px' }}>
+                        {boundaryValue! < basicCI.interval.lower
+                          ? t('confidence.belowCI')
+                          : boundaryValue! > basicCI.interval.upper
+                          ? t('confidence.aboveCI')
+                          : t('confidence.withinCI')}
+                      </Text>
+                    </Col>
+                  </Row>
+                </Space>
+              </Card>
+            )}
+          </div>
         </Card>
 
         <Card title={t('confidence.varianceCI')} style={{ backgroundColor: '#49483e' }}>
@@ -137,7 +222,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             <Col xs={24} md={8}>
               <Statistic
                 title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
-                value={`${(confidenceLevel * 100).toFixed(0)}%`}
+                value={`${(currentLevel * 100).toFixed(useCustomLevel ? 2 : 0)}%`}
                 valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
               />
             </Col>
@@ -147,7 +232,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  {t('confidence.varianceCI95', { level: (confidenceLevel * 100).toFixed(0) })}:
+                  {t('confidence.varianceCI95', { level: (currentLevel * 100).toFixed(useCustomLevel ? 2 : 0) })}:
                 </Text>
                 <Tag color="purple" style={{ fontSize: '14px' }}>
                   [{varianceCI.interval.lower?.toFixed(4) || '0.0000'},
@@ -474,7 +559,8 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
   const renderTwoSampleCI = () => {
     const secondData = generateSecondDataset(data.length);
-    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, confidenceLevel, equalVariance);
+    const currentLevel = getCurrentConfidenceLevel();
+    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, currentLevel, equalVariance);
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -492,18 +578,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
               </Select>
             </Col>
             <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
-              <Select
-                value={confidenceLevel}
-                onChange={setConfidenceLevel}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                <Option value={0.80}>80%</Option>
-                <Option value={0.90}>90%</Option>
-                <Option value={0.95}>95%</Option>
-                <Option value={0.99}>99%</Option>
-                <Option value={0.999}>99.9%</Option>
-              </Select>
+              {renderConfidenceLevelSelector()}
             </Col>
           </Row>
 
@@ -545,7 +620,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
                   {t('confidence.meanDiffCI', { 
-                    level: (confidenceLevel * 100).toFixed(0),
+                    level: (currentLevel * 100).toFixed(useCustomLevel ? 2 : 0),
                     method: twoSampleCI.method 
                   })}:
                 </Text>
@@ -569,10 +644,11 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
   const renderPairedCI = () => {
     const secondData = generateSecondDataset(data.length);
+    const currentLevel = getCurrentConfidenceLevel();
     let pairedCI;
 
     try {
-      pairedCI = calculatePairedMeanCI(data, secondData, confidenceLevel);
+      pairedCI = calculatePairedMeanCI(data, secondData, currentLevel);
     } catch (error) {
       return (
         <Alert
@@ -588,22 +664,9 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.pairedMeanDiff')} style={{ backgroundColor: '#49483e' }}>
-          <Row gutter={16} style={{ marginBottom: '16px' }}>
-            <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
-              <Select
-                value={confidenceLevel}
-                onChange={setConfidenceLevel}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                <Option value={0.80}>80%</Option>
-                <Option value={0.90}>90%</Option>
-                <Option value={0.95}>95%</Option>
-                <Option value={0.99}>99%</Option>
-                <Option value={0.999}>99.9%</Option>
-              </Select>
-            </Col>
-          </Row>
+          <div style={{ marginBottom: '16px' }}>
+            {renderConfidenceLevelSelector()}
+          </div>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
@@ -629,7 +692,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             <Col xs={24} md={6}>
               <Statistic
                 title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
-                value={`${(confidenceLevel * 100).toFixed(0)}%`}
+                value={`${(currentLevel * 100).toFixed(useCustomLevel ? 2 : 0)}%`}
                 valueStyle={{ color: '#f92672', fontSize: '16px' }}
               />
             </Col>
@@ -641,7 +704,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  {t('confidence.pairedDiffCI', { level: (confidenceLevel * 100).toFixed(0) })}:
+                  {t('confidence.pairedDiffCI', { level: (currentLevel * 100).toFixed(useCustomLevel ? 2 : 0) })}:
                 </Text>
                 <Tag color="cyan" style={{ fontSize: '14px' }}>
                   [{pairedCI.interval.lower?.toFixed(4) || '0.0000'},
@@ -665,27 +728,15 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     const successCount = Math.round(data.filter(x => x > analysisResult.mean).length);
     const totalCount = data.length;
     const mockSuccess2 = Math.round(totalCount * 0.4);
-    const proportionCI = calculateTwoProportionCI(successCount, totalCount, mockSuccess2, totalCount, confidenceLevel);
+    const currentLevel = getCurrentConfidenceLevel();
+    const proportionCI = calculateTwoProportionCI(successCount, totalCount, mockSuccess2, totalCount, currentLevel);
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title={t('confidence.twoProportionDiff')} style={{ backgroundColor: '#49483e' }}>
-          <Row gutter={16} style={{ marginBottom: '16px' }}>
-            <Col xs={24} md={12}>
-              <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
-              <Select
-                value={confidenceLevel}
-                onChange={setConfidenceLevel}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                <Option value={0.80}>80%</Option>
-                <Option value={0.90}>90%</Option>
-                <Option value={0.95}>95%</Option>
-                <Option value={0.99}>99%</Option>
-                <Option value={0.999}>99.9%</Option>
-              </Select>
-            </Col>
-          </Row>
+          <div style={{ marginBottom: '16px' }}>
+            {renderConfidenceLevelSelector()}
+          </div>
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Statistic
@@ -713,7 +764,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             <Col xs={24} md={6}>
               <Statistic
                 title={<Text style={{ color: '#90908a', fontSize: '12px' }}>{t('confidence.confidenceLevel')}</Text>}
-                value={`${(confidenceLevel * 100).toFixed(0)}%`}
+                value={`${(currentLevel * 100).toFixed(useCustomLevel ? 2 : 0)}%`}
                 valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
               />
             </Col>
@@ -725,7 +776,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             message={
               <Space direction="vertical">
                 <Text style={{ color: '#f8f8f2' }}>
-                  {t('confidence.proportionDiffCI', { level: (confidenceLevel * 100).toFixed(0) })}:
+                  {t('confidence.proportionDiffCI', { level: (currentLevel * 100).toFixed(useCustomLevel ? 2 : 0) })}:
                 </Text>
                 <Tag color="orange" style={{ fontSize: '14px' }}>
                   [{proportionCI.interval.lower?.toFixed(4) || '0.0000'},

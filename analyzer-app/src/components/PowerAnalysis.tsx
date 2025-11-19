@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider, Progress } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, Statistic, Row, Col, Typography, Space, Select, InputNumber, Alert, Tabs, Divider, Progress, Radio } from 'antd';
+import { Chart, registerables } from 'chart.js';
 import { useTranslation } from 'react-i18next';
 import {
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  LineChartOutlined
 } from '@ant-design/icons';
 import {
   calculatePowerOneSampleT,
@@ -10,8 +12,12 @@ import {
   calculatePowerTwoSampleT,
   calculateSampleSizeTwoSampleT,
   calculatePowerProportionTest,
-  calculateSampleSizeProportionTest
+  calculateSampleSizeProportionTest,
+  generatePowerFunctionData
 } from '../utils';
+
+// 注册Chart.js组件
+Chart.register(...registerables);
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -33,6 +39,10 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
   const [alternative, setAlternative] = useState('two-sided');
   const [p0, setP0] = useState(0.5);
   const [p1, setP1] = useState(0.6);
+  
+  // Power function chart相关状态
+  const [powerChartType, setPowerChartType] = useState<'effect-size' | 'sample-size'>('effect-size');
+  const powerChartRef = useRef<HTMLCanvasElement>(null);
 
   const runPowerAnalysis = () => {
     let result;
@@ -76,6 +86,171 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
 
   const powerResult = runPowerAnalysis();
   const sampleSizeResult = runSampleSizeCalculation();
+
+  // 生成并绘制 Power Function 图表
+  useEffect(() => {
+    if (!powerChartRef.current || !powerResult) return;
+
+    const ctx = powerChartRef.current.getContext('2d');
+    if (!ctx) return;
+
+    // 销毁现有图表
+    const existingChart = Chart.getChart(powerChartRef.current);
+    if (existingChart) existingChart.destroy();
+
+    // 准备参数
+    const fixedParams: any = {
+      alpha,
+      alternative: alternative as 'less' | 'greater' | 'two-sided'
+    };
+
+    let xRange: { min: number; max: number; steps: number };
+    let xLabel: string;
+    let yLabel = t('power.power');
+
+    if (powerChartType === 'effect-size') {
+      fixedParams.sampleSize = sampleSize;
+      if (testType === 'proportion') {
+        fixedParams.p0 = p0;
+      }
+      xRange = { min: 0.1, max: 2.0, steps: 50 };
+      xLabel = t('power.effectSize');
+    } else {
+      fixedParams.effectSize = effectSize;
+      if (testType === 'proportion') {
+        fixedParams.p0 = p0;
+        fixedParams.p1 = p1;
+      }
+      xRange = { min: 10, max: 200, steps: 50 };
+      xLabel = t('power.sampleSize');
+    }
+
+    // 生成数据
+    const chartData = generatePowerFunctionData(
+      testType as 'one-sample-t' | 'two-sample-t' | 'proportion',
+      powerChartType,
+      fixedParams,
+      xRange
+    );
+
+    // 创建图表
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.map(d => d.x.toFixed(2)),
+        datasets: [{
+          label: yLabel,
+          data: chartData.map(d => d.y),
+          borderColor: '#f92672',
+          backgroundColor: 'rgba(249, 38, 114, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: '#f92672',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 5,
+            bottom: 5,
+            left: 5,
+            right: 5
+          }
+        },
+        resizeDelay: 0,
+        plugins: {
+            title: {
+              display: true,
+              text: powerChartType === 'effect-size' 
+                ? t('power.powerVsEffectSize')
+                : t('power.powerVsSampleSize'),
+              color: '#f8f8f2',
+              font: { size: 14, weight: 'bold' },
+              padding: {
+                top: 10,
+                bottom: 15
+              }
+            },
+          legend: {
+            display: true,
+            labels: {
+              color: '#f8f8f2'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#2f2e27',
+            titleColor: '#f8f8f2',
+            bodyColor: '#f8f8f2',
+            borderColor: '#49483e',
+            borderWidth: 1,
+            callbacks: {
+              title: (tooltipItems) => {
+                const value = parseFloat(tooltipItems[0].label);
+                return `${xLabel}: ${value.toFixed(3)}`;
+              },
+              label: (context) => {
+                const powerValue = context.parsed.y;
+                if (powerValue === null || powerValue === undefined) {
+                  return `${yLabel}: N/A`;
+                }
+                return `${yLabel}: ${(powerValue * 100).toFixed(2)}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 1,
+            title: {
+              display: true,
+              text: yLabel,
+              color: '#f8f8f2'
+            },
+            ticks: {
+              color: '#90908a',
+              callback: function(value) {
+                return ((value as number) * 100).toFixed(0) + '%';
+              }
+            },
+            grid: {
+              color: '#49483e'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: xLabel,
+              color: '#f8f8f2',
+              font: {
+                size: 12
+              }
+            },
+            ticks: {
+              color: '#90908a',
+              maxTicksLimit: 10,
+              maxRotation: 45,
+              minRotation: 0
+            },
+            grid: {
+              color: '#49483e'
+            }
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeInOutQuart'
+        }
+      }
+    });
+  }, [powerChartType, testType, effectSize, alpha, sampleSize, alternative, p0, p1, powerResult, t]);
 
   const getAlternativeText = (alt: string) => {
     switch (alt) {
@@ -250,6 +425,79 @@ const PowerAnalysis: React.FC<PowerAnalysisProps> = ({ data }) => {
               • {t('power.lowPower')}
             </Text>
           </div>
+        </Card>
+      )}
+
+      {/* Power Function 图表 */}
+      {powerResult && (
+        <Card 
+          title={
+            <Space>
+              <LineChartOutlined style={{ color: '#f92672' }} />
+              <Text style={{ color: '#f8f8f2' }}>{t('power.powerFunction')}</Text>
+            </Space>
+          }
+          style={{ backgroundColor: '#49483e' }}
+        >
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Alert
+              message={
+                <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
+                  {t('power.powerFunctionDesc')}
+                </Text>
+              }
+              type="info"
+              showIcon
+              style={{ backgroundColor: '#2f2e27', borderColor: '#49483e' }}
+            />
+
+            {/* 图表类型选择 */}
+            <Radio.Group
+              value={powerChartType}
+              onChange={(e) => setPowerChartType(e.target.value)}
+              style={{ width: '100%' }}
+            >
+              <Radio.Button value="effect-size" style={{ color: '#f8f8f2' }}>
+                {t('power.powerVsEffectSize')}
+              </Radio.Button>
+              <Radio.Button value="sample-size" style={{ color: '#f8f8f2' }}>
+                {t('power.powerVsSampleSize')}
+              </Radio.Button>
+            </Radio.Group>
+
+            {/* 图表容器 */}
+            <div
+              style={{
+                backgroundColor: '#1e1e1e',
+                width: '100%',
+                height: '400px',
+                padding: '16px',
+                borderRadius: '6px',
+                position: 'relative',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <canvas ref={powerChartRef} />
+              </div>
+            </div>
+
+            {/* 图表说明 */}
+            <div style={{ padding: '12px', backgroundColor: '#2f2e27', borderRadius: '6px' }}>
+              <Text strong style={{ color: '#f8f8f2' }}>{t('power.powerFunctionNotes')}</Text>
+              <br />
+              <Text style={{ color: '#c8c8c2', fontSize: '12px' }}>
+                • {powerChartType === 'effect-size' 
+                  ? t('power.effectSizeNote')
+                  : t('power.sampleSizeNote')}
+                <br />
+                • {t('power.powerFunctionNote2')}
+                <br />
+                • {t('power.powerFunctionNote3')}
+              </Text>
+            </div>
+          </Space>
         </Card>
       )}
     </Space>
