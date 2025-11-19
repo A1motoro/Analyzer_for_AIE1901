@@ -1,8 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Alert, Tag, InputNumber, Button, Select } from 'antd';
 
 const { Text } = Typography;
 const { Option } = Select;
+
+// 定义边界计算结果的类型
+interface BoundaryResult {
+  // 单边界结果
+  boundary?: number;
+  // 双边界结果
+  lowerBound?: number;
+  upperBound?: number;
+  lowerBoundary?: number; // 兼容旧属性名
+  upperBoundary?: number; // 兼容旧属性名
+  // 检验方法
+  method?: 'z-test' | 't-test' | 'chi-square';
+  // 其他可能的属性
+  sampleVariance?: number;
+  df?: number;
+  criticalValue?: number;
+  direction?: 'less' | 'greater' | 'two-sided';
+}
+
+// 定义检验方法信息的类型
+interface TestMethodInfo {
+  method: string;
+  color: string;
+}
 
 interface ProbabilityBoundaryCardProps {
   title: string;
@@ -11,7 +35,7 @@ interface ProbabilityBoundaryCardProps {
   setProbability: (value: number) => void;
   direction: 'less' | 'greater' | 'two-sided';
   setDirection: (value: 'less' | 'greater' | 'two-sided') => void;
-  calculateFunction: (data: number[], probability: number, direction: 'less' | 'greater' | 'two-sided') => any;
+  calculateFunction: (data: number[], probability: number, direction: 'less' | 'greater' | 'two-sided') => BoundaryResult;
   resultConfig: {
     singleColor: string;
     upperColor: string;
@@ -30,10 +54,11 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
   calculateFunction,
   resultConfig
 }) => {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<BoundaryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // 提取计算逻辑到单独的函数，避免重复
+  const calculateBoundary = useCallback(() => {
     if (data && data.length > 0) {
       try {
         setError(null);
@@ -47,8 +72,13 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
     }
   }, [data, probability, direction, calculateFunction]);
 
-  // 获取检验方法和对应的颜色
-  const getTestMethodInfo = () => {
+  // 使用useEffect在依赖项变化时自动计算
+  useEffect(() => {
+    calculateBoundary();
+  }, [calculateBoundary]);
+
+  // 增强getTestMethodInfo函数的健壮性
+  const getTestMethodInfo = useCallback((): TestMethodInfo => {
     if (!result) return { method: '', color: 'purple' };
     
     // 处理均值边界计算的方法
@@ -60,7 +90,7 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
     }
     
     // 处理方差边界计算（使用卡方检验）
-    if (resultConfig.resultType === 'variance') {
+    if (resultConfig.resultType === 'variance' || result.method === 'chi-square') {
       return {
         method: 'Chi-square',
         color: 'purple'
@@ -69,9 +99,30 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
     
     // 默认情况
     return { method: '', color: 'purple' };
-  };
+  }, [result, resultConfig.resultType]);
 
   const { method: testMethod, color: tagColor } = getTestMethodInfo();
+
+  // 安全地获取边界值，处理可能不存在的属性
+  const getBoundaryValue = (property: keyof BoundaryResult, defaultValue: number = 0): string => {
+    const value = result?.[property];
+    return typeof value === 'number' ? value.toFixed(4) : defaultValue.toFixed(4);
+  };
+
+  // 获取下界值（兼容两种属性名）
+  const getLowerBound = (): string => {
+    return getBoundaryValue('lowerBound') || getBoundaryValue('lowerBoundary');
+  };
+
+  // 获取上界值（兼容两种属性名）
+  const getUpperBound = (): string => {
+    return getBoundaryValue('upperBound') || getBoundaryValue('upperBoundary');
+  };
+
+  // 获取单边界值
+  const getSingleBoundary = (): string => {
+    return getBoundaryValue('boundary');
+  };
 
   return (
     <Card title={title} style={{ backgroundColor: '#49483e' }}>
@@ -107,19 +158,7 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
         </Col>
         <Col xs={24} md={8}>
           <Button
-            onClick={() => {
-              if (data && data.length > 0) {
-                try {
-                  setError(null);
-                  const boundaryResult = calculateFunction(data, probability, direction);
-                  setResult(boundaryResult);
-                } catch (err) {
-                  console.error('Error calculating boundary:', err);
-                  setError(err instanceof Error ? err.message : '计算过程中发生未知错误');
-                  setResult(null);
-                }
-              }
-            }}
+            onClick={calculateBoundary}
             style={{ marginTop: '29px', width: '100%' }}
           >
             重新计算
@@ -147,20 +186,20 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
                     <Col xs={24} md={12}>
                       <Statistic
                         title={<Text style={{ color: '#90908a', fontSize: '12px' }}>下界值</Text>}
-                        value={result.lowerBound?.toFixed(4) || result.lowerBoundary?.toFixed(4) || '0.0000'}
+                        value={getLowerBound()}
                         valueStyle={{ color: resultConfig.lowerColor === 'blue' ? '#1890ff' : '#52c41a', fontSize: '16px' }}
                       />
                     </Col>
                     <Col xs={24} md={12}>
                       <Statistic
                         title={<Text style={{ color: '#90908a', fontSize: '12px' }}>上界值</Text>}
-                        value={result.upperBound?.toFixed(4) || result.upperBoundary?.toFixed(4) || '0.0000'}
+                        value={getUpperBound()}
                         valueStyle={{ color: resultConfig.upperColor === 'blue' ? '#1890ff' : '#52c41a', fontSize: '16px' }}
                       />
                     </Col>
                   </Row>
                   <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                    {resultConfig.resultType === 'mean' ? '均值' : '方差'}在 [{result.lowerBound?.toFixed(4) || result.lowerBoundary?.toFixed(4)}, {result.upperBound?.toFixed(4) || result.upperBoundary?.toFixed(4)}] 范围内的概率为 {(probability * 100).toFixed(1)}%
+                    {resultConfig.resultType === 'mean' ? '均值' : '方差'}在 [{getLowerBound()}, {getUpperBound()}] 范围内的概率为 {(probability * 100).toFixed(1)}%
                   </Text>
                 </>
               ) : (
@@ -169,12 +208,12 @@ const ProbabilityBoundaryCard: React.FC<ProbabilityBoundaryCardProps> = ({
                     title={<Text style={{ color: '#90908a', fontSize: '12px' }}>
                       {direction === 'less' ? '上界值' : '下界值'}
                     </Text>}
-                    value={result.boundary?.toFixed(4) || '0.0000'}
+                    value={getSingleBoundary()}
                     valueStyle={{ color: resultConfig.singleColor === 'green' ? '#52c41a' : '#1890ff', fontSize: '16px' }}
                   />
                   <Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
                     {resultConfig.resultType === 'mean' ? '均值' : '方差'}
-                    {direction === 'less' ? '小于' : '大于'} {result.boundary?.toFixed(4)} 的概率为 {(probability * 100).toFixed(1)}%
+                    {direction === 'less' ? '小于' : '大于'} {getSingleBoundary()} 的概率为 {(probability * 100).toFixed(1)}%
                   </Text>
                 </>
               )}
