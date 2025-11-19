@@ -15,6 +15,7 @@ import {
   calculateVarianceBoundary
 } from '../utils';
 import { useTranslation } from 'react-i18next';
+import ProbabilityBoundaryCard from './ProbabilityBoundaryCard';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -349,7 +350,8 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
                     {meanProb.probability.toFixed(6)} ({(meanProb.probability * 100).toFixed(4)}%)
                   </Tag>
                   <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                    使用 {meanProb.method.toUpperCase()} 方法, Z分数: {meanProb.zScore.toFixed(4)}
+                    使用 {meanProb.method.toUpperCase()} 方法, {meanProb.method.toUpperCase()}分数: {(meanProb.method === 'z' ? meanProb.zScore : meanProb.tScore)?.toFixed(4)}
+                    {meanProb.method === 't' && meanProb.degreesOfFreedom && `, 自由度: ${meanProb.degreesOfFreedom}`}
                   </Typography.Text>
                 </Space>
               }
@@ -412,208 +414,38 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
           </Card>
 
           {/* 通过概率值求均值边界值 */}
-          <Card title="概率求均值边界值" style={{ backgroundColor: '#49483e' }}>
-            <Row gutter={16} style={{ marginBottom: '16px' }}>
-              <Col xs={24} md={8}>
-                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>概率值:</Typography.Text>
-                <InputNumber
-                  value={meanProbabilityForBoundary}
-                  onChange={(value) => setMeanProbabilityForBoundary(value || 0.95)}
-                  style={{ width: '100%' }}
-                  precision={4}
-                  min={0.0001}
-                  max={0.9999}
-                  formatter={(value) => value !== undefined ? `${(value * 100).toFixed(2)}%` : '0%'}
-                  parser={(value) => parseFloat((value || '0').replace('%', '')) / 100}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>方向:</Typography.Text>
-                <Select
-                  value={meanDirectionForBoundary}
-                  onChange={(value) => setMeanDirectionForBoundary(value)}
-                  style={{ width: '100%' }}
-                >
-                  <Select.Option value="less">小于</Select.Option>
-                  <Select.Option value="greater">大于</Select.Option>
-                  <Select.Option value="two-sided">双侧</Select.Option>
-                </Select>
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={<Typography.Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Typography.Text>}
-                  value={(meanProbabilityForBoundary * 100).toFixed(2)}
-                  suffix="%"
-                  valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
-                />
-              </Col>
-            </Row>
-            
-            {(() => {
-              try {
-                const result = calculateMeanBoundary(data, meanProbabilityForBoundary, meanDirectionForBoundary);
-                
-                if (result.direction === 'two-sided') {
-                  return (
-                    <Alert
-                      message={
-                        <Space direction="vertical">
-                          <Typography.Text style={{ color: '#f8f8f2' }}>
-                            {`${(meanProbabilityForBoundary * 100).toFixed(2)}% 置信区间的均值边界:`}
-                          </Typography.Text>
-                          <Tag color="blue" style={{ fontSize: '14px' }}>
-                            下界: {result.lowerBound?.toFixed(6)}
-                          </Tag>
-                          <Tag color="blue" style={{ fontSize: '14px' }}>
-                            上界: {result.upperBound?.toFixed(6)}
-                          </Tag>
-                          <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                            使用 {result.method.toUpperCase()} 方法, 临界值: {result.criticalValue?.toFixed(4)}
-                          </Typography.Text>
-                        </Space>
-                      }
-                      type="success"
-                      showIcon
-                      style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                    />
-                  );
-                } else {
-                  return (
-                    <Alert
-                      message={
-                        <Space direction="vertical">
-                          <Typography.Text style={{ color: '#f8f8f2' }}>
-                            {`均值${result.direction === 'less' ? '小于' : '大于'}边界值的概率为 ${(meanProbabilityForBoundary * 100).toFixed(2)}% 时:`}
-                          </Typography.Text>
-                          <Tag color="green" style={{ fontSize: '14px' }}>
-                            边界值: {result.boundary?.toFixed(6)}
-                          </Tag>
-                          <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                            使用 {result.method.toUpperCase()} 方法, 临界值: {result.criticalValue?.toFixed(4)}
-                          </Typography.Text>
-                        </Space>
-                      }
-                      type="success"
-                      showIcon
-                      style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                    />
-                  );
-                }
-              } catch (error) {
-                return (
-                  <Alert
-                    message="计算错误"
-                    description="请检查输入参数"
-                    type="error"
-                    showIcon
-                    style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                  />
-                );
-              }
-            })()}
-          </Card>
+          <ProbabilityBoundaryCard
+            title="概率求均值边界值"
+            data={data}
+            probability={meanProbabilityForBoundary}
+            setProbability={setMeanProbabilityForBoundary}
+            direction={meanDirectionForBoundary}
+            setDirection={setMeanDirectionForBoundary}
+            calculateFunction={calculateMeanBoundary}
+            resultConfig={{
+              singleColor: 'green',
+              upperColor: 'blue',
+              lowerColor: 'blue',
+              resultType: 'mean'
+            }}
+          />
 
           {/* 通过概率值求方差边界值 */}
-          <Card title="概率求方差边界值" style={{ backgroundColor: '#49483e' }}>
-            <Row gutter={16} style={{ marginBottom: '16px' }}>
-              <Col xs={24} md={8}>
-                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>概率值:</Typography.Text>
-                <InputNumber
-                  value={varianceProbabilityForBoundary}
-                  onChange={(value) => setVarianceProbabilityForBoundary(value || 0.95)}
-                  style={{ width: '100%' }}
-                  precision={4}
-                  min={0.0001}
-                  max={0.9999}
-                  formatter={(value) => value !== undefined ? `${(value * 100).toFixed(2)}%` : '0%'}
-                  parser={(value) => parseFloat((value || '0').replace('%', '')) / 100}
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>方向:</Typography.Text>
-                <Select
-                  value={varianceDirectionForBoundary}
-                  onChange={(value) => setVarianceDirectionForBoundary(value)}
-                  style={{ width: '100%' }}
-                >
-                  <Select.Option value="less">小于</Select.Option>
-                  <Select.Option value="greater">大于</Select.Option>
-                  <Select.Option value="two-sided">双侧</Select.Option>
-                </Select>
-              </Col>
-              <Col xs={24} md={8}>
-                <Statistic
-                  title={<Typography.Text style={{ color: '#90908a', fontSize: '12px' }}>置信水平</Typography.Text>}
-                  value={(varianceProbabilityForBoundary * 100).toFixed(2)}
-                  suffix="%"
-                  valueStyle={{ color: '#a6e22e', fontSize: '16px' }}
-                />
-              </Col>
-            </Row>
-            
-            {(() => {
-              try {
-                const result = calculateVarianceBoundary(data, varianceProbabilityForBoundary, varianceDirectionForBoundary);
-                
-                if (result.direction === 'two-sided') {
-                  return (
-                    <Alert
-                      message={
-                        <Space direction="vertical">
-                          <Typography.Text style={{ color: '#f8f8f2' }}>
-                            {`${(varianceProbabilityForBoundary * 100).toFixed(2)}% 置信区间的方差边界:`}
-                          </Typography.Text>
-                          <Tag color="purple" style={{ fontSize: '14px' }}>
-                            下界: {result.lowerBound?.toFixed(6)}
-                          </Tag>
-                          <Tag color="purple" style={{ fontSize: '14px' }}>
-                            上界: {result.upperBound?.toFixed(6)}
-                          </Tag>
-                          <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                            自由度: {result.df}, 临界值: [{result.lowerCriticalValue?.toFixed(4)}, {result.upperCriticalValue?.toFixed(4)}]
-                          </Typography.Text>
-                        </Space>
-                      }
-                      type="success"
-                      showIcon
-                      style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                    />
-                  );
-                } else {
-                  return (
-                    <Alert
-                      message={
-                        <Space direction="vertical">
-                          <Typography.Text style={{ color: '#f8f8f2' }}>
-                            {`方差${result.direction === 'less' ? '小于' : '大于'}边界值的概率为 ${(varianceProbabilityForBoundary * 100).toFixed(2)}% 时:`}
-                          </Typography.Text>
-                          <Tag color="red" style={{ fontSize: '14px' }}>
-                            边界值: {result.boundary?.toFixed(6)}
-                          </Tag>
-                          <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
-                            自由度: {result.df}, 临界值: {result.criticalValue?.toFixed(4)}
-                          </Typography.Text>
-                        </Space>
-                      }
-                      type="success"
-                      showIcon
-                      style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                    />
-                  );
-                }
-              } catch (error) {
-                return (
-                  <Alert
-                    message="计算错误"
-                    description="请检查输入参数"
-                    type="error"
-                    showIcon
-                    style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
-                  />
-                );
-              }
-            })()}
-          </Card>
+          <ProbabilityBoundaryCard
+            title="概率求方差边界值"
+            data={data}
+            probability={varianceProbabilityForBoundary}
+            setProbability={setVarianceProbabilityForBoundary}
+            direction={varianceDirectionForBoundary}
+            setDirection={setVarianceDirectionForBoundary}
+            calculateFunction={calculateVarianceBoundary}
+            resultConfig={{
+              singleColor: 'red',
+              upperColor: 'purple',
+              lowerColor: 'purple',
+              resultType: 'variance'
+            }}
+          />
         </Space>
       );
   };

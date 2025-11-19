@@ -7,8 +7,8 @@ export const calculateBasicStats = function(data: number[]) {
     ? (sortedData[n/2 - 1] + sortedData[n/2]) / 2
     : sortedData[Math.floor(n/2)];
 
-  // 计算方差和标准差
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  // 计算方差和标准差（使用无偏估计，除以n-1）
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
   const stdDev = Math.sqrt(variance);
 
   // 计算众数
@@ -26,10 +26,10 @@ export const calculateBasicStats = function(data: number[]) {
   });
 
   // 计算偏度和峰度
-  const skewnessNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 3), 0) / n;
+  const skewnessNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 3), 0) / (n - 1);
   const skewness = skewnessNumerator / Math.pow(stdDev, 3);
 
-  const kurtosisNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 4), 0) / n;
+  const kurtosisNumerator = data.reduce((sum, val) => sum + Math.pow(val - mean, 4), 0) / (n - 1);
   const kurtosis = kurtosisNumerator / Math.pow(stdDev, 4) - 3;
 
   return {
@@ -109,10 +109,10 @@ export const parseCSVContent = function(content: string) {
 };
 
 export const calculateMLE = function(data: number[]) {
-  // 假设正态分布的MLE参数估计
+  // 假设正态分布的MLE参数估计，但使用无偏样本方差
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
 
   return {
     mean,
@@ -125,7 +125,7 @@ export const calculateMoM = function(data: number[]) {
   // 假设正态分布的MoM参数估计
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
 
   return {
     mean,
@@ -1096,7 +1096,7 @@ export const performOneSampleTTest = function(sampleData: number[], mu0: number,
 export function calculateMeanProbabilityFromData(data: number[], boundary: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided', knownVariance: number | null = null) {
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  let stdDev, standardError, zScore, probability;
+  let stdDev, standardError, zScore, tScore, probability, degreesOfFreedom;
   let method = '';
 
   if (knownVariance !== null) {
@@ -1133,9 +1133,9 @@ export function calculateMeanProbabilityFromData(data: number[], boundary: numbe
     }
   } else {
     // 使用t分布近似
-    // 对于小样本，使用正态近似，因为我们没有完整的t分布表实现
-    // 这是一个简化处理，实际应用中可能需要更精确的t分布计算
-    const cdfValue = normalCDF(zScore);
+    const degreesOfFreedom = n - 1;
+    const tScore = (boundary - mean) / standardError;
+    const cdfValue = tCDFApprox(tScore, degreesOfFreedom);
     
     switch (direction) {
       case 'less':
@@ -1145,7 +1145,7 @@ export function calculateMeanProbabilityFromData(data: number[], boundary: numbe
         probability = 1 - cdfValue;
         break;
       case 'two-sided':
-        const tailProbability = 1 - normalCDF(Math.abs(zScore));
+        const tailProbability = 1 - tCDFApprox(Math.abs(tScore), degreesOfFreedom);
         probability = 2 * tailProbability;
         break;
     }
@@ -1154,7 +1154,10 @@ export function calculateMeanProbabilityFromData(data: number[], boundary: numbe
   return {
     probability: Math.max(0, Math.min(1, probability)), // 确保概率值在[0,1]范围内
     mean,
-    zScore,
+    score: method === 'z' ? zScore : tScore,
+    zScore: method === 'z' ? zScore : undefined,
+    tScore: method === 't' ? tScore : undefined,
+    degreesOfFreedom: method === 't' ? degreesOfFreedom : undefined,
     method,
     sampleSize: n,
     standardError
@@ -1208,7 +1211,7 @@ export function calculateMeanBoundary(data: number[], probability: number, direc
   // 计算样本统计量
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
   const variance = knownVariance !== null ? knownVariance : sampleVariance;
   const stdDev = Math.sqrt(variance);
   
@@ -1297,7 +1300,7 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
   // 计算样本统计量
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
-  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+  const sampleVariance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
   
   // 自由度
   const df = n - 1;
