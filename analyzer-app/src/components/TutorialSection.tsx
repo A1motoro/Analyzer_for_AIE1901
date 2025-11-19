@@ -16,9 +16,25 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
+interface SidebarItem {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+}
+
 const TutorialSection: React.FC = () => {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('quickstart');
+  
+  // 侧边栏导航项目
+  const sidebarItems: SidebarItem[] = [
+    { key: 'quickstart', label: t('tutorial.nav.quickStart'), icon: <ThunderboltOutlined /> },
+    { key: 'dataInput', label: t('tutorial.nav.dataInput'), icon: <UploadOutlined /> },
+    { key: 'analysis', label: t('tutorial.nav.analysis'), icon: <BarChartOutlined /> },
+    { key: 'aiAssistant', label: t('tutorial.nav.aiAssistant'), icon: <RobotOutlined /> },
+    { key: 'settings', label: t('tutorial.nav.settings'), icon: <SettingOutlined /> },
+    { key: 'tips', label: t('tutorial.nav.tips'), icon: <FileTextOutlined /> }
+  ];
 
   // 快速开始步骤
   const quickStartSteps = [
@@ -163,16 +179,8 @@ const TutorialSection: React.FC = () => {
     }
   ];
 
-  // 侧边栏导航
-  const sidebarItems = [
-    { key: 'quickstart', label: t('tutorial.nav.quickStart'), icon: <ThunderboltOutlined /> },
-    { key: 'dataInput', label: t('tutorial.nav.dataInput'), icon: <UploadOutlined /> },
-    { key: 'analysis', label: t('tutorial.nav.analysis'), icon: <BarChartOutlined /> },
-    { key: 'aiAssistant', label: t('tutorial.nav.aiAssistant'), icon: <RobotOutlined /> },
-    { key: 'settings', label: t('tutorial.nav.settings'), icon: <SettingOutlined /> },
-    { key: 'tips', label: t('tutorial.nav.tips'), icon: <FileTextOutlined /> }
-  ];
-
+  // 侧边栏导航 - 已经在组件顶部定义
+  
   const renderContent = () => {
     switch (activeSection) {
       case 'quickstart':
@@ -606,61 +614,41 @@ const TutorialSection: React.FC = () => {
 
       {/* 教程主题导航 */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {Object.entries(tutorialContents).map(([key, topic]) => (
+        {sidebarItems.map((item) => (
           <button
-                  key={item.key}
-                  onClick={() => setActiveSection(item.key)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: activeSection === item.key 
-                      ? 'var(--monokai-purple)' 
-                      : 'transparent',
-                    color: activeSection === item.key 
-                      ? 'var(--monokai-bg)' 
-                      : 'var(--monokai-fg)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    transition: 'all 0.2s ease',
-                    fontSize: '14px',
-                    fontWeight: activeSection === item.key ? '600' : '400'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (activeSection !== item.key) {
-                      e.currentTarget.style.background = 'var(--monokai-bg)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeSection !== item.key) {
-                      e.currentTarget.style.background = 'transparent';
-                    }
-                  }}
-                >
-                  {item.icon}
-                  {item.label}
+            key={item.key}
+            onClick={() => setActiveSection(item.key)}
+            style={{
+              width: '100%',
+              textAlign: 'left',
+              padding: '12px 16px',
+              border: `1px solid ${activeSection === item.key ? 'var(--primary-color)' : 'var(--monokai-bg-lighter)'}`,
+              background: activeSection === item.key ? 'var(--primary-color)' : 'var(--monokai-bg)',
+              color: activeSection === item.key ? 'white' : 'var(--monokai-fg)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '16px',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {item.icon}
+            {item.label}
           </button>
         ))}
-            </Space>
       </div>
-
-          {/* 主内容区 */}
-          <div style={{
-            flex: 1,
-            background: 'var(--monokai-bg-light)',
-            borderRadius: '12px',
-            padding: '32px',
-            border: '1px solid var(--monokai-bg-lighter)'
-          }}>
-            {renderContent()}
-          </div>
-        </div>
+      
+      {/* 主内容区 */}
+      <div style={{
+        background: 'var(--monokai-bg-light)',
+        borderRadius: '12px',
+        padding: '32px',
+        border: '1px solid var(--monokai-bg-lighter)'
+      }}>
+        {renderContent()}
       </div>
-    </div>
+    </section>
   );
 };
 

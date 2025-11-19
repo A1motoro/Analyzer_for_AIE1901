@@ -41,7 +41,6 @@ const App: React.FC = () => {
   // API配置状态
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('qwen-plus');
-  const [apiSaveSuccess, setApiSaveSuccess] = useState(false);
 
   // 初始化主题
   useEffect(() => {
@@ -127,14 +126,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // 保存API配置
-  const handleApiSave = () => {
-    const config = { apiKey, model };
-    localStorage.setItem('aliyunApiConfig', JSON.stringify(config));
-    setApiSaveSuccess(true);
-    message.success(t('api.saveSuccess'));
-    setTimeout(() => setApiSaveSuccess(false), 3000);
-  };
+  // 保存API密钥的函数将在后续实现
 
   // 处理数据分析
   const analyzeData = () => {
@@ -888,26 +880,7 @@ const App: React.FC = () => {
                 {t('api.save')}
               </Button>
 
-              {/* 保存成功提示 */}
-              {apiSaveSuccess && (
-                <div style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  background: theme === 'dark' ? 'rgba(78, 201, 176, 0.1)' : '#f6ffed',
-                  border: `1px solid ${theme === 'dark' ? 'var(--monokai-green)' : '#b7eb8f'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
-                  <i className="fa fa-check-circle" style={{ color: 'var(--monokai-green)' }}></i>
-                  <span style={{ 
-                    fontSize: '13px',
-                    color: 'var(--monokai-green)' 
-                  }}>
-                    {t('api.saveSuccess')}
-                  </span>
-                </div>
-              )}
+              {/* API保存成功提示将在后续实现 */}
             </Space>
           </div>
 
