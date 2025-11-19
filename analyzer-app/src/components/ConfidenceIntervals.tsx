@@ -9,9 +9,13 @@ import {
   calculateTwoProportionCI,
   calculateVarianceCI,
   calculateConfidenceInterval,
-  calculateMeanProbability
+  calculateMeanProbabilityFromData,
+  calculateVarianceProbability,
+  calculateMeanBoundary,
+  calculateVarianceBoundary
 } from '../utils';
 import { useTranslation } from 'react-i18next';
+import ProbabilityBoundaryCard from './ProbabilityBoundaryCard';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -26,73 +30,21 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('mean');
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
+  const [currentLevel, setCurrentLevel] = useState(0.95); // 当前置信水平
+  const [useCustomLevel, setUseCustomLevel] = useState(false); // 是否使用自定义置信水平
+  const [boundaryValue, setBoundaryValue] = useState<number>(analysisResult.mean || 0); // 边界值
+  const [probabilityResult, setProbabilityResult] = useState<any>(null); // 概率计算结果
   const [equalVariance, setEqualVariance] = useState(true);
-  const [boundaryValue, setBoundaryValue] = useState<number | null>(null);
-  const [customConfidenceLevel, setCustomConfidenceLevel] = useState<number | null>(null);
-  const [useCustomLevel, setUseCustomLevel] = useState(false);
-
-  // 获取当前使用的置信水平
-  const getCurrentConfidenceLevel = () => {
-    return useCustomLevel && customConfidenceLevel !== null 
-      ? Math.max(0.01, Math.min(0.9999, customConfidenceLevel / 100))
-      : confidenceLevel;
-  };
-
-  // 渲染置信水平选择器
-  const renderConfidenceLevelSelector = () => {
-    return (
-      <Row gutter={16}>
-        <Col xs={24} md={useCustomLevel ? 12 : 24}>
-          <Text style={{ color: '#90908a' }}>{t('confidence.confidenceLevel')}:</Text>
-          <Select
-            value={useCustomLevel ? 'custom' : confidenceLevel}
-            onChange={(value) => {
-              if (value === 'custom') {
-                setUseCustomLevel(true);
-                if (customConfidenceLevel === null) {
-                  setCustomConfidenceLevel(95);
-                }
-              } else if (typeof value === 'number') {
-                setUseCustomLevel(false);
-                setConfidenceLevel(value);
-              }
-            }}
-            style={{ width: '100%', marginTop: '8px' }}
-          >
-            <Option value={0.80}>80%</Option>
-            <Option value={0.90}>90%</Option>
-            <Option value={0.95}>95%</Option>
-            <Option value={0.99}>99%</Option>
-            <Option value={0.999}>99.9%</Option>
-            <Option value="custom">{t('confidence.customLevel')}</Option>
-          </Select>
-        </Col>
-        {useCustomLevel && (
-          <Col xs={24} md={12}>
-            <Text style={{ color: '#90908a' }}>{t('confidence.customLevelValue')}:</Text>
-            <InputNumber
-              value={customConfidenceLevel}
-              onChange={(value) => {
-                if (value !== null && value >= 0.01 && value <= 99.99) {
-                  setCustomConfidenceLevel(value);
-                }
-              }}
-              min={0.01}
-              max={99.99}
-              precision={2}
-              formatter={(value) => `${value}%`}
-              parser={(value) => {
-                const parsed = value!.replace('%', '');
-                return parsed === '' ? 0 : parseFloat(parsed);
-              }}
-              style={{ width: '100%', marginTop: '8px' }}
-              placeholder={t('confidence.customLevelPlaceholder')}
-            />
-          </Col>
-        )}
-      </Row>
-    );
-  };
+    // 概率计算相关状态
+    const [meanBoundary, setMeanBoundary] = useState<number>(analysisResult.mean || 0);
+    const [varianceBoundary, setVarianceBoundary] = useState<number>(analysisResult.variance || 1);
+    const [meanDirection, setMeanDirection] = useState<'less' | 'greater' | 'two-sided'>('two-sided');
+    const [varianceDirection, setVarianceDirection] = useState<'less' | 'greater'>('greater');
+    // 概率求边界值相关状态
+    const [meanProbabilityForBoundary, setMeanProbabilityForBoundary] = useState<number>(0.95);
+    const [varianceProbabilityForBoundary, setVarianceProbabilityForBoundary] = useState<number>(0.95);
+    const [meanDirectionForBoundary, setMeanDirectionForBoundary] = useState<'less' | 'greater' | 'two-sided'>('two-sided');
+    const [varianceDirectionForBoundary, setVarianceDirectionForBoundary] = useState<'less' | 'greater' | 'two-sided'>('two-sided');
 
   // 生成第二个数据集用于演示（在实际应用中应该让用户输入）
   const generateSecondDataset = (size: number) => {
@@ -101,24 +53,64 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return Array.from({ length: size }, () => mean + (Math.random() - 0.5) * 2 * std + (Math.random() > 0.5 ? 5 : -5));
   };
 
+  // 获取当前置信水平
+  const getCurrentConfidenceLevel = () => {
+    return useCustomLevel ? currentLevel : confidenceLevel;
+  };
+
+  // 渲染置信水平选择器
+  const renderConfidenceLevelSelector = () => {
+    return (
+      <div>
+        <Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>
+          {t('confidence.confidenceLevel')}:
+        </Text>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Select
+            value={useCustomLevel ? 'custom' : confidenceLevel.toString()}
+            onChange={(value) => {
+              if (value === 'custom') {
+                setUseCustomLevel(true);
+              } else {
+                setUseCustomLevel(false);
+                setConfidenceLevel(parseFloat(value));
+                setCurrentLevel(parseFloat(value));
+              }
+            }}
+            style={{ width: '120px' }}
+          >
+            <Option value="0.90">90%</Option>
+            <Option value="0.95">95%</Option>
+            <Option value="0.99">99%</Option>
+            <Option value="custom">自定义</Option>
+          </Select>
+          {useCustomLevel && (
+            <InputNumber
+              value={currentLevel}
+              onChange={(value) => setCurrentLevel(value || 0.95)}
+              style={{ width: '120px' }}
+              min={0.01}
+              max={0.99}
+              precision={3}
+              formatter={(value) => value !== undefined ? `${(value * 100).toFixed(1)}%` : '95%'}
+              parser={(value) => parseFloat((value || '95').replace('%', '')) / 100}
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderOneSampleCI = () => {
-    // 使用自定义置信水平重新计算均值置信区间
-    const currentLevel = getCurrentConfidenceLevel();
-    const basicCI = calculateConfidenceInterval(data, currentLevel);
-    const varianceCI = calculateVarianceCI(data, currentLevel);
-    
-    // 计算边界值概率（如果提供了边界值）
-    let probabilityResult = null;
-    if (boundaryValue !== null && !isNaN(boundaryValue)) {
-      const degreesOfFreedom = basicCI.method === 't' ? data.length - 1 : 0;
-      probabilityResult = calculateMeanProbability(
-        basicCI.mean,
-        basicCI.standardError,
-        boundaryValue,
-        basicCI.method as 'z' | 't',
-        degreesOfFreedom
-      );
-    }
+      // 使用自定义置信水平重新计算均值置信区间
+      const basicCI = calculateConfidenceInterval(data, getCurrentConfidenceLevel());
+      const varianceCI = calculateVarianceCI(data, getCurrentConfidenceLevel());
+      
+      // 计算概率
+      const meanProb = calculateMeanProbabilityFromData(data, meanBoundary, meanDirection);
+      const varianceProb = calculateVarianceProbability(data, varianceBoundary, varianceDirection);
+      
+      
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -180,7 +172,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
                 </Text>
                 <InputNumber
                   value={boundaryValue}
-                  onChange={(value) => setBoundaryValue(value)}
+                  onChange={(value) => setBoundaryValue(value ?? boundaryValue)}
                   placeholder={t('confidence.boundaryPlaceholder')}
                   style={{ width: '100%' }}
                   precision={4}
@@ -188,7 +180,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
               </Col>
               <Col xs={24} md={8}>
                 <Button
-                  onClick={() => setBoundaryValue(basicCI?.mean || null)}
+                  onClick={() => setBoundaryValue(basicCI?.mean ?? boundaryValue)}
                   style={{ marginTop: '29px', width: '100%' }}
                 >
                   {t('confidence.useSampleMean')}
@@ -308,14 +300,152 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
             style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
           />
         </Card>
-      </Space>
-    );
+
+          <Card title="均值概率计算" style={{ backgroundColor: '#49483e' }}>
+            <Row gutter={16} style={{ marginBottom: '16px' }}>
+              <Col xs={24} md={8}>
+                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>边界值:</Typography.Text>
+                <InputNumber
+                  value={meanBoundary}
+                  onChange={(value) => setMeanBoundary(value || 0)}
+                  style={{ width: '100%' }}
+                  precision={4}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>方向:</Typography.Text>
+                <Select
+                  value={meanDirection}
+                  onChange={(value) => setMeanDirection(value)}
+                  style={{ width: '100%' }}
+                >
+                  <Select.Option value="less">小于</Select.Option>
+                  <Select.Option value="greater">大于</Select.Option>
+                  <Select.Option value="two-sided">双侧</Select.Option>
+                </Select>
+              </Col>
+              <Col xs={24} md={8}>
+                <Statistic
+                  title={<Typography.Text style={{ color: '#90908a', fontSize: '12px' }}>概率值</Typography.Text>}
+                  value={(meanProb.probability * 100).toFixed(4)}
+                  suffix="%"
+                  valueStyle={{ color: '#66d9ef', fontSize: '16px' }}
+                />
+              </Col>
+            </Row>
+            <Alert
+              message={
+                <Space direction="vertical">
+                  <Typography.Text style={{ color: '#f8f8f2' }}>
+                    {meanDirection === 'less' ? '均值小于' : meanDirection === 'greater' ? '均值大于' : '均值不等于'} {meanBoundary} 的概率:
+                  </Typography.Text>
+                  <Tag color="green" style={{ fontSize: '14px' }}>
+                    {meanProb.probability.toFixed(6)} ({(meanProb.probability * 100).toFixed(4)}%)
+                  </Tag>
+                  <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
+                    使用 {meanProb.method.toUpperCase()} 方法, {meanProb.method.toUpperCase()}分数: {(meanProb.method === 'z' ? meanProb.zScore : meanProb.tScore)?.toFixed(4)}
+                    {meanProb.method === 't' && meanProb.degreesOfFreedom && `, 自由度: ${meanProb.degreesOfFreedom}`}
+                  </Typography.Text>
+                </Space>
+              }
+              type="info"
+              showIcon
+              style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
+            />
+          </Card>
+
+          <Card title="方差概率计算" style={{ backgroundColor: '#49483e' }}>
+            <Row gutter={16} style={{ marginBottom: '16px' }}>
+              <Col xs={24} md={8}>
+                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>边界值:</Typography.Text>
+                <InputNumber
+                  value={varianceBoundary}
+                  onChange={(value) => setVarianceBoundary(value || 1)}
+                  style={{ width: '100%' }}
+                  precision={4}
+                  min={0.0001}
+                />
+              </Col>
+              <Col xs={24} md={8}>
+                <Typography.Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>方向:</Typography.Text>
+                <Select
+                  value={varianceDirection}
+                  onChange={(value) => setVarianceDirection(value)}
+                  style={{ width: '100%' }}
+                >
+                  <Select.Option value="less">小于</Select.Option>
+                  <Select.Option value="greater">大于</Select.Option>
+                </Select>
+              </Col>
+              <Col xs={24} md={8}>
+                <Statistic
+                  title={<Typography.Text style={{ color: '#90908a', fontSize: '12px' }}>概率值</Typography.Text>}
+                  value={(varianceProb.probability * 100).toFixed(4)}
+                  suffix="%"
+                  valueStyle={{ color: '#f92672', fontSize: '16px' }}
+                />
+              </Col>
+            </Row>
+            <Alert
+              message={
+                <Space direction="vertical">
+                  <Typography.Text style={{ color: '#f8f8f2' }}>
+                    方差{varianceDirection === 'less' ? '小于' : '大于'} {varianceBoundary} 的概率:
+                  </Typography.Text>
+                  <Tag color="red" style={{ fontSize: '14px' }}>
+                    {varianceProb.probability.toFixed(6)} ({(varianceProb.probability * 100).toFixed(4)}%)
+                  </Tag>
+                  <Typography.Text style={{ color: '#f8f8f2', fontSize: '12px' }}>
+                    自由度: {varianceProb.degreesOfFreedom}, 卡方统计量: {varianceProb.chiSquare.toFixed(4)}
+                  </Typography.Text>
+                </Space>
+              }
+              type="info"
+              showIcon
+              style={{ backgroundColor: '#2f2e27', color: '#f8f8f2' }}
+            />
+          </Card>
+
+          {/* 通过概率值求均值边界值 */}
+          <ProbabilityBoundaryCard
+            title="概率求均值边界值"
+            data={data}
+            probability={meanProbabilityForBoundary}
+            setProbability={setMeanProbabilityForBoundary}
+            direction={meanDirectionForBoundary}
+            setDirection={setMeanDirectionForBoundary}
+            calculateFunction={calculateMeanBoundary}
+            resultConfig={{
+              singleColor: 'green',
+              upperColor: 'blue',
+              lowerColor: 'blue',
+              resultType: 'mean'
+            }}
+          />
+
+          {/* 通过概率值求方差边界值 */}
+          <ProbabilityBoundaryCard
+            title="概率求方差边界值"
+            data={data}
+            probability={varianceProbabilityForBoundary}
+            setProbability={setVarianceProbabilityForBoundary}
+            direction={varianceDirectionForBoundary}
+            setDirection={setVarianceDirectionForBoundary}
+            calculateFunction={calculateVarianceBoundary}
+            resultConfig={{
+              singleColor: 'red',
+              upperColor: 'purple',
+              lowerColor: 'purple',
+              resultType: 'variance'
+            }}
+          />
+        </Space>
+      );
   };
 
   const renderTwoSampleCI = () => {
     const secondData = generateSecondDataset(data.length);
-    const currentLevel = getCurrentConfidenceLevel();
-    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, currentLevel, equalVariance);
+    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, getCurrentConfidenceLevel(), equalVariance);
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
