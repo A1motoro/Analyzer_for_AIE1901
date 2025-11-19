@@ -502,7 +502,13 @@
     "modernDesign": "🚀 Modern Design",
     "aiDriven": "🤖 AI Driven",
     "dataVisualization": "📊 Data Visualization",
-    "highPerformance": "⚡ High Performance"
+    "highPerformance": "⚡ High Performance",
+    "footerTitle": "Data Analyst Web App",
+    "footerSubtitle": "AI-driven Data Analysis Platform",
+    "modernDesignText": "Modern Design",
+    "aiDrivenText": "AI Driven",
+    "dataVisualizationText": "Data Visualization",
+    "highPerformanceText": "High Performance"
   },
   "advanced": {
     "title": "Advanced Statistical Features and Distribution Analysis",

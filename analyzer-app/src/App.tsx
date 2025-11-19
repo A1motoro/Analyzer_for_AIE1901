@@ -446,17 +446,17 @@ const App: React.FC = () => {
             {/* 副标题区域 */}
             <div className="mb-6">
               <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--monokai-fg)' }}>
-                数据分析师 Web应用
+                {t('appInfo.footerTitle')}
               </h3>
               <p className="text-lg mb-4" style={{ color: 'var(--monokai-cyan)' }}>
-                AI驱动的数据分析平台
+                {t('appInfo.footerSubtitle')}
               </p>
             </div>
             
             {/* 版权信息 */}
             <div className="mb-4">
               <p className="text-sm" style={{ color: 'var(--monokai-gray)' }}>
-                © 2024 数据分析师Web应用. 保留所有权利.
+                {t('app.footer')}
               </p>
             </div>
             
@@ -464,19 +464,19 @@ const App: React.FC = () => {
             <div className="feature-tags">
               <span className="feature-tag">
                 <span className="feature-tag-icon">🚀</span>
-                现代化设计
+                {t('appInfo.modernDesignText')}
               </span>
               <span className="feature-tag">
                 <span className="feature-tag-icon">🤖</span>
-                AI驱动
+                {t('appInfo.aiDrivenText')}
               </span>
               <span className="feature-tag">
                 <span className="feature-tag-icon">📊</span>
-                数据可视化
+                {t('appInfo.dataVisualizationText')}
               </span>
               <span className="feature-tag">
                 <span className="feature-tag-icon">⚡</span>
-                高性能
+                {t('appInfo.highPerformanceText')}
               </span>
             </div>
           </div>

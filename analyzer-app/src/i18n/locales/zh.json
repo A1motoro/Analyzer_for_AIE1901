@@ -507,7 +507,13 @@
     "modernDesign": "🚀 现代化设计",
     "aiDriven": "🤖 AI驱动",
     "dataVisualization": "📊 数据可视化",
-    "highPerformance": "⚡ 高性能"
+    "highPerformance": "⚡ 高性能",
+    "footerTitle": "数据分析师 Web应用",
+    "footerSubtitle": "AI驱动的数据分析平台",
+    "modernDesignText": "现代化设计",
+    "aiDrivenText": "AI驱动",
+    "dataVisualizationText": "数据可视化",
+    "highPerformanceText": "高性能"
   },
   "advanced": {
     "title": "高级统计特性与分布分析",
