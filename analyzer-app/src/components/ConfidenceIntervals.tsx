@@ -110,14 +110,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
       const meanProb = calculateMeanProbabilityFromData(data, meanBoundary, meanDirection);
       const varianceProb = calculateVarianceProbability(data, varianceBoundary, varianceDirection);
       
-      // 计算边界值概率并设置到状态中
-      const boundaryProb = calculateMeanProbabilityFromData(data, boundaryValue, 'two-sided');
-      setProbabilityResult({
-        probabilityGreater: boundaryProb.probability > 0.5 ? 1 - boundaryProb.probability : boundaryProb.probability,
-        probabilityLess: boundaryProb.probability < 0.5 ? 1 - boundaryProb.probability : boundaryProb.probability,
-        zScore: boundaryProb.zScore,
-        method: boundaryProb.method
-      });
+      
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
