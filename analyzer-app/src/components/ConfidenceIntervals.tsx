@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Row, Col, Typography, Space, Select, Alert, Tabs, Divider, Tag, InputNumber } from 'antd';
+import { Card, Statistic, Row, Col, Typography, Space, Select, Alert, Tabs, Divider, Tag, InputNumber, Button } from 'antd';
 import {
   CalculatorOutlined
 } from '@ant-design/icons';
@@ -9,7 +9,7 @@ import {
   calculateTwoProportionCI,
   calculateVarianceCI,
   calculateConfidenceInterval,
-  calculateMeanProbability,
+  calculateMeanProbabilityFromData,
   calculateVarianceProbability,
   calculateMeanBoundary,
   calculateVarianceBoundary
@@ -29,7 +29,11 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('mean');
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
-    const [equalVariance, setEqualVariance] = useState(true);
+  const [currentLevel, setCurrentLevel] = useState(0.95); // 当前置信水平
+  const [useCustomLevel, setUseCustomLevel] = useState(false); // 是否使用自定义置信水平
+  const [boundaryValue, setBoundaryValue] = useState<number>(analysisResult.mean || 0); // 边界值
+  const [probabilityResult, setProbabilityResult] = useState<any>(null); // 概率计算结果
+  const [equalVariance, setEqualVariance] = useState(true);
     // 概率计算相关状态
     const [meanBoundary, setMeanBoundary] = useState<number>(analysisResult.mean || 0);
     const [varianceBoundary, setVarianceBoundary] = useState<number>(analysisResult.variance || 1);
@@ -48,14 +52,71 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
     return Array.from({ length: size }, () => mean + (Math.random() - 0.5) * 2 * std + (Math.random() > 0.5 ? 5 : -5));
   };
 
+  // 获取当前置信水平
+  const getCurrentConfidenceLevel = () => {
+    return useCustomLevel ? currentLevel : confidenceLevel;
+  };
+
+  // 渲染置信水平选择器
+  const renderConfidenceLevelSelector = () => {
+    return (
+      <div>
+        <Text style={{ color: '#90908a', display: 'block', marginBottom: '8px' }}>
+          {t('confidence.confidenceLevel')}:
+        </Text>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Select
+            value={useCustomLevel ? 'custom' : confidenceLevel.toString()}
+            onChange={(value) => {
+              if (value === 'custom') {
+                setUseCustomLevel(true);
+              } else {
+                setUseCustomLevel(false);
+                setConfidenceLevel(parseFloat(value));
+                setCurrentLevel(parseFloat(value));
+              }
+            }}
+            style={{ width: '120px' }}
+          >
+            <Option value="0.90">90%</Option>
+            <Option value="0.95">95%</Option>
+            <Option value="0.99">99%</Option>
+            <Option value="custom">自定义</Option>
+          </Select>
+          {useCustomLevel && (
+            <InputNumber
+              value={currentLevel}
+              onChange={(value) => setCurrentLevel(value || 0.95)}
+              style={{ width: '120px' }}
+              min={0.01}
+              max={0.99}
+              precision={3}
+              formatter={(value) => value !== undefined ? `${(value * 100).toFixed(1)}%` : '95%'}
+              parser={(value) => parseFloat((value || '95').replace('%', '')) / 100}
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderOneSampleCI = () => {
       // 使用自定义置信水平重新计算均值置信区间
-      const basicCI = calculateConfidenceInterval(data, confidenceLevel);
-      const varianceCI = calculateVarianceCI(data, confidenceLevel);
+      const basicCI = calculateConfidenceInterval(data, getCurrentConfidenceLevel());
+      const varianceCI = calculateVarianceCI(data, getCurrentConfidenceLevel());
       
       // 计算概率
-      const meanProb = calculateMeanProbability(data, meanBoundary, meanDirection);
+      const meanProb = calculateMeanProbabilityFromData(data, meanBoundary, meanDirection);
       const varianceProb = calculateVarianceProbability(data, varianceBoundary, varianceDirection);
+      
+      // 计算边界值概率并设置到状态中
+      const boundaryProb = calculateMeanProbabilityFromData(data, boundaryValue, 'two-sided');
+      setProbabilityResult({
+        probabilityGreater: boundaryProb.probability > 0.5 ? 1 - boundaryProb.probability : boundaryProb.probability,
+        probabilityLess: boundaryProb.probability < 0.5 ? 1 - boundaryProb.probability : boundaryProb.probability,
+        zScore: boundaryProb.zScore,
+        method: boundaryProb.method
+      });
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -117,7 +178,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
                 </Text>
                 <InputNumber
                   value={boundaryValue}
-                  onChange={(value) => setBoundaryValue(value)}
+                  onChange={(value) => setBoundaryValue(value ?? boundaryValue)}
                   placeholder={t('confidence.boundaryPlaceholder')}
                   style={{ width: '100%' }}
                   precision={4}
@@ -125,7 +186,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
               </Col>
               <Col xs={24} md={8}>
                 <Button
-                  onClick={() => setBoundaryValue(basicCI?.mean || null)}
+                  onClick={() => setBoundaryValue(basicCI?.mean ?? boundaryValue)}
                   style={{ marginTop: '29px', width: '100%' }}
                 >
                   {t('confidence.useSampleMean')}
@@ -559,8 +620,7 @@ const ConfidenceIntervals: React.FC<ConfidenceIntervalsProps> = ({ data, analysi
 
   const renderTwoSampleCI = () => {
     const secondData = generateSecondDataset(data.length);
-    const currentLevel = getCurrentConfidenceLevel();
-    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, currentLevel, equalVariance);
+    const twoSampleCI = calculateTwoSampleMeanCI(data, secondData, getCurrentConfidenceLevel(), equalVariance);
 
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>

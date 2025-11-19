@@ -1092,8 +1092,8 @@ export const performOneSampleTTest = function(sampleData: number[], mu0: number,
   };
 };
 
-// 计算均值大于或小于边界数值的概率
-export function calculateMeanProbability(data: number[], boundary: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided', knownVariance: number | null = null) {
+// 计算均值大于或小于边界数值的概率（从原始数据）
+export function calculateMeanProbabilityFromData(data: number[], boundary: number, direction: 'less' | 'greater' | 'two-sided' = 'two-sided', knownVariance: number | null = null) {
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
   let stdDev, standardError, zScore, probability;
