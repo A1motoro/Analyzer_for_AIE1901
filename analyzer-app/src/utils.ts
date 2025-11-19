@@ -1220,7 +1220,7 @@ export function calculateMeanBoundary(data: number[], probability: number, direc
   const standardError = stdDev / Math.sqrt(n);
   
   // 根据样本量和是否已知方差选择分布
-  const useTTest = n < 30 || knownVariance === null;
+  const useTTest = knownVariance === null;
   const df = useTTest ? n - 1 : Infinity;
   
   // 计算临界值
