@@ -20,11 +20,13 @@ i18n
   .use(initReactI18next) // 传递 i18n 到 react-i18next
   .init({
     resources,
-    fallbackLng: 'zh', // 默认语言
-    debug: false, // 生产环境设为 false
+    fallbackLng: 'zh', // 默认语言为中文
+    lng: 'zh', // 明确设置初始语言为中文
+    debug: false, // 开发环境可设为 true 以调试
 
     interpolation: {
       escapeValue: false, // React 已经做了转义
+      skipOnVariables: false, // 确保变量插值正常工作
     },
 
     detection: {
@@ -32,6 +34,8 @@ i18n
       lookupLocalStorage: 'i18nextLng',
       caches: ['localStorage'],
     },
+    supportedLngs: ['en', 'zh'], // 支持的语言列表 (替换废弃的whitelist)
+    load: 'languageOnly', // 只加载语言代码部分，不包含地区代码
   });
 
 export default i18n;

@@ -1,5 +1,27 @@
+import type { QQPlotPoint, GoodnessOfFitResult } from './types';
+
+// 误差函数实现
+function erf(x: number): number {
+  // 使用多项式近似计算误差函数
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  
+  // 近似公式
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+  
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  
+  return sign * y;
+}
+
 // 工具函数
-export const calculateBasicStats = function(data: number[]) {
+export const calculateBasicStats = function(data: number[]): { mean: number; median: number; variance: number; stdDev: number; mode: number; skewness: number; kurtosis: number } {
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
   const sortedData = [...data].sort((a, b) => a - b);
@@ -1814,4 +1836,241 @@ export const calculateBootstrapConfidenceInterval = function(data: number[], con
     skewness,
     riskWarnings
   };
+};
+
+// 执行分布拟合优度检验
+export const performGoodnessOfFitTest = function(data: number[]): GoodnessOfFitResult {
+  const n = data.length;
+  const sortedData = [...data].sort((a, b) => a - b);
+  const min = sortedData[0];
+  const max = sortedData[n - 1];
+  const mean = data.reduce((sum, val) => sum + val, 0) / n;
+  const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (n - 1);
+  const stdDev = Math.sqrt(variance);
+  
+  // 确定合适的区间数量（使用Sturges'公式）
+  const numBins = Math.max(5, Math.min(20, Math.floor(Math.log2(n)) + 1));
+  const binWidth = (max - min) / numBins;
+  const bins = Array.from({ length: numBins }, (_, i) => ({
+    lower: min + i * binWidth,
+    upper: min + (i + 1) * binWidth,
+    observed: 0
+  }));
+  
+  // 计算观察频率
+  data.forEach(val => {
+    const binIndex = Math.min(Math.floor((val - min) / binWidth), numBins - 1);
+    bins[binIndex].observed++;
+  });
+  
+  // 计算各种分布的卡方拟合优度检验
+  const distributions = [
+    {
+      name: 'normal',
+      cdf: (x: number) => 0.5 * (1 + erf((x - mean) / (stdDev * Math.sqrt(2))))
+    },
+    {
+      name: 'uniform',
+      cdf: (x: number) => (x - min) / (max - min)
+    },
+    {
+      name: 'exponential',
+      cdf: (x: number) => {
+        const lambda = 1 / mean;
+        return 1 - Math.exp(-lambda * (x - min));
+      }
+    },
+    {
+      name: 'lognormal',
+      cdf: (x: number) => {
+        const logData = data.map(d => Math.log(Math.max(d, min + 0.001)));
+        const logMean = logData.reduce((sum, val) => sum + val, 0) / n;
+        const logVariance = logData.reduce((sum, val) => sum + Math.pow(val - logMean, 2), 0) / (n - 1);
+        const logStdDev = Math.sqrt(logVariance);
+        return 0.5 * (1 + erf((Math.log(Math.max(x, min + 0.001)) - logMean) / (logStdDev * Math.sqrt(2))));
+      }
+    }
+  ];
+  
+  const results = distributions.map(dist => {
+    let chiSquare = 0;
+    let validBins = 0;
+    
+    bins.forEach(bin => {
+      // 计算理论概率
+      const pLower = bin.lower === min ? 0 : dist.cdf(bin.lower);
+      const pUpper = bin.upper === max ? 1 : dist.cdf(bin.upper);
+      const expectedProbability = pUpper - pLower;
+      const expectedCount = n * expectedProbability; // 使用真实期望频数
+      
+      // 计算卡方统计量。注意：当期望频数过低时，卡方检验的近似效果会变差。
+      // 一个更稳健的方法是合并期望频数低的区间，但这里为了简化，我们仅在期望不为零时计算。
+      if (expectedCount > 0) {
+        chiSquare += Math.pow(bin.observed - expectedCount, 2) / expectedCount;
+        validBins++;
+      }
+    });
+    
+    // 自由度 = 区间数 - 1 - 估计参数个数
+    let paramsCount = 0;
+    switch (dist.name) {
+      case 'normal': paramsCount = 2; break; // 均值和标准差
+      case 'exponential': paramsCount = 1; break; // 速率参数
+      case 'lognormal': paramsCount = 2; break; // 对数均值和对数标准差
+      case 'uniform': paramsCount = 2; break; // 最小值和最大值
+    }
+    
+    const degreesOfFreedom = Math.max(1, validBins - 1 - paramsCount);
+    
+    // 近似计算p值（简化版卡方分布）
+    const pValue = 1 - chiSquareCDF(chiSquare, degreesOfFreedom);
+    
+    return {
+      distribution: dist.name,
+      chiSquare,
+      degreesOfFreedom,
+      pValue,
+      recommendation: pValue > 0.05 // 显著性水平0.05
+    };
+  });
+  
+  // 选择最佳拟合分布（p值最大的）
+  const bestFit = results.reduce((best, current) => 
+    current.pValue > best.pValue ? current : best
+  ).distribution;
+  
+  return {
+    bestFit,
+    results,
+    sampleSize: n
+  };
+};
+
+// 正则化不完全伽马函数近似（当前未使用，但保留以备将来使用）
+/*
+function gammaIncompleteRegularized(a: number, x: number): number {
+  if (x < 0 || a <= 0) return 0;
+  if (x === 0) return 0;
+  if (x >= a + 1) {
+    // 使用互补形式计算大x值
+    return 1 - gammaIncompleteRegularizedComplement(a, x);
+  }
+  
+  // 级数展开
+  let term = 1 / a;
+  let sum = term;
+  
+  for (let k = 1; k <= 100; k++) {
+    term *= x / (a + k);
+    sum += term;
+  }
+  
+  return Math.pow(x, a) * Math.exp(-x) * sum / gammaFunction(a);
+}
+*/
+
+// 互补正则化不完全伽马函数（当前未使用，但保留以备将来使用）
+/*
+function gammaIncompleteRegularizedComplement(a: number, x: number): number {
+  // 连分数展开
+  let b = x + 1 - a;
+  let c = 1 / 1e-30;
+  let d = 1 / b;
+  let h = d;
+
+  for (let i = 1; i <= 100; i++) {
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b;
+    c = b + an / c;
+    d = 1 / d;
+    const delta = d * c;
+    h *= delta;
+
+    if (Math.abs(delta - 1) < 1e-10) break;
+  }
+
+  return Math.exp(-x + a * Math.log(x) - lnGamma(a)) * h;
+}
+
+// 伽马函数近似
+function gammaFunction(z: number): number {
+  if (z < 0.5) {
+    return Math.PI / (Math.sin(Math.PI * z) * gammaFunction(1 - z));
+  }
+
+  z -= 1;
+  const p = [
+    0.99999999999980993,
+    676.5203681218851,
+    -1259.1392167224028,
+    771.32342877765313,
+    -176.61502916214059,
+    12.507343278686905,
+    -0.13857109526572012,
+    9.9843695780195716e-6,
+    1.5056327351493116e-7
+  ];
+
+  let result = p[0];
+  for (let i = 1; i < p.length; i++) {
+    result += p[i] / (z + i);
+  }
+
+  const t = z + p.length - 0.5;
+  const sqrt2pi = Math.sqrt(2 * Math.PI);
+
+  return sqrt2pi * Math.pow(t, z + 0.5) * Math.exp(-t) * result;
+}
+
+// 伽马函数的自然对数
+function lnGamma(z: number): number {
+  if (z < 0.5) {
+    return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - lnGamma(1 - z);
+  }
+
+  z -= 1;
+  const p = [
+    0.99999999999980993,
+    676.5203681218851,
+    -1259.1392167224028,
+    771.32342877765313,
+    -176.61502916214059,
+    12.507343278686905,
+    -0.13857109526572012,
+    9.9843695780195716e-6,
+    1.5056327351493116e-7
+  ];
+
+  let result = p[0];
+  for (let i = 1; i < p.length; i++) {
+    result += p[i] / (z + i);
+  }
+
+  const t = z + p.length - 0.5;
+  const sqrt2pi = Math.sqrt(2 * Math.PI);
+
+  return Math.log(sqrt2pi) + (z + 0.5) * Math.log(t) - t + Math.log(result);
+}
+*/
+
+// 生成Q-Q图数据
+export const generateQQPlotData = function(data: number[]): QQPlotPoint[] {
+  const n = data.length;
+  const sortedData = [...data].sort((a, b) => a - b);
+  
+  // 计算样本分位数和理论分位数
+  const qqData = sortedData.map((value, index) => {
+    // 使用Blom's公式计算经验概率
+    const p = (index + 0.5) / n;
+    // 计算标准正态分布的理论分位数
+    const theoreticalQuantile = normalQuantile(p);
+    
+    return {
+      sampleQuantiles: value,
+      theoreticalQuantiles: theoreticalQuantile
+    };
+  });
+  
+  return qqData;
 };

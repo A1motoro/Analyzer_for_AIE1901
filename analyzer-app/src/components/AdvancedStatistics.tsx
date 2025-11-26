@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Tag, Alert, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
@@ -214,7 +214,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         {t('advanced.distributionType')}
                       </Text>
                     }
-                    value={distributionAnalysis?.distributionType || t('advanced.unknown')}
+                    value={distributionAnalysis?.distributionType ? t(`advanced.${distributionAnalysis?.distributionType}`) : t('advanced.unknown')}
                     valueStyle={{
                       color: getDistributionColor(distributionAnalysis?.distributionType || t('advanced.unknown')),
                       fontSize: '16px',
