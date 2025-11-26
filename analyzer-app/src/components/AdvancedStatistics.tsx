@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 import { Card, Statistic, Row, Col, Typography, Space, Tooltip, Tag, Alert, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {

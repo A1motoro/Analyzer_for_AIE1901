@@ -21,7 +21,7 @@ function erf(x: number): number {
 }
 
 // 工具函数
-export const calculateBasicStats = function(data: number[]) {
+export const calculateBasicStats = function(data: number[]): { mean: number; median: number; variance: number; stdDev: number; mode: number; skewness: number; kurtosis: number; min: number; max: number; range: number; q1: number; q3: number; iqr: number; sum: number } {
   const n = data.length;
   const mean = data.reduce((sum, val) => sum + val, 0) / n;
   const sortedData = [...data].sort((a, b) => a - b);

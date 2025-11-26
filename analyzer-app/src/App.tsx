@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type FC, type ChangeEvent } from 'react';
 import type { GoodnessOfFitResult, QQPlotPoint, AnalysisResult } from './types';
 import { ConfigProvider, Radio, Space, Typography, Divider, Button, Drawer, message, Input } from 'antd';
 import { useTranslation } from 'react-i18next';

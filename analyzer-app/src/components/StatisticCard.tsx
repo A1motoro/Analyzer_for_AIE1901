@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 import { Card, Statistic, Space, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,7 +20,7 @@ interface StatisticCardProps {
   tooltip?: string;
 }
 
-const StatisticCard: React.FC<StatisticCardProps> = ({
+const StatisticCard: FC<StatisticCardProps> = ({
   title,
   value,
   suffix,

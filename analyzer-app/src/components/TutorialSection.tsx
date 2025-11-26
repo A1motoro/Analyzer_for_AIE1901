@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Steps, Divider, Typography, Space, Tag } from 'antd';
 import {
@@ -22,7 +22,7 @@ interface SidebarItem {
   icon: React.ReactNode;
 }
 
-const TutorialSection: React.FC = () => {
+const TutorialSection: FC = () => {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('quickstart');
   
