@@ -1,3 +1,4 @@
+import React, { type FC } from 'react';
 import { Space, Typography, Table, Card, Divider } from 'antd';
 import {
   CalculatorOutlined,
@@ -31,7 +32,7 @@ interface AnalysisResultSectionProps {
   qqPlotData?: QQPlotPoint[];
 }
 
-const AnalysisResultSection = ({
+const AnalysisResultSection: FC<AnalysisResultSectionProps> = ({
   activeTab,
   setActiveTab,
   analysisResult,

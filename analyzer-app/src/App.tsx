@@ -25,7 +25,7 @@ import {
   generateQQPlotData
 } from './utils';
 
-const App: React.FC = () => {
+const App: FC = () => {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('basic');
   const [inputMethod, setInputMethod] = useState('upload');
@@ -233,7 +233,7 @@ const App: React.FC = () => {
   };
 
   // 处理分布生成
-  const handleDistributionGenerate = (type: string, customParams?: any) => {
+  const handleDistributionGenerate = (type: string, customParams?: { sampleSize?: number; [key: string]: any }) => {
     const { sampleSize, ...distParams } = customParams || {};
     const params = {
       type,
