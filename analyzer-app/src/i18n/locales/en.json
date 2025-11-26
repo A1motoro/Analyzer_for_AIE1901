@@ -219,6 +219,7 @@
     "hypothesisTesting": "Hypothesis Testing",
     "confidenceIntervals": "Confidence Intervals",
     "powerAnalysis": "Power Analysis",
+    "distributionFit": "Distribution Fit",
     "roheAnalysis": "ROHE Analysis"
   },
   "settings": {
@@ -520,6 +521,11 @@
     "distributionType": "Distribution Type",
     "autoDetect": "Auto-detected type",
     "unknown": "Unknown",
+    "normal": "Normal Distribution",
+    "uniform": "Uniform Distribution",
+    "exponential": "Exponential Distribution",
+    "lognormal": "Lognormal Distribution",
+    "approxNormal": "Approximately Normal Distribution",
     "skewnessTest": "Skewness Test",
     "skewnessValue": "Skewness Value",
     "standardError": "Standard Error",
@@ -809,6 +815,17 @@
     "stdDevTooltip": "Measure of data dispersion",
     "varianceSuffix": "Variance",
     "varianceTooltip": "Square of standard deviation, measuring data variability"
+  },
+  "analysis": {
+    "distributionFit": "Distribution Fit",
+    "distributionType": "Distribution Type",
+    "chisquareStatistic": "Chi-Square Statistic",
+    "bestFitDistribution": "Best Fit Distribution",
+    "normal": "Normal Distribution",
+    "uniform": "Uniform Distribution",
+    "exponential": "Exponential Distribution",
+    "lognormal": "Lognormal Distribution",
+    "qqPlotDescription": "Quantile-Quantile plot for distribution fit assessment"
   },
   "visualization": {
     "title": "Data Visualization Analysis",

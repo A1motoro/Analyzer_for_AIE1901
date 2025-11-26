@@ -214,7 +214,7 @@ const AdvancedStatistics: React.FC<AdvancedStatisticsProps> = ({ analysisResult 
                         {t('advanced.distributionType')}
                       </Text>
                     }
-                    value={distributionAnalysis?.distributionType || t('advanced.unknown')}
+                    value={distributionAnalysis?.distributionType ? t(`advanced.${distributionAnalysis?.distributionType}`) : t('advanced.unknown')}
                     valueStyle={{
                       color: getDistributionColor(distributionAnalysis?.distributionType || t('advanced.unknown')),
                       fontSize: '16px',
