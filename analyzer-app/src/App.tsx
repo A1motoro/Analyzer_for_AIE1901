@@ -391,7 +391,7 @@ const App: FC = () => {
                     setActiveTab={setActiveTab}
                     analysisResult={analysisResult}
                     data={data}
-                    goodnessOfFitResult={goodnessOfFitResult}
+                    goodnessOfFitResult={goodnessOfFitResult || undefined}
                     qqPlotData={qqPlotData}
                   />
                 )}
