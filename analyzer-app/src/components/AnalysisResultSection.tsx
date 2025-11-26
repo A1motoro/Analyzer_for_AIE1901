@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
+import type { GoodnessOfFitResult, QQPlotPoint } from '../types';
 
 // 导入子组件
 import { CoreStatistics } from './StatisticCard';
@@ -26,8 +27,8 @@ interface AnalysisResultSectionProps {
   setActiveTab: (tab: string) => void;
   analysisResult: any;
   data: number[];
-  goodnessOfFitResult?: any;
-  qqPlotData?: any;
+  goodnessOfFitResult?: GoodnessOfFitResult;
+  qqPlotData?: QQPlotPoint[];
 }
 
 const AnalysisResultSection = ({

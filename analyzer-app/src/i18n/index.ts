@@ -33,10 +33,8 @@ i18n
       order: ['localStorage', 'navigator', 'htmlTag'],
       lookupLocalStorage: 'i18nextLng',
       caches: ['localStorage'],
-      // 确保检测功能正确工作
-      checkWhitelist: true,
     },
-    whitelist: ['en', 'zh'], // 支持的语言列表
+    supportedLngs: ['en', 'zh'], // 支持的语言列表 (替换废弃的whitelist)
     load: 'languageOnly', // 只加载语言代码部分，不包含地区代码
   });
 

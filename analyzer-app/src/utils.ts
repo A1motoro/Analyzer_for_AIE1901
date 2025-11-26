@@ -1,3 +1,5 @@
+import type { QQPlotPoint, GoodnessOfFitResult } from './types';
+
 // 误差函数实现
 function erf(x: number): number {
   // 使用多项式近似计算误差函数
@@ -1803,7 +1805,7 @@ export const calculateBootstrapConfidenceInterval = function(data: number[], con
 };
 
 // 执行分布拟合优度检验
-export const performGoodnessOfFitTest = function(data: number[]): any {
+export const performGoodnessOfFitTest = function(data: number[]): GoodnessOfFitResult {
   const n = data.length;
   const sortedData = [...data].sort((a, b) => a - b);
   const min = sortedData[0];
@@ -1865,10 +1867,11 @@ export const performGoodnessOfFitTest = function(data: number[]): any {
       const pLower = bin.lower === min ? 0 : dist.cdf(bin.lower);
       const pUpper = bin.upper === max ? 1 : dist.cdf(bin.upper);
       const expectedProbability = pUpper - pLower;
-      const expectedCount = Math.max(5, n * expectedProbability); // 确保期望计数至少为5
+      const expectedCount = n * expectedProbability; // 使用真实期望频数
       
-      // 计算卡方统计量（跳过期望计数小于5的区间）
-      if (expectedCount >= 5) {
+      // 计算卡方统计量。注意：当期望频数过低时，卡方检验的近似效果会变差。
+      // 一个更稳健的方法是合并期望频数低的区间，但这里为了简化，我们仅在期望不为零时计算。
+      if (expectedCount > 0) {
         chiSquare += Math.pow(bin.observed - expectedCount, 2) / expectedCount;
         validBins++;
       }
@@ -2018,7 +2021,7 @@ function lnGamma(z: number): number {
 */
 
 // 生成Q-Q图数据
-export const generateQQPlotData = function(data: number[]): any[] {
+export const generateQQPlotData = function(data: number[]): QQPlotPoint[] {
   const n = data.length;
   const sortedData = [...data].sort((a, b) => a - b);
   
