@@ -220,7 +220,25 @@
     "confidenceIntervals": "Confidence Intervals",
     "powerAnalysis": "Power Analysis",
     "distributionFit": "Distribution Fit",
-    "roheAnalysis": "ROHE Analysis"
+    "roheAnalysis": "ROHE Analysis",
+    "noFitData": "No fit data available",
+    "distributionType": "Distribution Type",
+    "chisquareStatistic": "Chi-Square Statistic",
+    "dof": "Degrees of Freedom",
+    "pValue": "p-value",
+    "fitRecommendation": "Fit Recommendation",
+    "recommended": "Recommended",
+    "notRecommended": "Not Recommended",
+    "goodnessOfFitResults": "Goodness of Fit Test Results",
+    "bestFitDistribution": "Best Fit Distribution: {{distribution}}",
+    "normal": "Normal Distribution",
+    "uniform": "Uniform Distribution",
+    "exponential": "Exponential Distribution",
+    "lognormal": "Lognormal Distribution",
+    "qqPlot": "Q-Q Plot",
+    "theoreticalQuantiles": "Theoretical Quantiles",
+    "sampleQuantiles": "Sample Quantiles",
+    "qqPlotDescription": "Quantile-Quantile plot for distribution fit assessment"
   },
   "settings": {
     "title": "Settings",
@@ -240,8 +258,6 @@
   "tutorial": {
     "title": "Tutorial",
     "gettingStarted": "Getting Started",
-    "dataInput": "Data Input Methods",
-    "analysis": "Analysis Features",
     "visualization": "Visualization",
     "nav": {
       "title": "Tutorial Navigation",
@@ -815,17 +831,6 @@
     "stdDevTooltip": "Measure of data dispersion",
     "varianceSuffix": "Variance",
     "varianceTooltip": "Square of standard deviation, measuring data variability"
-  },
-  "analysis": {
-    "distributionFit": "Distribution Fit",
-    "distributionType": "Distribution Type",
-    "chisquareStatistic": "Chi-Square Statistic",
-    "bestFitDistribution": "Best Fit Distribution",
-    "normal": "Normal Distribution",
-    "uniform": "Uniform Distribution",
-    "exponential": "Exponential Distribution",
-    "lognormal": "Lognormal Distribution",
-    "qqPlotDescription": "Quantile-Quantile plot for distribution fit assessment"
   },
   "visualization": {
     "title": "Data Visualization Analysis",

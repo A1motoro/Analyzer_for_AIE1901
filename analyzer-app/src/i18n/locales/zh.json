@@ -225,7 +225,25 @@
     "confidenceIntervals": "置信区间",
     "powerAnalysis": "功效分析",
     "distributionFit": "分布拟合",
-    "roheAnalysis": "ROHE分析"
+    "roheAnalysis": "ROHE分析",
+    "noFitData": "暂无拟合数据",
+    "distributionType": "分布类型",
+    "chisquareStatistic": "卡方统计量",
+    "dof": "自由度",
+    "pValue": "p值",
+    "fitRecommendation": "拟合建议",
+    "recommended": "推荐",
+    "notRecommended": "不推荐",
+    "goodnessOfFitResults": "拟合优度检验结果",
+    "bestFitDistribution": "最佳拟合分布: {{distribution}}",
+    "normal": "正态分布",
+    "uniform": "均匀分布",
+    "exponential": "指数分布",
+    "lognormal": "对数正态分布",
+    "qqPlot": "Q-Q图",
+    "theoreticalQuantiles": "理论分位数",
+    "sampleQuantiles": "样本分位数",
+    "qqPlotDescription": "分布拟合评估的分位数-分位数图"
   },
   "settings": {
     "title": "设置",
@@ -245,8 +263,6 @@
   "tutorial": {
     "title": "使用教程",
     "gettingStarted": "入门指南",
-    "dataInput": "数据输入方法",
-    "analysis": "分析功能",
     "visualization": "可视化展示",
     "nav": {
       "title": "教程导航",
@@ -820,17 +836,6 @@
     "stdDevTooltip": "衡量数据分散程度的统计量",
     "varianceSuffix": "方差",
     "varianceTooltip": "标准差的平方，衡量数据变异性"
-  },
-  "analysis": {
-    "distributionFit": "分布拟合",
-    "distributionType": "分布类型",
-    "chisquareStatistic": "卡方统计量",
-    "bestFitDistribution": "最佳拟合分布",
-    "normal": "正态分布",
-    "uniform": "均匀分布",
-    "exponential": "指数分布",
-    "lognormal": "对数正态分布",
-    "qqPlotDescription": "分布拟合评估的分位数-分位数图"
   },
   "visualization": {
     "title": "数据可视化分析",
