@@ -1300,7 +1300,7 @@ export function calculateMeanBoundary(data: number[], probability: number, direc
       standardError,
       criticalValue,
       df,
-      method: useTTest ? 't-test' : 'z-test',
+      method: useTTest ? 't-test' as const : 'z-test' as const,
       direction
     };
   } else if (direction === 'greater') {
@@ -1321,7 +1321,7 @@ export function calculateMeanBoundary(data: number[], probability: number, direc
       standardError,
       criticalValue,
       df,
-      method: useTTest ? 't-test' : 'z-test',
+      method: useTTest ? 't-test' as const : 'z-test' as const,
       direction
     };
   } else { // direction === 'less'
@@ -1342,7 +1342,7 @@ export function calculateMeanBoundary(data: number[], probability: number, direc
       standardError,
       criticalValue,
       df,
-      method: useTTest ? 't-test' : 'z-test',
+      method: useTTest ? 't-test' as const : 'z-test' as const,
       direction
     };
   }
@@ -1380,7 +1380,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       df,
       lowerCriticalValue,
       upperCriticalValue,
-      direction
+      direction,
+      method: 'chi-square' as const
     };
   } else if (direction === 'greater') {
     // 右侧检验
@@ -1395,7 +1396,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       sampleVariance,
       df,
       criticalValue,
-      direction
+      direction,
+      method: 'chi-square' as const
     };
   } else { // direction === 'less'
     // 左侧检验
@@ -1410,7 +1412,8 @@ export function calculateVarianceBoundary(data: number[], probability: number, d
       sampleVariance,
       df,
       criticalValue,
-      direction
+      direction,
+      method: 'chi-square' as const
     };
   }
 };
