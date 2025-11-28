@@ -1,1 +1,7 @@
 node_modules
+dist
+dist-singlefile
+dist-electron
+electron
+win-unpacked
+*.asar
